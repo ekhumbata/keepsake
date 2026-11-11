@@ -8,6 +8,12 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **No more double spaces in `.txt` books** (#90). Files saved on Windows (CRLF line
+  endings), tabs and runs of spaces now show as single spaces; blank lines still start
+  a new paragraph.
+
 ### Added
 
 - **Continue reading, with the cover** (#27). The top of the Books screen shows the book

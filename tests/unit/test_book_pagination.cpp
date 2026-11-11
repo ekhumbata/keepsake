@@ -125,8 +125,7 @@ TEST_CASE("CRLF line endings behave like LF")
     const std::string text = "one\r\ntwo\r\n\r\nthree";
     const auto layout = epaper_ui::PaginateBookText(kPortraitWidth, kPortraitHeight, text);
     REQUIRE(layout.lines.size() == 3);
-    // Words only: the length-preserving normalization pads '\r' to an extra space today.
-    CHECK(SplitWords(layout.lines[0]) == std::vector<std::string>{"one", "two"});
+    CHECK(layout.lines[0] == "one two");
     CHECK(layout.lines[1].empty());
     CHECK(layout.lines[2] == "three");
 }
@@ -166,4 +165,36 @@ TEST_CASE("a multi-byte character cut by a chunk boundary does not break paginat
     CHECK(layout.text_exhausted);
     REQUIRE(layout.lines.size() == 1);
     CHECK(layout.lines[0] == "ends with a cut");
+}
+
+TEST_CASE("curly quotes and runs of spaces come out as single spaces and whole words (#90)")
+{
+    const std::string text =
+        "\xE2\x80\x9C" "Don\xE2\x80\x99t,\xE2\x80\x9D she said.   Tabs\tand\t\tspaces\r\n"
+        "wrap \xC2\xA0here.";
+    const auto layout = epaper_ui::PaginateBookText(kPortraitWidth, kPortraitHeight, text);
+    std::string joined;
+    for (const std::string& line : layout.lines) {
+        CHECK(line.find("  ") == std::string::npos);
+        CHECK((line.empty() || (line.front() != ' ' && line.back() != ' ')));
+        joined += (joined.empty() ? "" : " ") + line;
+    }
+    CHECK(joined == "\"Don't,\" she said. Tabs and spaces wrap here.");
+    CHECK(layout.consumed_bytes == text.size());
+}
+
+TEST_CASE("a page that ends in whitespace resumes at the next word")
+{
+    // Fill one short page, then check the next one starts exactly on a word.
+    std::string text;
+    for (int i = 0; i < 400; ++i) {
+        text += "word\r\n";
+    }
+    const auto first = epaper_ui::PaginateBookText(kPortraitWidth, 300, text);
+    REQUIRE_FALSE(first.text_exhausted);
+    REQUIRE(first.consumed_bytes < text.size());
+    const auto second =
+        epaper_ui::PaginateBookText(kPortraitWidth, 300, text.substr(first.consumed_bytes));
+    REQUIRE_FALSE(second.lines.empty());
+    CHECK(second.lines[0].substr(0, 4) == "word");
 }
