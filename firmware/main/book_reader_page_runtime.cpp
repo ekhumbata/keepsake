@@ -24,6 +24,16 @@ void SavePositionLocked()
     s_coordinator.SavePosition();
 }
 
+// Moves the book to the top of the shelf with its current progress. Called on open and on
+// leaving the reader, not per page turn (that's one SD write per turn already, for .pos).
+void RecordOpenedLocked()
+{
+    if (!s_coordinator.filename().empty()) {
+        text_reader_service::RecordOpened(s_coordinator.filename(),
+                                          s_coordinator.ProgressPercent());
+    }
+}
+
 }  // namespace
 
 esp_err_t UpdateDisplayState()
@@ -52,6 +62,7 @@ esp_err_t OpenBook(const std::string& filename)
         s_coordinator.Show(filename, display_service::PortraitWidth(),
                            display_service::PortraitHeight());
         SavePositionLocked();
+        RecordOpenedLocked();
     }
     return UpdateDisplayState();
 }
@@ -98,6 +109,10 @@ bool ExitActiveControl()
 
 void RequestBack()
 {
+    {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        RecordOpenedLocked();
+    }
     s_pending_back.store(true, std::memory_order_relaxed);
 }
 

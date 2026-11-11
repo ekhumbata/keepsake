@@ -1,7 +1,7 @@
 # Screen gallery golden hashes (CRC-32 of each 800x480 framebuffer).
 # Regenerate after an intended UI change, and look at the PNGs first:
 #   build/tests/screen_gallery --out build/tests/gallery --golden tests/gallery/golden.txt --update
-book_list 87a55c85
+book_list 104c37df
 book_reader_epub ac49f7c0
 book_reader_txt 9870e585
 details 2fceeb80

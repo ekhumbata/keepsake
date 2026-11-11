@@ -124,6 +124,19 @@ void BookReaderPageCoordinator::SavePosition() const
                                           {position.spine, position.block, position.offset});
 }
 
+int BookReaderPageCoordinator::ProgressPercent() const
+{
+    if (epub_) {
+        return epub_failed_ ? -1 : epub_session_.percent();
+    }
+    const uint64_t size = text_reader_service::GetFileSize(filename_);
+    if (size == 0) {
+        return 0;
+    }
+    const uint64_t end = has_more_after_ ? next_page_start_offset_ : size;
+    return static_cast<int>(std::min<uint64_t>(100, end * 100 / size));
+}
+
 bool BookReaderPageCoordinator::TurnPage(int delta, int portrait_width, int portrait_height)
 {
     if (epub_) {

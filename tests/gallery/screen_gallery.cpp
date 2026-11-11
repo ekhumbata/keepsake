@@ -283,8 +283,9 @@ std::map<std::string, Renderer> Screens()
     });
     screens["book_list"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         BookListPageState state = {};
-        for (const char* name : {"a_rainy_day_sampler.epub", "garden_notes.txt",
-                                 "the_lighthouse_keepers_cat.epub", "winter_recipes.txt"}) {
+        // As the shelf shows them: titles, progress, the book being read first.
+        for (const char* name : {"A Rainy Day Sampler - 42%", "The Lighthouse Keeper's Cat - 7%",
+                                 "Garden notes", "Winter recipes"}) {
             SelectItemState item = {};
             item.label_text = name;
             state.books_list.items.push_back(item);

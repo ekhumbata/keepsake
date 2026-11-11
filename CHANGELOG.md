@@ -8,6 +8,14 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Added
+
+- **A proper library shelf** (#27). Books shows each book's real title (from the
+  EPUB itself, or a tidied-up file name for `.txt`) instead of the file name, with
+  how far you've read (`Emma - 42%`, `Done`). The book you're reading is at the top,
+  then the rest A to Z. Books in subfolders of `books` are found too. Titles and
+  progress are remembered in a small hidden `.library` file in the books folder.
+
 ### Changed
 
 - **New fonts** (#19): the interface uses **Nunito**, a rounded, friendly face, and
