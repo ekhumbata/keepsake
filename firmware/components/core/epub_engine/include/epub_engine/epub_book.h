@@ -2,6 +2,7 @@
 #define EPUB_ENGINE_EPUB_BOOK_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,6 +30,7 @@ struct SpineItem {
     std::string path;        // zip path of the content document
     std::string media_type;  // usually application/xhtml+xml
     bool linear = true;      // linear="no" items (pop-up notes) are skipped when paging
+    uint32_t bytes = 0;      // uncompressed size: how much of the book it is, for progress
 };
 
 struct TocEntry {

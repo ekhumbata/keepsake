@@ -206,3 +206,46 @@ TEST_CASE("relayout before opening does nothing")
     EpubSession session;
     CHECK_FALSE(session.Relayout(TinyPage()));
 }
+
+TEST_CASE("go to percent lands where the progress says it is")
+{
+    EpubSession session;
+    REQUIRE(session.Open(Fixture("epub2_ncx.epub"), &kMeasurer, TinyPage()) == epub::OpenError::kNone);
+
+    REQUIRE(session.GoToPercent(0));
+    CHECK(session.spine_index() == 0);
+    CHECK(session.page_index() == 0);
+
+    REQUIRE(session.GoToPercent(100));
+    CHECK(session.percent() == 100);
+    CHECK_FALSE(session.NextPage());  // the very end
+
+    // In between, the jump and the readout agree to within one page's worth.
+    int previous = -1;
+    for (int target = 5; target <= 95; target += 10) {
+        REQUIRE(session.GoToPercent(target));
+        const int landed = session.percent();
+        CHECK(landed >= target);
+        CHECK(landed >= previous);
+        previous = landed;
+        // One page back is before the target (unless this is the first page of the book).
+        if (session.PreviousPage()) {
+            CHECK(session.percent() <= target);
+        }
+    }
+}
+
+TEST_CASE("progress weighs chapters by size and only counts the reading order")
+{
+    EpubSession session;
+    REQUIRE(session.Open(Fixture("epub2_ncx.epub"), &kMeasurer, TinyPage()) == epub::OpenError::kNone);
+    int last = -1;
+    do {
+        CHECK(session.percent() >= last);
+        last = session.percent();
+    } while (session.NextPage());
+    CHECK(last == 100);
+
+    EpubSession closed;
+    CHECK_FALSE(closed.GoToPercent(50));
+}

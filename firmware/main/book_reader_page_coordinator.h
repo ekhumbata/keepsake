@@ -49,6 +49,9 @@ public:
     // Lays the open book out again after the text size changed (#28), staying on the passage
     // being read.
     void Relayout(int portrait_width, int portrait_height);
+    // Jumps to `percent` of the way through the book (#28): for .txt, the first word at or
+    // after that byte. False when nothing is open or the book couldn't be read.
+    bool GoToPercent(int percent, int portrait_width, int portrait_height);
 
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }

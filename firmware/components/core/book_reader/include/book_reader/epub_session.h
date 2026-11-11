@@ -56,8 +56,12 @@ public:
     size_t page_count() const { return pages_.size(); }
     // The TOC title for the current chapter (the last TOC entry at or before it), or "".
     std::string chapter_title() const;
-    // Rough whole-book progress, 0..100, from the spine position and page within the chapter.
+    // Whole-book progress, 0..100: chapters weigh by their size (linear ones only), and the
+    // page counts as read once it's showing.
     int percent() const;
+    // Jumps to roughly `percent` of the way through (the inverse of percent()), landing on a
+    // readable chapter. False if no book is open.
+    bool GoToPercent(int percent);
     // True when the current chapter couldn't be read and is shown as a short notice instead.
     bool chapter_failed() const { return chapter_failed_; }
 
@@ -69,7 +73,13 @@ private:
     // The next readable spine item in `direction` (+1/-1) from `from`, or false at the end.
     bool FindReadable(size_t from, int direction, size_t* out);
 
+    // Fraction of the book done before `spine_index` and the share `spine_index` itself is.
+    double ShareBefore(size_t spine_index) const;
+    double Share(size_t spine_index) const;
+
     std::unique_ptr<epub::EpubBook> book_;
+    std::vector<uint64_t> start_bytes_;  // per spine item: linear bytes before it
+    uint64_t total_bytes_ = 0;           // linear bytes in the whole book
     const book_layout::TextMeasurer* measurer_ = nullptr;
     book_layout::LayoutOptions options_;
     std::vector<book_layout::Page> pages_;
