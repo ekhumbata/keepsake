@@ -10,6 +10,15 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Provisioning file** (#42). Put `.keepsake/provision.json` on the SD card (format:
+  `provision.example.json`) and Keepsake imports it at start-up: Wi-Fi network,
+  timezone, Gemini key, and the friend's name, birthday, welcome message and weather
+  location. It then overwrites and deletes the file and shows "All set up!". A file with
+  mistakes imports nothing and gets a `provision-problems.txt` next to it saying what to
+  fix.
+
+### Added
+
 - **Continue reading, with the cover** (#27). The top of the Books screen shows the book
   you're reading: its cover (dithered to black and white), title, author and a progress
   bar. Covers are decoded once and kept in `books/.cache/`.

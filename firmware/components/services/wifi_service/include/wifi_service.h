@@ -83,6 +83,9 @@ bool ConnectToNetwork(const std::string& ssid, const std::string& password,
 bool DisconnectFromNetwork(bool clear_saved_credentials = true);
 bool StartNetworkScan();
 bool ClearSavedCredentials();
+// Saves a network as the one to join (provisioning file, #42) without connecting now: the next
+// Start() or reconnect uses it. Replaces the saved network.
+bool SaveNetwork(const std::string& ssid, const std::string& password);
 // Stops the Wi-Fi radio before esp_light_sleep_start(), so the light-sleep window
 // (up to 30 minutes by default) doesn't leave it fully associated the whole time --
 // esp_wifi_set_ps(WIFI_PS_NONE) means it otherwise never enters even modem sleep. A
