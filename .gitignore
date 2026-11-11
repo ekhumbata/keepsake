@@ -91,3 +91,6 @@ __pycache__/
 
 # Design resources (Craig's local assets, not tracked)
 design/
+
+# macOS Finder metadata
+.DS_Store
