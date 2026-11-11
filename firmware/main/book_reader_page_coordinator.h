@@ -37,6 +37,15 @@ public:
     // How far through the book the current page is, 0..100 (for the shelf).
     int ProgressPercent() const;
 
+    // Reader menu (#28). Contents is EPUB-only: one label per table-of-contents entry,
+    // indented by depth, at most kMaxContentsEntries.
+    static constexpr size_t kMaxContentsEntries = 80;
+    std::string MenuTitle() const;
+    std::vector<std::string> ContentsLabels() const;
+    // The TOC entry for the chapter being read (the last one at or before it), or 0.
+    int CurrentContentsIndex() const;
+    bool GoToContentsEntry(size_t index);
+
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }
 

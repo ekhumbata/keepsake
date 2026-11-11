@@ -10,6 +10,10 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Reader menu with Contents** (#28). Pressing the rocker while reading opens a
+  menu: **Contents** lists the book's chapters (with the current one highlighted)
+  and jumps straight to the one you pick; **Back to books** returns to the shelf.
+
 - **A proper library shelf** (#27). Books shows each book's real title (from the
   EPUB itself, or a tidied-up file name for `.txt`) instead of the file name, with
   how far you've read (`Emma - 42%`, `Done`). The book you're reading is at the top,

@@ -137,6 +137,58 @@ int BookReaderPageCoordinator::ProgressPercent() const
     return static_cast<int>(std::min<uint64_t>(100, end * 100 / size));
 }
 
+std::string BookReaderPageCoordinator::MenuTitle() const
+{
+    if (epub_ && !epub_failed_ && !epub_session_.metadata().title.empty()) {
+        return epaper_ui::ToDisplayText(epub_session_.metadata().title);
+    }
+    return filename_;
+}
+
+std::vector<std::string> BookReaderPageCoordinator::ContentsLabels() const
+{
+    std::vector<std::string> labels;
+    if (!epub_ || epub_failed_) {
+        return labels;
+    }
+    for (const epub::TocEntry& entry : epub_session_.toc()) {
+        if (labels.size() >= kMaxContentsEntries) {
+            break;
+        }
+        labels.push_back(std::string(static_cast<size_t>(std::min(entry.depth, 3)) * 2, ' ') +
+                         epaper_ui::ToDisplayText(entry.title));
+    }
+    return labels;
+}
+
+int BookReaderPageCoordinator::CurrentContentsIndex() const
+{
+    if (!epub_ || epub_failed_) {
+        return 0;
+    }
+    const auto& toc = epub_session_.toc();
+    int best = 0;
+    for (size_t i = 0; i < toc.size() && i < kMaxContentsEntries; ++i) {
+        if (toc[i].spine_index >= 0 &&
+            toc[i].spine_index <= static_cast<int>(epub_session_.spine_index())) {
+            best = static_cast<int>(i);
+        }
+    }
+    return best;
+}
+
+bool BookReaderPageCoordinator::GoToContentsEntry(size_t index)
+{
+    if (!epub_ || epub_failed_ || index >= kMaxContentsEntries) {
+        return false;
+    }
+    if (!epub_session_.GoToTocEntry(index)) {
+        return false;
+    }
+    page_number_ = static_cast<int>(epub_session_.page_index()) + 1;
+    return true;
+}
+
 bool BookReaderPageCoordinator::TurnPage(int delta, int portrait_width, int portrait_height)
 {
     if (epub_) {
