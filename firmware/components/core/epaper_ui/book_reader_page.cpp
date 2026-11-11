@@ -13,7 +13,7 @@ namespace epaper_ui {
 namespace {
 
 constexpr auto kTitleRole = design::TypographyRole::kHeadingH2;
-constexpr auto kBodyRole = design::TypographyRole::kBody;
+constexpr auto kBodyRole = design::TypographyRole::kBookBody;  // Literata, at the reader's text size
 constexpr auto kPageIndicatorRole = design::TypographyRole::kLabelSmallBlack;
 constexpr int kSideInset = design::spacing::k16;
 constexpr int kTopGap = design::spacing::k24;

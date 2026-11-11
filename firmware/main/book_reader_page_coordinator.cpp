@@ -82,13 +82,39 @@ void BookReaderPageCoordinator::Show(const std::string& filename, int portrait_w
     BuildPageAt(page_start_offset_, portrait_width, portrait_height);
 }
 
-void BookReaderPageCoordinator::ShowEpub(int portrait_width, int portrait_height)
+namespace {
+
+book_layout::LayoutOptions EpubLayoutOptions(int portrait_width, int portrait_height)
 {
     const epaper_ui::UiRect content =
         epaper_ui::BookReaderContentBounds(portrait_width, portrait_height);
     book_layout::LayoutOptions options;
     options.width = content.width;
     options.height = content.height;
+    return options;
+}
+
+}  // namespace
+
+void BookReaderPageCoordinator::Relayout(int portrait_width, int portrait_height)
+{
+    if (filename_.empty()) {
+        return;
+    }
+    if (epub_ && !epub_failed_ && epub_session_.is_open()) {
+        epub_session_.Relayout(EpubLayoutOptions(portrait_width, portrait_height));
+        page_number_ = static_cast<int>(epub_session_.page_index()) + 1;
+        return;
+    }
+    // .txt (and an EPUB showing its "can't open" message): reopen from the saved place. The
+    // page starts exactly there; the pages before it are re-derived at the new size.
+    SavePosition();
+    Show(filename_, portrait_width, portrait_height);
+}
+
+void BookReaderPageCoordinator::ShowEpub(int portrait_width, int portrait_height)
+{
+    const book_layout::LayoutOptions options = EpubLayoutOptions(portrait_width, portrait_height);
 
     text_reader_service::EpubPosition saved = {};
     book_reader::ReadingPosition start = {};

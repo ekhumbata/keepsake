@@ -153,3 +153,56 @@ TEST_CASE("books that can't open report why")
     CHECK(session.page().lines.empty());
     CHECK(session.Open(Fixture("missing.epub"), &kMeasurer, TinyPage()) == epub::OpenError::kIoError);
 }
+
+namespace {
+
+class ScalableMeasurer final : public book_layout::TextMeasurer {
+public:
+    int Width(std::string_view text, uint8_t, book_layout::TextRole) const override
+    {
+        return static_cast<int>(text.size()) * char_width;
+    }
+    int LineHeight(book_layout::TextRole) const override { return char_width * 2; }
+    int char_width = 10;
+};
+
+bool Before(const ReadingPosition& a, const ReadingPosition& b)
+{
+    return a.block != b.block ? a.block < b.block : a.offset < b.offset;
+}
+
+}  // namespace
+
+TEST_CASE("changing the text size keeps the reader on the same passage")
+{
+    ScalableMeasurer measurer;
+    EpubSession session;
+    REQUIRE(session.Open(Fixture("epub2_ncx.epub"), &measurer, TinyPage()) == epub::OpenError::kNone);
+    REQUIRE(session.NextPage());
+    REQUIRE(session.NextPage());
+    const ReadingPosition was = session.position();
+    const size_t medium_pages = session.page_count();
+
+    // Bigger text: more pages, and the page shown starts at or before where we were...
+    measurer.char_width = 13;
+    REQUIRE(session.Relayout(TinyPage()));
+    CHECK(session.page_count() > medium_pages);
+    CHECK(session.spine_index() == was.spine);
+    CHECK_FALSE(Before(was, session.position()));
+    // ...and the next page starts after it, so the passage is on screen.
+    if (session.page_index() + 1 < session.page_count()) {
+        REQUIRE(session.NextPage());
+        CHECK(Before(was, session.position()));
+    }
+
+    // Back to the old size: same pages as before.
+    measurer.char_width = 10;
+    REQUIRE(session.Relayout(TinyPage()));
+    CHECK(session.page_count() == medium_pages);
+}
+
+TEST_CASE("relayout before opening does nothing")
+{
+    EpubSession session;
+    CHECK_FALSE(session.Relayout(TinyPage()));
+}

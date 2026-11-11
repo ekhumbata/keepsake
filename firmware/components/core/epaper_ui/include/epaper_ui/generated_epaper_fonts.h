@@ -6,9 +6,15 @@
 
 namespace epaper_fonts {
 
+extern const epaper_font::BitmapFont kBook19Bold;
+extern const epaper_font::BitmapFont kBook19Italic;
+extern const epaper_font::BitmapFont kBook19Regular;
 extern const epaper_font::BitmapFont kBook22Bold;
 extern const epaper_font::BitmapFont kBook22Italic;
 extern const epaper_font::BitmapFont kBook22Regular;
+extern const epaper_font::BitmapFont kBook26Bold;
+extern const epaper_font::BitmapFont kBook26Italic;
+extern const epaper_font::BitmapFont kBook26Regular;
 extern const epaper_font::BitmapFont kUi165Black;
 extern const epaper_font::BitmapFont kUi165Bold;
 extern const epaper_font::BitmapFont kUi165SemiBold;

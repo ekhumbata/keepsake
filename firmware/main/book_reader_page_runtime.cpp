@@ -2,9 +2,13 @@
 
 #include <atomic>
 #include <mutex>
+#include <string>
 #include <vector>
 
+#include "app_state_service.h"
 #include "book_reader_page_coordinator.h"
+#include "cpu_boost.h"
+#include "epaper_ui/font_renderer.h"
 #include "esp_log.h"
 #include "overlay_runtime.h"
 #include "text_reader_service.h"
@@ -17,8 +21,8 @@ std::mutex s_mutex;
 BookReaderPageCoordinator s_coordinator = {};
 std::atomic<bool> s_pending_back{false};
 
-enum class MenuAction : uint8_t { kContents, kBackToBooks, kClose };
-enum class MenuStage : uint8_t { kNone, kMenu, kContents };
+enum class MenuAction : uint8_t { kContents, kTextSize, kBackToBooks, kClose };
+enum class MenuStage : uint8_t { kNone, kMenu, kContents, kTextSize };
 MenuStage s_menu_stage = MenuStage::kNone;
 std::vector<MenuAction> s_menu_actions;
 
@@ -67,6 +71,8 @@ esp_err_t OpenBook(const std::string& filename)
 {
     {
         std::lock_guard<std::mutex> lock(s_mutex);
+        epaper_ui::SetBookTextSize(
+            static_cast<epaper_ui::BookTextSize>(app_state_service::ReaderTextSize()));
         s_coordinator.Show(filename, display_service::PortraitWidth(),
                            display_service::PortraitHeight());
         SavePositionLocked();
@@ -140,6 +146,9 @@ bool ShowMenu()
             modal.items.push_back({"Contents"});
             s_menu_actions.push_back(MenuAction::kContents);
         }
+        modal.items.push_back(
+            {std::string("Text size: ") + epaper_ui::BookTextSizeName(epaper_ui::GetBookTextSize())});
+        s_menu_actions.push_back(MenuAction::kTextSize);
         modal.items.push_back({"Back to books"});
         s_menu_actions.push_back(MenuAction::kBackToBooks);
         modal.items.push_back({"Close"});
@@ -172,6 +181,27 @@ bool ShowContentsLocked(epaper_ui::SelectModalState* modal)
     modal->selected_index = s_coordinator.CurrentContentsIndex();
     s_menu_stage = MenuStage::kContents;
     return true;
+}
+
+void ShowTextSizesLocked(epaper_ui::SelectModalState* modal)
+{
+    modal->title_text = "Text size";
+    for (int i = 0; i < epaper_ui::kBookTextSizeCount; ++i) {
+        modal->items.push_back(
+            {epaper_ui::BookTextSizeName(static_cast<epaper_ui::BookTextSize>(i))});
+    }
+    modal->selected_index = static_cast<int>(epaper_ui::GetBookTextSize());
+    s_menu_stage = MenuStage::kTextSize;
+}
+
+// Shows a follow-up menu; if it can't be shown, nothing is waiting on a selection any more.
+void ShowSubmenu(const epaper_ui::SelectModalState& modal)
+{
+    const esp_err_t err = overlay_runtime::ShowSelectModal(modal);
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        s_menu_stage = MenuStage::kNone;
+    }
 }
 
 }  // namespace
@@ -212,6 +242,25 @@ bool HandleMenuSelection(int selected_index)
         return true;
     }
 
+    if (stage == MenuStage::kTextSize) {
+        if (selected_index < 0 || selected_index >= epaper_ui::kBookTextSizeCount ||
+            selected_index == static_cast<int>(epaper_ui::GetBookTextSize())) {
+            return true;  // dismissed, or no change
+        }
+        {
+            // Re-laying out the chapter is work the reader is waiting on.
+            const cpu_boost::ScopedBoost boost("text size");
+            std::lock_guard<std::mutex> lock(s_mutex);
+            epaper_ui::SetBookTextSize(static_cast<epaper_ui::BookTextSize>(selected_index));
+            app_state_service::SetReaderTextSize(static_cast<uint8_t>(selected_index));
+            s_coordinator.Relayout(display_service::PortraitWidth(),
+                                   display_service::PortraitHeight());
+            SavePositionLocked();
+        }
+        (void)UpdateDisplayStateAndRequestRefresh(display_service::RefreshMode::kPartial);
+        return true;
+    }
+
     switch (action) {
         case MenuAction::kContents: {
             epaper_ui::SelectModalState modal = {};
@@ -221,12 +270,17 @@ bool HandleMenuSelection(int selected_index)
                 show = ShowContentsLocked(&modal);
             }
             if (show) {
-                const esp_err_t err = overlay_runtime::ShowSelectModal(modal);
-                if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    std::lock_guard<std::mutex> lock(s_mutex);
-                    s_menu_stage = MenuStage::kNone;
-                }
+                ShowSubmenu(modal);
             }
+            break;
+        }
+        case MenuAction::kTextSize: {
+            epaper_ui::SelectModalState modal = {};
+            {
+                std::lock_guard<std::mutex> lock(s_mutex);
+                ShowTextSizesLocked(&modal);
+            }
+            ShowSubmenu(modal);
             break;
         }
         case MenuAction::kBackToBooks:
