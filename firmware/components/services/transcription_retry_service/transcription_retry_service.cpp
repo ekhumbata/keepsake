@@ -10,6 +10,7 @@
 #include "chroninkle_task_config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "gemini_service.h"
 #include "recording_archive_service.h"
 #include "recording_service.h"
 #include "transcription_service.h"
@@ -22,6 +23,13 @@ constexpr const char* kTag = "TranscribeRetry";
 // (kTranscribeTimeoutMs); this leaves margin for task scheduling before giving up on one item.
 constexpr int64_t kItemTimeoutUs = 40 * 1000 * 1000;
 constexpr int64_t kPollIntervalMs = 250;
+constexpr int64_t kWaitPollIntervalMs = 500;
+
+bool GeminiReady()
+{
+    return gemini_service::GetSnapshot().runtime.ready;
+}
+
 // Mirrors details_page_runtime's TranscribeWorker: loading a clip back off SD needs a
 // generously sized stack.
 constexpr uint32_t kRetryTaskStackWords = 8192;
@@ -206,6 +214,11 @@ bool RetryPending()
     if (recording_archive_service::GetSnapshot().pending_transcription_count == 0) {
         return false;
     }
+    if (!GeminiReady()) {
+        // Gemini authenticates after each fresh connection. Starting now would mark every
+        // pending note as failed ("couldn't start"); leave them pending for the ready edge.
+        return false;
+    }
 
     bool expected = false;
     if (!s_batch_in_flight.compare_exchange_strong(expected, true)) {
@@ -228,6 +241,36 @@ bool RetryPending()
         s_snapshot.batch_in_flight = false;
         NotifyLocked();
         return false;
+    }
+    return true;
+}
+
+bool RetryPendingAndWait(uint32_t ready_timeout_ms)
+{
+    if (Init() != ESP_OK) {
+        return true;
+    }
+    if (!gemini_service::GetSnapshot().settings.configured) {
+        return true;  // no key: nothing will ever transcribe these, so don't hold the radio
+    }
+    if (recording_archive_service::GetSnapshot().pending_transcription_count == 0 &&
+        !s_batch_in_flight.load(std::memory_order_acquire)) {
+        return true;
+    }
+    const int64_t ready_deadline_us =
+        esp_timer_get_time() + static_cast<int64_t>(ready_timeout_ms) * 1000;
+    while (!GeminiReady()) {
+        if (esp_timer_get_time() > ready_deadline_us) {
+            ESP_LOGW(kTag, "Gemini not ready after %lu ms; leaving notes pending",
+                     static_cast<unsigned long>(ready_timeout_ms));
+            return false;
+        }
+        vTaskDelay(pdMS_TO_TICKS(kWaitPollIntervalMs));
+    }
+    (void)RetryPending();  // false if a batch is already running: wait for that one instead
+    // Each item has its own timeout, so the batch always ends.
+    while (s_batch_in_flight.load(std::memory_order_acquire)) {
+        vTaskDelay(pdMS_TO_TICKS(kWaitPollIntervalMs));
     }
     return true;
 }

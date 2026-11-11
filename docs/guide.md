@@ -59,7 +59,7 @@ update) · 💤 later
 |---|---|---|
 | Auto-sleep | ✅ | Screen rests after ~3 min, deep sleep after ~30 min |
 | Power management | 🚧 [#16](https://github.com/ekhumbata/keepsake/issues/16) | Slower CPU while idle (frequency scaling is in; to be measured on the device) |
-| Wi-Fi only when needed | 🚧 [#17](https://github.com/ekhumbata/keepsake/issues/17) | Radio off by default; jobs batched. Built, behind a menuconfig switch until it's checked on the board |
+| Wi-Fi only when needed | 🚧 [#17](https://github.com/ekhumbata/keepsake/issues/17) | Radio off by default; jobs batched; a new recording brings it up to transcribe straight away. Built, behind a menuconfig switch until it's checked on the board |
 | Charging screen + low-battery nudges | 📋 [#84](https://github.com/ekhumbata/keepsake/issues/84) | Mochi while charging; gentle warnings at 20/10/5% |
 | Battery saver + profiles | 🎁 [#58](https://github.com/ekhumbata/keepsake/issues/58) | Always fresh / Balanced / Max battery |
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |

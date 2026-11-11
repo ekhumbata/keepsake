@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "ai_features.h"
 #include "app_state_service.h"
 #include "book_list_page_runtime.h"
 #include "book_reader_page_runtime.h"
@@ -1141,6 +1142,29 @@ void HandleTranscriptionEvent(const transcription_service::Event& event, void*)
     recording_session_service::HandleTranscriptionEvent(event);
 }
 
+// How long a transcription job waits for Gemini to finish authenticating on a fresh connection.
+constexpr uint32_t kGeminiReadyWaitMs = 20000;
+
+// Transcribes every note still waiting for it, holding the network until done (#17).
+bool TranscribePendingJob()
+{
+    return transcription_retry_service::RetryPendingAndWait(kGeminiReadyWaitMs);
+}
+
+// With Wi-Fi on demand the radio is usually off when a recording is saved, so it was saved
+// pending. Ask for the network now, as work a person is waiting on, rather than leaving it for
+// the next periodic sync. Returns whether a transcription was queued.
+bool TranscribeSavedRecordingSoon()
+{
+    if (!net_jobs_service::OnDemandEnabled() || !ai_features::Enabled() ||
+        recording_archive_service::GetSnapshot().pending_transcription_count == 0) {
+        return false;
+    }
+    net_jobs_service::Submit(net_jobs::Urgency::kUser, "transcribe new recording",
+                             TranscribePendingJob);
+    return true;
+}
+
 void HandleRecordingSessionEvent(const recording_session_service::Event& event, void*)
 {
     ESP_LOGI(kTag,
@@ -1216,6 +1240,8 @@ void HandleRecordingSessionEvent(const recording_session_service::Event& event, 
                     event.snapshot.last_error_code == "RESOURCE_EXHAUSTED";
                 toast = BuildToast(quota_exceeded ? "Gemini quota exceeded" : "Transcription failed",
                                    EmbeddedIconId::kClose);
+            } else if (event.snapshot.clip_saved && TranscribeSavedRecordingSoon()) {
+                toast = BuildToast("Saved. Transcribing soon", EmbeddedIconId::kCheck);
             } else if (event.snapshot.clip_saved) {
                 toast = BuildToast("Recording saved to SD", EmbeddedIconId::kCheck);
             } else {
@@ -1524,13 +1550,12 @@ void HandleWifiEvent(const wifi_service::Event& event, void*)
         // gemini_service's `ready` flag doesn't reset across a disconnect/reconnect once
         // authenticated at boot, so HandleGeminiEvent's ready-edge retry trigger only ever
         // fires on the very first boot-time authentication. Retry off the Wi-Fi reconnect
-        // edge too -- RetryPending() is a no-op if nothing is pending or a batch is already
-        // in flight, so firing from both edges is safe. As a network job (#17) it runs while
-        // connected, and with Wi-Fi on demand it counts as work keeping the radio up.
-        net_jobs_service::Submit(net_jobs::Urgency::kBackground, "transcription retry", [] {
-            (void)transcription_retry_service::RetryPending();
-            return true;
-        });
+        // edge too -- it's a no-op if nothing is pending, and joins a batch already in
+        // flight, so firing from both edges is safe. As a network job (#17) it runs while
+        // connected and blocks until the batch is done, so with Wi-Fi on demand the radio
+        // stays up for the whole transcription.
+        net_jobs_service::Submit(net_jobs::Urgency::kBackground, "transcription retry",
+                                 TranscribePendingJob);
     }
 
     // Region scope, not screen scope. Wi-Fi events fire during and right after the page
@@ -2049,7 +2074,7 @@ void InitWifiService()
     });
     net_jobs_service::SetPeriodicSync([] {
         (void)timezone_service::SyncNow(nullptr, 5000);
-        (void)transcription_retry_service::RetryPending();
+        (void)TranscribePendingJob();  // anything left waits for the next sync or recording
         return true;
     });
     if (const esp_err_t jobs_err = net_jobs_service::Init(); jobs_err != ESP_OK) {
