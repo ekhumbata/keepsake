@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Final flash layout, with room for crash dumps** (#39). The two app slots are 128 KB
+  smaller (still almost 8 MB each) and the last 128 KB of flash keeps a core dump when
+  the firmware crashes. **Flash this build over USB** (a full `idf.py flash`): OTA can't
+  change the partition table.
+
 ### Fixed
 
 - **No more double spaces in `.txt` books** (#90). Files saved on Windows (CRLF line

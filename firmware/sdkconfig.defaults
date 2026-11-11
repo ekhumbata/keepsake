@@ -41,6 +41,11 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
 CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
 
+# Crash dumps (#39, #41): on a panic the core dump goes to the `coredump` partition as an ELF;
+# the next boot copies it to the SD card for Eric (crash_report_service).
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF=y
+
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 # Frequency scaling (idle low, full speed while a cpu_boost::ScopedBoost is held); see the
