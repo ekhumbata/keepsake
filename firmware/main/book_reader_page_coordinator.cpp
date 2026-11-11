@@ -150,6 +150,70 @@ bool BookReaderPageCoordinator::GoToPercent(int percent, int portrait_width, int
     return true;
 }
 
+library::Bookmark BookReaderPageCoordinator::CurrentBookmark() const
+{
+    library::Bookmark bookmark;
+    bookmark.percent = std::max(0, ProgressPercent());
+    if (epub_ && !epub_failed_) {
+        const book_reader::ReadingPosition at = epub_session_.position();
+        bookmark.spine = at.spine;
+        bookmark.block = at.block;
+        bookmark.offset = at.offset;
+        bookmark.label = epaper_ui::ToDisplayText(epub_session_.chapter_title());
+        return bookmark;
+    }
+    bookmark.offset = page_start_offset_;
+    if (!page_lines_.empty()) {
+        bookmark.label = page_lines_.front();
+        constexpr size_t kMaxLabel = 40;
+        if (bookmark.label.size() > kMaxLabel) {
+            bookmark.label = bookmark.label.substr(0, kMaxLabel) + "...";
+        }
+    }
+    return bookmark;
+}
+
+int BookReaderPageCoordinator::BookmarkOnPage(
+    const std::vector<library::Bookmark>& bookmarks) const
+{
+    for (size_t i = 0; i < bookmarks.size(); ++i) {
+        const library::Bookmark& b = bookmarks[i];
+        bool here = false;
+        if (epub_) {
+            here = !epub_failed_ &&
+                   epub_session_.IsOnCurrentPage({b.spine, b.block, static_cast<uint32_t>(b.offset)});
+        } else {
+            const uint64_t end = has_more_after_ ? next_page_start_offset_
+                                                 : text_reader_service::GetFileSize(filename_) + 1;
+            here = b.offset >= page_start_offset_ && b.offset < end;
+        }
+        if (here) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+bool BookReaderPageCoordinator::GoToBookmark(const library::Bookmark& bookmark,
+                                             int portrait_width, int portrait_height)
+{
+    if (filename_.empty()) {
+        return false;
+    }
+    if (epub_) {
+        if (epub_failed_ ||
+            !epub_session_.GoTo({bookmark.spine, bookmark.block,
+                                 static_cast<uint32_t>(bookmark.offset)})) {
+            return false;
+        }
+        page_number_ = static_cast<int>(epub_session_.page_index()) + 1;
+        return true;
+    }
+    text_reader_service::SavePosition(filename_, static_cast<size_t>(bookmark.offset));
+    Show(filename_, portrait_width, portrait_height);
+    return true;
+}
+
 void BookReaderPageCoordinator::ShowEpub(int portrait_width, int portrait_height)
 {
     const book_layout::LayoutOptions options = EpubLayoutOptions(portrait_width, portrait_height);

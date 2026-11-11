@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "esp_err.h"
+#include "library/library.h"
 
 namespace text_reader_service {
 
@@ -68,7 +69,12 @@ struct EpubPosition {
 bool LoadEpubPosition(const std::string& filename, EpubPosition* out);
 void SaveEpubPosition(const std::string& filename, const EpubPosition& position);
 
-// Removes the book and its position sidecar (if any) from the configured folder. Returns
+// Bookmarks (#28), in a "<filename>.bm" sidecar next to the book (library's bookmarks format).
+// Empty when there are none or the file can't be read; saving an empty list removes the file.
+std::vector<library::Bookmark> LoadBookmarks(const std::string& filename);
+void SaveBookmarks(const std::string& filename, const std::vector<library::Bookmark>& bookmarks);
+
+// Removes the book and its position and bookmark sidecars (if any) from the configured folder. Returns
 // true if the book file was removed or was already gone; false on an actual I/O error.
 bool DeleteBook(const std::string& filename);
 

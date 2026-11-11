@@ -25,6 +25,8 @@ struct BookReaderPageState {
     bool use_layout_page = false;
     book_layout::Page layout_page = {};
     std::string page_label = {};
+    // This page has a bookmark (#28): a ribbon hangs from the top right corner.
+    bool bookmarked = false;
 
     bool operator==(const BookReaderPageState& other) const = default;
 };

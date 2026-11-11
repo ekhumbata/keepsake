@@ -20,6 +20,11 @@ constexpr int kTopGap = design::spacing::k24;
 constexpr int kTitleContentGap = design::spacing::k16;
 constexpr int kContentIndicatorGap = design::spacing::k8;
 constexpr int kIndicatorFooterGap = design::spacing::k16;
+// Bookmark ribbon (#28): hangs from under the status bar at the right edge, with a notch.
+constexpr int kRibbonWidth = 18;
+constexpr int kRibbonHeight = 34;
+constexpr int kRibbonNotch = 8;
+constexpr int kRibbonTitleGap = design::spacing::k8;
 
 int FooterTop(int portrait_height)
 {
@@ -287,7 +292,24 @@ void DrawBookReaderPage(uint8_t* framebuffer,
 
     const Layout layout = BuildLayout(portrait_width, portrait_height);
 
-    const std::string title = FitLabelText(kTitleRole, state.title_text, layout.title.width);
+    int title_width = layout.title.width;
+    if (state.bookmarked) {
+        const int ribbon_x = layout.title.right() - kRibbonWidth;
+        const int ribbon_top = StatusBarHeight();
+        for (int row = 0; row < kRibbonHeight; ++row) {
+            // Rows above the notch are solid; below, a V opens up from the middle.
+            const int gap = std::max(0, row - (kRibbonHeight - kRibbonNotch)) * kRibbonWidth /
+                            kRibbonNotch;
+            const int side = (kRibbonWidth - gap) / 2;
+            FillPortraitRect(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                             {ribbon_x, ribbon_top + row, side, 1}, design::color::kBlack);
+            FillPortraitRect(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                             {ribbon_x + kRibbonWidth - side, ribbon_top + row, side, 1},
+                             design::color::kBlack);
+        }
+        title_width = std::max(0, title_width - kRibbonWidth - kRibbonTitleGap);
+    }
+    const std::string title = FitLabelText(kTitleRole, state.title_text, title_width);
     if (!title.empty()) {
         DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
                            layout.title.x, layout.title.y, title, kTitleRole, design::color::kBlack);

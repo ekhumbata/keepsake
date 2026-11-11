@@ -24,6 +24,8 @@ namespace {
 
 constexpr const char* kTag = "TextReaderService";
 constexpr const char* kPositionSuffix = ".pos";
+constexpr const char* kBookmarksSuffix = ".bm";
+constexpr size_t kMaxBookmarksBytes = 64u * 1024u;
 constexpr const char* kIndexFileName = ".library";
 constexpr int kMaxFolderDepth = 4;
 constexpr size_t kMaxBooks = 2000;
@@ -56,6 +58,11 @@ std::string BookPath(const std::string& filename)
 std::string PositionSidecarPath(const std::string& filename)
 {
     return BookPath(filename) + kPositionSuffix;
+}
+
+std::string BookmarksSidecarPath(const std::string& filename)
+{
+    return BookPath(filename) + kBookmarksSuffix;
 }
 
 bool HasExtension(const std::string& name, const char* wanted)
@@ -384,8 +391,47 @@ void SavePosition(const std::string& filename, size_t offset)
     std::fclose(file);
 }
 
+std::vector<library::Bookmark> LoadBookmarks(const std::string& filename)
+{
+    FILE* file = std::fopen(BookmarksSidecarPath(filename).c_str(), "rb");
+    if (file == nullptr) {
+        return {};
+    }
+    std::string text;
+    char buffer[512];
+    size_t read = 0;
+    while ((read = std::fread(buffer, 1, sizeof(buffer), file)) > 0 &&
+           text.size() < kMaxBookmarksBytes) {
+        text.append(buffer, read);
+    }
+    std::fclose(file);
+    return library::ParseBookmarks(text);
+}
+
+void SaveBookmarks(const std::string& filename, const std::vector<library::Bookmark>& bookmarks)
+{
+    const std::string path = BookmarksSidecarPath(filename);
+    if (bookmarks.empty()) {
+        (void)unlink(path.c_str());  // no file rather than an empty one
+        return;
+    }
+    const std::string text = library::SerializeBookmarks(bookmarks);
+    FILE* file = std::fopen(path.c_str(), "wb");
+    if (file == nullptr) {
+        ESP_LOGW(kTag, "Saving bookmarks for %s failed", filename.c_str());
+        return;
+    }
+    std::fwrite(text.data(), 1, text.size(), file);
+    std::fclose(file);
+}
+
 bool DeleteBook(const std::string& filename)
 {
+    errno = 0;
+    if (unlink(BookmarksSidecarPath(filename).c_str()) != 0 && errno != ENOENT) {
+        ESP_LOGW(kTag, "Delete bookmarks for %s failed: errno=%d (%s)", filename.c_str(), errno,
+                 std::strerror(errno));
+    }
     // Sidecar first: if the process is interrupted between the two removals, leaving a
     // stray .pos behind is harmless (ListBooks only ever looks at .txt/.epub files), whereas
     // leaving the book behind with its position already gone is a worse partial state.

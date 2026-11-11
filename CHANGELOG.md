@@ -10,6 +10,11 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Bookmarks** (#28). The reader menu has **Add bookmark** / **Remove bookmark** and,
+  once a book has some, **Bookmarks** to jump back to one. A bookmarked page shows a
+  small ribbon in the top right corner. They're kept in a `.bm` file next to the book
+  (deleted with it), and they stay put when the text size changes.
+
 - **Go to a point in a book** (#28). The reader menu has **Go to...**: 0%, 10%, ...
   100%, with the nearest one to where you are highlighted. Works for EPUB and `.txt`.
   EPUB progress now weighs chapters by their size, so a short preface no longer

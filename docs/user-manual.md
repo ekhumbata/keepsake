@@ -284,6 +284,11 @@ mass storage, from Settings > Storage) and they'll show up here.
 - **Press the rocker in** while reading to open the reader menu:
   - **Contents** (EPUB books) lists the chapters, with the one you're in
     highlighted; pick one to jump straight to it.
+  - **Add bookmark** marks the page you're on: a small ribbon appears in the top
+    right corner. On a bookmarked page the item reads **Remove bookmark** instead.
+  - **Bookmarks** (once a book has some) lists them with how far through the book
+    each one is and its chapter (or, for `.txt`, the first words of the page). Pick
+    one to jump to it. Bookmarks stay put when you change the text size.
   - **Go to...** jumps to a point in the book: pick 0% (the start), 10%, 20% and so
     on up to 100% (the end). The one nearest to where you are is highlighted.
   - **Text size** picks **Small**, **Medium** (the starting size) or **Large** for
@@ -299,7 +304,8 @@ mass storage, from Settings > Storage) and they'll show up here.
   only reads `.epub` and `.txt` files. Files and folders whose names start with a
   dot are ignored. Keepsake keeps a small hidden `.library` file there to remember
   titles and progress; deleting it is harmless, it's rebuilt the next time you open
-  Books.
+  Books. Next to each book there's also a `.pos` file (where you are) and, once you
+  add one, a `.bm` file (your bookmarks).
 
 ## Settings
 

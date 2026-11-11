@@ -8,6 +8,7 @@
 #include "book_reader/epub_session.h"
 #include "epaper_ui/book_page.h"
 #include "epaper_ui/book_reader_page.h"
+#include "library/library.h"
 
 // Paginates a .txt file for the reader screen: greedily wraps text from a byte offset to fill
 // one screen's worth of lines (BookReaderContentBounds/PaginateBookText), reading the file in
@@ -52,6 +53,15 @@ public:
     // Jumps to `percent` of the way through the book (#28): for .txt, the first word at or
     // after that byte. False when nothing is open or the book couldn't be read.
     bool GoToPercent(int percent, int portrait_width, int portrait_height);
+
+    // Bookmarks (#28). The coordinator knows places; the runtime keeps the list and saves it.
+    // The current page as a bookmark (place, percent, and a label: chapter or first words).
+    library::Bookmark CurrentBookmark() const;
+    // False while an EPUB that couldn't be opened is showing its message.
+    bool CanBookmark() const { return !filename_.empty() && !(epub_ && epub_failed_); }
+    // Index of a bookmark on the page showing now, or -1.
+    int BookmarkOnPage(const std::vector<library::Bookmark>& bookmarks) const;
+    bool GoToBookmark(const library::Bookmark& bookmark, int portrait_width, int portrait_height);
 
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }
