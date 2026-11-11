@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import struct
-import subprocess
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,82 +34,39 @@ def parse_asset_spec(raw: str) -> AssetSpec:
     return AssetSpec(path=path, symbol=parts[1])
 
 
-def convert_png_to_bmp(
-    asset_path: Path,
-    temp_dir: str,
-    *,
-    fixed_size: int | None = None,
-) -> Path:
-    bmp_path = Path(temp_dir) / f"{asset_path.stem}.bmp"
-    command = ["sips"]
-    if fixed_size is not None:
-        command.extend(["-z", str(fixed_size), str(fixed_size)])
-    command.extend(
-        [
-            "-s",
-            "format",
-            "bmp",
-            str(asset_path),
-            "--out",
-            str(bmp_path),
-        ]
-    )
-    result = subprocess.run(command, check=False, capture_output=True, text=True)
-    if result.returncode != 0:
+def load_png_pixels(asset_path: Path, *, fixed_size: int | None = None) -> tuple[int, int, list[int]]:
+    """Loads a PNG (any OS, via Pillow) as 1 = ink, 0 = paper.
+
+    A pixel is ink when it is at least slightly opaque (alpha >= 16) and darker than near-white
+    (luminance < 245), the same threshold the original macOS sips/BMP pipeline used.
+    `fixed_size` resizes to a square first, for icon sets drawn at a larger size. Bicubic is
+    the Pillow filter closest to sips's output (measured on the 44 -> 36 px icons: 12/58
+    identical, 3% of ink pixels differ, all on edges).
+    """
+    try:
+        from PIL import Image
+    except ImportError as exc:  # pragma: no cover - environment check
         raise AssetGenError(
-            f"failed to convert {asset_path} with sips:\n{result.stderr.strip()}"
-        )
-    if not bmp_path.is_file():
-        raise AssetGenError(f"sips did not produce output for {asset_path}")
-    return bmp_path
+            "asset generation needs Pillow: pip install -r tools/requirements.txt"
+        ) from exc
 
+    try:
+        with Image.open(asset_path) as source:
+            image = source.convert("RGBA")
+    except OSError as exc:
+        raise AssetGenError(f"unable to read {asset_path}: {exc}") from exc
 
-def parse_bmp_pixels(bmp_path: Path) -> tuple[int, int, list[int]]:
-    data = bmp_path.read_bytes()
-    if len(data) < 54 or data[:2] != b"BM":
-        raise AssetGenError(f"unsupported BMP file: {bmp_path}")
+    if fixed_size is not None and image.size != (fixed_size, fixed_size):
+        image = image.resize((fixed_size, fixed_size), Image.Resampling.BICUBIC)
 
-    pixel_offset = struct.unpack_from("<I", data, 10)[0]
-    dib_size = struct.unpack_from("<I", data, 14)[0]
-    if dib_size < 40:
-        raise AssetGenError(f"unsupported BMP DIB header in {bmp_path}")
-
-    width = struct.unpack_from("<i", data, 18)[0]
-    height = struct.unpack_from("<i", data, 22)[0]
-    bits_per_pixel = struct.unpack_from("<H", data, 28)[0]
-    compression = struct.unpack_from("<I", data, 30)[0]
-
-    if width <= 0 or height == 0:
-        raise AssetGenError(f"invalid BMP dimensions in {bmp_path}")
-    if bits_per_pixel not in (24, 32):
-        raise AssetGenError(
-            f"unsupported BMP bit depth {bits_per_pixel} in {bmp_path}"
-        )
-    if compression not in (0, 3):
-        raise AssetGenError(
-            f"unsupported BMP compression {compression} in {bmp_path}"
-        )
-
-    abs_height = abs(height)
-    top_down = height < 0
-    bytes_per_pixel = bits_per_pixel // 8
-    row_stride = ((width * bits_per_pixel + 31) // 32) * 4
-    pixels = [0x00] * (width * abs_height)
-
-    for row in range(abs_height):
-        source_row = row if top_down else abs_height - 1 - row
-        row_start = pixel_offset + source_row * row_stride
-        for col in range(width):
-            pixel_start = row_start + col * bytes_per_pixel
-            blue = data[pixel_start]
-            green = data[pixel_start + 1]
-            red = data[pixel_start + 2]
-            alpha = data[pixel_start + 3] if bytes_per_pixel == 4 else 0xFF
-            luminance = (red * 30 + green * 59 + blue * 11) // 100
-            filled = alpha >= 16 and luminance < 245
-            pixels[row * width + col] = 1 if filled else 0
-
-    return width, abs_height, pixels
+    width, height = image.size
+    rgba = image.tobytes()
+    pixels: list[int] = []
+    for index in range(0, len(rgba), 4):
+        red, green, blue, alpha = rgba[index], rgba[index + 1], rgba[index + 2], rgba[index + 3]
+        luminance = (red * 30 + green * 59 + blue * 11) // 100
+        pixels.append(1 if alpha >= 16 and luminance < 245 else 0)
+    return width, height, pixels
 
 
 def pack_bitmap(width: int, height: int, pixels: list[int]) -> BitmapAsset:
@@ -201,9 +155,7 @@ def write_source(
 
 def build_bitmaps(specs: list[AssetSpec], *, fixed_size: int | None) -> list[BitmapAsset]:
     bitmaps: list[BitmapAsset] = []
-    with tempfile.TemporaryDirectory() as temp_dir:
-        for spec in specs:
-            bmp_path = convert_png_to_bmp(spec.path, temp_dir, fixed_size=fixed_size)
-            width, height, pixels = parse_bmp_pixels(bmp_path)
-            bitmaps.append(pack_bitmap(width, height, pixels))
+    for spec in specs:
+        width, height, pixels = load_png_pixels(spec.path, fixed_size=fixed_size)
+        bitmaps.append(pack_bitmap(width, height, pixels))
     return bitmaps
