@@ -274,7 +274,8 @@ mass storage, from Settings > Storage) and they'll show up here.
   where you stopped.
 - **EPUB books** show their title at the top and, at the bottom, the chapter name,
   the page within that chapter, and how far through the whole book you are (for
-  example `Chapter Two - 3/12 - 41%`). Pages turn straight from one chapter into the
+  example `Chapter Two - 3/12 - 41%`; a long chapter counts for more of the book
+  than a short one). Pages turn straight from one chapter into the
   next. Headings, bold and italic text, lists and scene breaks are shown, and
   pictures appear as a framed caption.
 - If a book can't be opened, the reader says why in plain words instead: it's
@@ -283,6 +284,8 @@ mass storage, from Settings > Storage) and they'll show up here.
 - **Press the rocker in** while reading to open the reader menu:
   - **Contents** (EPUB books) lists the chapters, with the one you're in
     highlighted; pick one to jump straight to it.
+  - **Go to...** jumps to a point in the book: pick 0% (the start), 10%, 20% and so
+    on up to 100% (the end). The one nearest to where you are is highlighted.
   - **Text size** picks **Small**, **Medium** (the starting size) or **Large** for
     the book text. You stay on the same passage, and the size is used for every
     book (EPUB and `.txt`) until you change it again.

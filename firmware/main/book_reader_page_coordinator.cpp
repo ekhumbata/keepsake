@@ -12,6 +12,8 @@ namespace {
 // the page is simply cut short once the budget is spent.
 constexpr size_t kReadChunkBytes = 4096;
 constexpr int kMaxChunkReadsPerPage = 4;
+// Go to 100% in a .txt lands about this far before the end, roughly the last page.
+constexpr uint64_t kEndBackoffBytes = 1500;
 
 }  // namespace
 
@@ -110,6 +112,42 @@ void BookReaderPageCoordinator::Relayout(int portrait_width, int portrait_height
     // page starts exactly there; the pages before it are re-derived at the new size.
     SavePosition();
     Show(filename_, portrait_width, portrait_height);
+}
+
+bool BookReaderPageCoordinator::GoToPercent(int percent, int portrait_width, int portrait_height)
+{
+    if (filename_.empty()) {
+        return false;
+    }
+    percent = std::clamp(percent, 0, 100);
+    if (epub_) {
+        if (epub_failed_ || !epub_session_.GoToPercent(percent)) {
+            return false;
+        }
+        page_number_ = static_cast<int>(epub_session_.page_index()) + 1;
+        return true;
+    }
+    const uint64_t size = text_reader_service::GetFileSize(filename_);
+    uint64_t target = size * static_cast<uint64_t>(percent) / 100u;
+    if (target + kEndBackoffBytes > size) {
+        // 100% (or close): back off about a page so there's something left to read.
+        target = size > kEndBackoffBytes ? size - kEndBackoffBytes : 0;
+    }
+    size_t offset = static_cast<size_t>(target);
+    if (offset > 0) {
+        // Start on a word: skip to just past the next space or line break.
+        char chunk[256];
+        const size_t got = text_reader_service::ReadChunk(filename_, offset, chunk, sizeof(chunk));
+        for (size_t i = 0; i < got; ++i) {
+            if (chunk[i] == ' ' || chunk[i] == '\n' || chunk[i] == '\t') {
+                offset += i + 1;
+                break;
+            }
+        }
+    }
+    text_reader_service::SavePosition(filename_, offset);
+    Show(filename_, portrait_width, portrait_height);
+    return true;
 }
 
 void BookReaderPageCoordinator::ShowEpub(int portrait_width, int portrait_height)

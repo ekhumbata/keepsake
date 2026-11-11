@@ -10,6 +10,11 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Go to a point in a book** (#28). The reader menu has **Go to...**: 0%, 10%, ...
+  100%, with the nearest one to where you are highlighted. Works for EPUB and `.txt`.
+  EPUB progress now weighs chapters by their size, so a short preface no longer
+  counts as much of the book as a long chapter.
+
 - **Text size for books** (#28). The reader menu has **Text size**: Small, Medium or
   Large (Literata at 19, 22 or 26 px). Changing it keeps you on the same passage and
   is remembered on the device. `.txt` books now use Literata too, so the size applies

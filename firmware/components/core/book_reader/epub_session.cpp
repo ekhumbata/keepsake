@@ -1,6 +1,7 @@
 #include "book_reader/epub_session.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace book_reader {
 namespace {
@@ -44,6 +45,14 @@ epub::OpenError EpubSession::Open(std::unique_ptr<epub::ByteSource> source,
     book_ = epub::EpubBook::Open(std::move(source), &error);
     if (book_ == nullptr) {
         return error;
+    }
+    start_bytes_.clear();
+    total_bytes_ = 0;
+    for (const epub::SpineItem& item : book_->spine()) {
+        start_bytes_.push_back(total_bytes_);
+        if (item.linear) {
+            total_bytes_ += std::max<uint32_t>(1, item.bytes);
+        }
     }
 
     const size_t last = book_->spine().size() - 1;
@@ -213,6 +222,25 @@ std::string EpubSession::chapter_title() const
     return {};
 }
 
+double EpubSession::ShareBefore(size_t spine_index) const
+{
+    if (total_bytes_ == 0 || spine_index >= start_bytes_.size()) {
+        return static_cast<double>(spine_index) / static_cast<double>(book_->spine().size());
+    }
+    return static_cast<double>(start_bytes_[spine_index]) / static_cast<double>(total_bytes_);
+}
+
+double EpubSession::Share(size_t spine_index) const
+{
+    if (total_bytes_ == 0 || spine_index >= start_bytes_.size()) {
+        return 1.0 / static_cast<double>(book_->spine().size());
+    }
+    const uint64_t end =
+        spine_index + 1 < start_bytes_.size() ? start_bytes_[spine_index + 1] : total_bytes_;
+    return static_cast<double>(end - start_bytes_[spine_index]) /
+           static_cast<double>(total_bytes_);
+}
+
 int EpubSession::percent() const
 {
     if (!is_open() || book_->spine().empty()) {
@@ -221,9 +249,44 @@ int EpubSession::percent() const
     const double within = pages_.empty() ? 0.0
                                          : static_cast<double>(page_index_ + 1) /
                                                static_cast<double>(pages_.size());
-    const double done = (static_cast<double>(spine_index_) + within) /
-                        static_cast<double>(book_->spine().size());
+    const double done = ShareBefore(spine_index_) + within * Share(spine_index_);
     return std::clamp(static_cast<int>(done * 100.0 + 0.5), 0, 100);
+}
+
+bool EpubSession::GoToPercent(int percent)
+{
+    if (!is_open() || book_->spine().empty()) {
+        return false;
+    }
+    const double target = std::clamp(percent, 0, 100) / 100.0;
+    const size_t count = book_->spine().size();
+    // The last chapter that starts at or before the target (and has a share of the book).
+    size_t spine = 0;
+    for (size_t i = 0; i < count; ++i) {
+        if (Share(i) > 0.0 && ShareBefore(i) <= target) {
+            spine = i;
+        }
+    }
+    const double share = Share(spine);
+    const double within =
+        share > 0.0 ? std::clamp((target - ShareBefore(spine)) / share, 0.0, 1.0) : 0.0;
+
+    if (!LoadChapter(spine) || (IsEmpty(pages_) && !chapter_failed_)) {
+        size_t readable = spine;
+        if (!FindReadable(spine, +1, &readable) && !FindReadable(spine, -1, &readable)) {
+            return true;  // nothing readable anywhere: stay on what's loaded
+        }
+        LoadChapter(readable);
+        return true;  // landed on a neighbour: its first page
+    }
+    if (!pages_.empty()) {
+        // percent() counts page i as (i + 1) / n of the chapter, so pick the page whose count
+        // first reaches the target.
+        const double pages = static_cast<double>(pages_.size());
+        const double index = std::ceil(within * pages) - 1.0;
+        page_index_ = static_cast<size_t>(std::clamp(index, 0.0, pages - 1.0));
+    }
+    return true;
 }
 
 const epub::BookMetadata& EpubSession::metadata() const

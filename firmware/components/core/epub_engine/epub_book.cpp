@@ -182,6 +182,11 @@ OpenError EpubBook::Load(const OpenLimits& limits)
     if (spine_.empty()) {
         return OpenError::kNoContent;
     }
+    for (SpineItem& item : spine_) {
+        if (const ZipEntry* entry = zip_.Find(item.path)) {
+            item.bytes = entry->uncompressed_size;
+        }
+    }
 
     std::string document;
     if (!nav_path.empty() &&

@@ -1,5 +1,6 @@
 #include "book_reader_page_runtime.h"
 
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -21,8 +22,11 @@ std::mutex s_mutex;
 BookReaderPageCoordinator s_coordinator = {};
 std::atomic<bool> s_pending_back{false};
 
-enum class MenuAction : uint8_t { kContents, kTextSize, kBackToBooks, kClose };
-enum class MenuStage : uint8_t { kNone, kMenu, kContents, kTextSize };
+enum class MenuAction : uint8_t { kContents, kGoTo, kTextSize, kBackToBooks, kClose };
+enum class MenuStage : uint8_t { kNone, kMenu, kContents, kGoTo, kTextSize };
+// Go to... offers 0%, 10%, ... 100%.
+constexpr int kGoToStepPercent = 10;
+constexpr int kGoToChoices = 100 / kGoToStepPercent + 1;
 MenuStage s_menu_stage = MenuStage::kNone;
 std::vector<MenuAction> s_menu_actions;
 
@@ -146,6 +150,8 @@ bool ShowMenu()
             modal.items.push_back({"Contents"});
             s_menu_actions.push_back(MenuAction::kContents);
         }
+        modal.items.push_back({"Go to..."});
+        s_menu_actions.push_back(MenuAction::kGoTo);
         modal.items.push_back(
             {std::string("Text size: ") + epaper_ui::BookTextSizeName(epaper_ui::GetBookTextSize())});
         s_menu_actions.push_back(MenuAction::kTextSize);
@@ -181,6 +187,18 @@ bool ShowContentsLocked(epaper_ui::SelectModalState* modal)
     modal->selected_index = s_coordinator.CurrentContentsIndex();
     s_menu_stage = MenuStage::kContents;
     return true;
+}
+
+void ShowGoToLocked(epaper_ui::SelectModalState* modal)
+{
+    modal->title_text = "Go to";
+    for (int i = 0; i < kGoToChoices; ++i) {
+        modal->items.push_back({std::to_string(i * kGoToStepPercent) + "%"});
+    }
+    const int now = std::max(0, s_coordinator.ProgressPercent());
+    modal->selected_index =
+        std::min(kGoToChoices - 1, (now + kGoToStepPercent / 2) / kGoToStepPercent);
+    s_menu_stage = MenuStage::kGoTo;
 }
 
 void ShowTextSizesLocked(epaper_ui::SelectModalState* modal)
@@ -242,6 +260,27 @@ bool HandleMenuSelection(int selected_index)
         return true;
     }
 
+    if (stage == MenuStage::kGoTo) {
+        if (selected_index < 0 || selected_index >= kGoToChoices) {
+            return true;  // dismissed
+        }
+        bool moved = false;
+        {
+            const cpu_boost::ScopedBoost boost("go to");
+            std::lock_guard<std::mutex> lock(s_mutex);
+            moved = s_coordinator.GoToPercent(selected_index * kGoToStepPercent,
+                                              display_service::PortraitWidth(),
+                                              display_service::PortraitHeight());
+            if (moved) {
+                SavePositionLocked();
+            }
+        }
+        if (moved) {
+            (void)UpdateDisplayStateAndRequestRefresh(display_service::RefreshMode::kPartial);
+        }
+        return true;
+    }
+
     if (stage == MenuStage::kTextSize) {
         if (selected_index < 0 || selected_index >= epaper_ui::kBookTextSizeCount ||
             selected_index == static_cast<int>(epaper_ui::GetBookTextSize())) {
@@ -272,6 +311,15 @@ bool HandleMenuSelection(int selected_index)
             if (show) {
                 ShowSubmenu(modal);
             }
+            break;
+        }
+        case MenuAction::kGoTo: {
+            epaper_ui::SelectModalState modal = {};
+            {
+                std::lock_guard<std::mutex> lock(s_mutex);
+                ShowGoToLocked(&modal);
+            }
+            ShowSubmenu(modal);
             break;
         }
         case MenuAction::kTextSize: {

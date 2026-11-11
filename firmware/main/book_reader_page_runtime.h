@@ -41,7 +41,8 @@ bool ExitActiveControl();
 void RequestBack();
 bool ConsumePendingBack();
 
-// Reader menu (#28), opened with the rocker press: Contents (EPUB), Back to books, Close.
+// Reader menu (#28), opened with the rocker press: Contents (EPUB), Go to (0-100%), Text size,
+// Back to books, Close.
 // Contents opens a second list of the book's table of contents. Selections arrive through
 // HandleMenuSelection (app_shell's select-modal chain); false when the modal wasn't ours.
 bool ShowMenu();
