@@ -36,5 +36,8 @@ inline constexpr UBaseType_t kPriorityTranscriptionRetry = 2;
 // last-good values off the UI path, so a poll that loses a race to SD/display
 // bus activity simply retries on the next cycle without ever blocking a refresh.
 inline constexpr UBaseType_t kPrioritySensorPoll = 2;
+// Wi-Fi on demand (#17): runs queued network jobs (time sync, uploads) one at a time and
+// decides when the radio is on. Background work, so below the UI and Wi-Fi driver tasks.
+inline constexpr UBaseType_t kPriorityNetJobs = 2;
 
 }  // namespace chroninkle_task_config

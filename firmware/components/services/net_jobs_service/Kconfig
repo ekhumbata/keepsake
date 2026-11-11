@@ -1,0 +1,27 @@
+menu "Keepsake Wi-Fi on demand"
+
+    config KEEPSAKE_WIFI_ON_DEMAND
+        bool "Keep the Wi-Fi radio off until network work needs it (experimental)"
+        default n
+        help
+            Off (default): Wi-Fi behaves as it always has -- it connects at boot and stays
+            connected -- and network jobs run whenever it is connected.
+
+            On: the radio is off by default. Network jobs (time sync, transcription retries,
+            and later weather, downloads and update checks) bring it up, run together, keep it
+            on for 30 s in case more follow, then turn it off. With no known network in range
+            it waits 30, then 60 minutes before trying again, but anything a person is waiting
+            on tries straight away. The radio stays on while the Wi-Fi settings page or the
+            setup hotspot is in use. See net_jobs::Scheduler (#17). Needs an on-device check
+            before it becomes the default.
+
+    config KEEPSAKE_NET_SYNC_INTERVAL_HOURS
+        int "Background sync interval (hours)"
+        depends on KEEPSAKE_WIFI_ON_DEMAND
+        range 1 48
+        default 6
+        help
+            How often, with Wi-Fi on demand, the radio comes up on its own to sync the time
+            and send any recordings still waiting for transcription.
+
+endmenu

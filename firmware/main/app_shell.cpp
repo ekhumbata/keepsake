@@ -25,6 +25,7 @@
 #include "footer_runtime.h"
 #include "chroninkle_task_config.h"
 #include "cpu_boost.h"
+#include "net_jobs_service.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gemini_service.h"
@@ -1518,13 +1519,18 @@ void HandleWifiEvent(const wifi_service::Event& event, void*)
     const bool wifi_connected = event.ui_state.connected;
     const bool was_wifi_connected =
         s_wifi_connected.exchange(wifi_connected, std::memory_order_relaxed);
+    net_jobs_service::OnWifiStateChanged(wifi_connected);
     if (wifi_connected && !was_wifi_connected) {
         // gemini_service's `ready` flag doesn't reset across a disconnect/reconnect once
         // authenticated at boot, so HandleGeminiEvent's ready-edge retry trigger only ever
-        // fires on the very first boot-time authentication. Retry directly off the Wi-Fi
-        // reconnect edge too -- RetryPending() is a no-op if nothing is pending or a batch
-        // is already in flight, so firing from both edges is safe.
-        (void)transcription_retry_service::RetryPending();
+        // fires on the very first boot-time authentication. Retry off the Wi-Fi reconnect
+        // edge too -- RetryPending() is a no-op if nothing is pending or a batch is already
+        // in flight, so firing from both edges is safe. As a network job (#17) it runs while
+        // connected, and with Wi-Fi on demand it counts as work keeping the radio up.
+        net_jobs_service::Submit(net_jobs::Urgency::kBackground, "transcription retry", [] {
+            (void)transcription_retry_service::RetryPending();
+            return true;
+        });
     }
 
     // Region scope, not screen scope. Wi-Fi events fire during and right after the page
@@ -2034,6 +2040,25 @@ void InitWifiService()
     if (err != ESP_OK) {
         ESP_LOGW(kTag, "Wi-Fi service init failed: %s", esp_err_to_name(err));
         return;
+    }
+    // Network work runs as jobs (#17). The radio stays on while the Wi-Fi page or the setup
+    // hotspot is in use, whatever the jobs say.
+    net_jobs_service::SetHoldProvider([] {
+        return display_service::GetCurrentScreen() == display_service::ScreenId::kWifi ||
+               wifi_service::IsAccessPointMode();
+    });
+    net_jobs_service::SetPeriodicSync([] {
+        (void)timezone_service::SyncNow(nullptr, 5000);
+        (void)transcription_retry_service::RetryPending();
+        return true;
+    });
+    if (const esp_err_t jobs_err = net_jobs_service::Init(); jobs_err != ESP_OK) {
+        ESP_LOGW(kTag, "Network jobs init failed: %s", esp_err_to_name(jobs_err));
+    }
+    if (net_jobs_service::OnDemandEnabled()) {
+        // Wi-Fi on demand: boot with the radio off; jobs (including the periodic sync just
+        // registered) bring it up when there is work.
+        wifi_service::SetWifiEnabled(false);
     }
     wifi_service::Start();
 }
