@@ -1,12 +1,23 @@
 # Changelog
 
-All notable changes to Chroninkle (renamed from Followup at 0.6.0) are
-documented here. Format follows
+All notable changes to Keepsake (forked from Chroninkle at 1.0.0; Chroninkle
+was renamed from Followup at 0.6.0) are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows
 [Semantic Versioning](docs/versioning.md). History prior to 0.2.0 is available
 via `git log`, not backfilled here.
 
 ## [Unreleased]
+
+### Changed
+
+- **Rebranded to Keepsake** (user-facing only). The boot screen shows a
+  Keepsake wordmark (a placeholder until the redesign's real logo) and credits
+  "Chroninkle and" Followup/ALXV Labs. The About page credits both projects
+  and the GPLv3. The onboarding welcome says Keepsake. The Wi-Fi setup hotspot
+  is now `Keepsake-XXXXXX` and the setup portal is titled "Keepsake Setup".
+  The device registers as `keepsake` on the router (DHCP hostname), and a
+  freshly formatted SD card is labelled `KEEPSAKE`. Config symbols and
+  internal names keep their Chroninkle names.
 
 ## [1.0.0] - 2026-09-24
 

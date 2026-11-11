@@ -20,6 +20,8 @@ const EmbeddedImageAsset* GetLogo(EmbeddedLogoId id)
             return &epaper_logos::kChroninkleLogoStacked;
         case EmbeddedLogoId::kFollowupLogo:
             return &epaper_logos::kFollowupLogo;
+        case EmbeddedLogoId::kKeepsakeLogo:
+            return &epaper_logos::kKeepsakeLogo;
         default:
             return nullptr;
     }

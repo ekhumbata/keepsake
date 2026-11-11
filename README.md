@@ -1,83 +1,47 @@
-# Chroninkle Product Introduction
+# Keepsake
 
-![Chroninkle](assets/logos/chroninkle-logo.png)
+![Keepsake](assets/logos/keepsake-logo.png)
 
-Chroninkle is a place to capture your thoughts — whether it's an idea, a to-do, or just a note. Record what's on your mind at that light-bulb moment, before it slips away, and Chroninkle helps you organize it afterward. With Gemini, your recordings are transcribed automatically, and you can ask for a written summary of your Notes or Todos any time. Everything is stored on your SD card.
+Keepsake is cozy firmware for the [Waveshare ESP32-S3-ePaper-3.97](https://docs.waveshare.com/ESP32-S3-ePaper-3.97):
+a calm e-paper **book reader** first, an **ambient companion** (clock, calendar, weather, indoor climate) second, with
+reminders, timers and voice notes alongside. It's designed as a gift for someone who reads a lot and doesn't want to
+think about the tech: setup and recovery need no AI or API knowledge, battery life matters, and it should feel warm
+rather than gadgety.
 
-It runs on the [Waveshare ESP32-S3-ePaper-3.97](https://docs.waveshare.com/ESP32-S3-ePaper-3.97), so your thoughts live on a quiet, always-on screen you can place anywhere — a constant, low-interruption reminder instead of one more notification buried in your phone.
+Keepsake is a fork of [Chroninkle](https://github.com/mach1na/chroninkle) (a voice-first thought-capture app), which
+grew out of ALXV Labs' Followup. Everything Chroninkle does still works; Keepsake builds the reading and ambient
+features on top.
 
-For the full walkthrough of every screen and control, see the [user manual](docs/user-manual.md).
+**Status:** early. The plan of record is [`docs/plan.md`](docs/plan.md), and progress is tracked as
+[milestones](https://github.com/ekhumbata/keepsake/milestones) and
+[issues](https://github.com/ekhumbata/keepsake/issues).
 
-## One-Sentence Positioning
+## What works today (inherited from Chroninkle)
 
-**Chroninkle is a voice-first thought-capture companion on always-on ePaper: record ideas, to-dos, and notes in the moment, let Gemini transcribe them and summarize what matters on demand, and keep your pending todos in view even when the screen is locked or off.**
+- **Voice notes:** hold Record to capture, tag it Idea / To-do / Note / Topic, review playback before saving. Stored on
+  the SD card as audio.
+- **Optional Gemini transcription and summaries,** when a key is set.
+- **Todos and follow-ups,** with pending todos on the lock screen.
+- **Plain `.txt` books** from the SD card, with saved reading position.
+- **USB drive mode** (Settings → Storage) to copy files onto the SD card from a computer.
+- **Wi-Fi setup** through the device's own `Keepsake-XXXXXX` hotspot.
 
-## What It Is Suitable For
+The full walkthrough of every screen and control is in the [user manual](docs/user-manual.md).
 
-- Capturing a sudden idea by voice at the light-bulb moment, before it's forgotten
-- Jotting quick to-dos and notes hands-free while you're in the middle of something else
-- Keeping a device on a desk, fridge, or wall that shows your pending todos at a glance, even locked or powered off
-- Revisiting past ideas later to decide what's still worth pursuing
-- Anyone who wants their thoughts organized without living inside another app on their phone
+## Coming next
 
-## Key Features
-
-### 1. Capture at the Light-Bulb Moment
-
-Press record and speak. Every capture starts as a voice recording, tagged as an **Idea**, a **To-do**, or a **Note**, so you can get the thought down the instant it arrives without stopping to type. You can also speak a **Topic** into existence the same way — say a project name, tag it Topic, and it's ready to attach to other recordings.
-
-### 2. Gemini Transcription, Plus On-Demand Summaries
-
-Once a recording is saved, Gemini automatically transcribes it in the background, turning your voice into readable text. From the Summarize screen, you can also ask Gemini for a fresh written recap of everything currently in your Notes or your Todos, generated on demand rather than after every recording.
-
-A Gemini API key from [Google AI Studio](https://aistudio.google.com/) is required. You can get started on the free tier, subject to Gemini's free-tier limits, or use a paid account without those limits.
-
-### 3. Everything Stored on Your SD Card
-
-Recordings, transcripts, and summaries are stored locally on the device's SD card. Your thoughts stay with you, on your own storage.
-
-### 4. Follow Up on Tasks and Notes
-
-Mark a task or note as a follow-up to keep it on your radar. Chroninkle helps you stay on track and focused on what actually needs doing next.
-
-### 5. Your Pending Todos, Visible at a Glance
-
-Lock the screen — or shut the device down — and the ePaper freezes on a summary of your pending todos instead of going blank or dark. Because e-paper holds its image with no power, that summary stays legible and in front of you even while the device is locked, asleep, or fully off.
-
-### 6. Browse Your Follow-Ups as Stickies
-
-From the Home screen, open your flagged follow-ups as a stack of sticky notes you browse one at a time — a quick way to page back through what you've marked as worth revisiting, whatever it's tagged as.
-
-### 7. Group Anything Under a Topic
-
-Tag a Note, Idea, or Todo with a topic — a project name, say — independent of what type it's tagged as. Browse everything under a topic from the Home screen, and ask Gemini for a written recap of everything ever tagged with it, no matter how long ago it was captured.
-
-### 8. Read Your Own Text Files
-
-Copy plain `.txt` files onto the SD card's `books` folder and read them right on the device. Chroninkle remembers your page in each book, so picking one back up continues where you left off.
-
-## Typical Applications
-
-| Application | Description |
-| --- | --- |
-| Idea | Capture a spark by voice, filed alongside your Notes and groupable under a Topic |
-| To-do | Record a task hands-free and follow up until it's done |
-| Note | Keep a quick thought or reminder, transcribed automatically |
-| Follow-up | Flag the items that matter so they stay top of mind |
-| Lock screen | See your pending todos at a glance whenever the device is locked or shut down |
-| Stickies | Browse your flagged follow-ups one at a time from the Home screen |
-| Topics | Group Notes, Ideas, and Todos under a shared label and summarize them together |
-| Books | Read plain-text files stored on the SD card, picking up where you left off |
-| Summaries | Ask Gemini for a fresh written recap of your Notes, Todos, or a Topic, on demand |
+EPUB reading with a proper reader font, a books-first Home screen, a library with covers, adding books from a phone
+over Wi-Fi, free public-domain books (Project Gutenberg), an ambient lock screen, a cute original visual identity, and
+over-the-air updates. See the [plan](docs/plan.md) for the full list and order.
 
 ## Brief Specifications
 
-Chroninkle runs on the [Waveshare ESP32-S3-ePaper-3.97](https://docs.waveshare.com/ESP32-S3-ePaper-3.97).
+Keepsake runs on the [Waveshare ESP32-S3-ePaper-3.97](https://docs.waveshare.com/ESP32-S3-ePaper-3.97).
 
 | Item | Information |
 | --- | --- |
-| Product Name | Chroninkle (on ESP32-S3-ePaper-3.97) |
-| Product Type | Voice-capture notes app on an ePaper terminal |
+| Product Name | Keepsake (on ESP32-S3-ePaper-3.97) |
+| Product Type | E-paper reader + ambient companion, with voice notes |
 | MCU | ESP32-S3R8, dual-core Xtensa LX7 up to 240MHz |
 | Memory | 8MB PSRAM, 16MB flash |
 | Screen | 3.97-inch black-and-white ePaper, 800 x 480, SSD1677 controller |
@@ -87,13 +51,13 @@ Chroninkle runs on the [Waveshare ESP32-S3-ePaper-3.97](https://docs.waveshare.c
 | Sensors | QMI8658 6-axis IMU, PCF85063 real-time clock |
 | Power | AXP2101 PMIC, 3.7V lithium battery (MX1.25 connector), USB-C charging |
 | Storage | microSD card (recordings, transcripts, summaries, `.txt` books) |
-| AI | Gemini (cloud) transcription and summarization, over Wi-Fi |
+| AI (optional) | Gemini (cloud) transcription and summarization, over Wi-Fi; everything else works without it |
 
-The board also carries an SHTC3 temperature/humidity sensor on the shared I2C bus. Chroninkle does not currently read it.
+The board also carries an SHTC3 temperature/humidity sensor on the shared I2C bus; the ambient screen will use it ([#36](https://github.com/ekhumbata/keepsake/issues/36)).
 
 ## Controls
 
-Chroninkle is driven entirely by three physical controls: a rocker, the Record button, and the PWR button. There is no touchscreen.
+Keepsake is driven entirely by three physical controls: a rocker, the Record button, and the PWR button. There is no touchscreen.
 
 | Control | Action |
 | --- | --- |
@@ -109,18 +73,22 @@ Recording is exclusive to the Record button, so no other control can start or st
 
 See the [user manual](docs/user-manual.md) for how these controls apply on every screen.
 
-## Product Value Summary
-
-The value of Chroninkle is a quiet, always-visible place to catch your thoughts and keep the important ones in front of you. Instead of losing an idea to a forgotten note app or burying a task in a notification stream, you speak it in the moment, let Gemini turn it into clean text and a summary, and keep everything private on your SD card.
-
-Tasks and notes become follow-ups so you stay on track. Your pending todos stay visible at a glance on the lock screen — even locked, asleep, or shut down — and the follow-ups you've flagged are always a button away as stickies: together, a steady, low-interruption view of what's next.
-
 ## License and Attribution
 
-Chroninkle is licensed under the [GNU GPLv3](LICENSE): Copyright (C) 2026 Alex Vong ([ALXV](https://github.com/alxv2016)), Copyright (C) 2026 Craig Richards ([mach1na](https://github.com/mach1na)).
+Keepsake is licensed under the [GNU GPLv3](LICENSE), like the projects it's built on:
+Copyright (C) 2026 Alex Vong ([ALXV](https://github.com/alxv2016)), Copyright (C) 2026 Craig Richards
+([mach1na](https://github.com/mach1na)), and the Keepsake contributors.
 
-Chroninkle was renamed from **Followup**, this project's own name through [version 0.5.0](CHANGELOG.md) — the boot screen still credits that name on a "Based on" line rather than dropping it. Followup was itself a fork of [ALXV's folloup-sticky](https://github.com/alxv2016/folloup-sticky), whose `main` branch targets SeeedStudio's reTerminal Sticky and which also has a `folloup-waveshare` branch porting it to the Waveshare ESP32-S3-ePaper-3.97; this fork built on that Waveshare work and made it the primary target going forward. Thank you to ALXV for the original design and implementation this project builds on.
+- **[Chroninkle](https://github.com/mach1na/chroninkle)** by mach1na is the direct upstream; Keepsake forked it at
+  v1.0.0. Chroninkle was itself renamed from **Followup** (its name through version 0.5.0).
+- **Followup** was a fork of [ALXV's folloup-sticky](https://github.com/alxv2016/folloup-sticky), whose `main` branch
+  targets SeeedStudio's reTerminal Sticky and whose `folloup-waveshare` branch ports it to this Waveshare board.
+  The boot screen credits Chroninkle and shows Followup's original logo on its "Based on" line.
 
-The rename is still in progress — the GitHub repo, build/config identifiers, and some internal docs still say Followup/Folloup under the hood (tracked in `docs/todo.md`).
+Thank you to ALXV and mach1na for the design and implementation Keepsake grows from.
 
-The on-device UI's bitmap fonts are generated from [Inter](https://github.com/rsms/inter), © The Inter Project Authors, licensed under the [SIL Open Font License 1.1](fonts/OFL.txt).
+Internal identifiers (`CONFIG_CHRONINKLE_*`, the `chroninkle` CMake project, source symbols) deliberately keep their
+upstream names so upstream fixes can still be cherry-picked.
+
+The on-device UI's bitmap fonts are generated from [Inter](https://github.com/rsms/inter), © The Inter Project Authors,
+licensed under the [SIL Open Font License 1.1](fonts/OFL.txt).

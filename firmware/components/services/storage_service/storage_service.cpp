@@ -28,7 +28,8 @@ constexpr const char* kTag = "StorageService";
 constexpr const char* kMountPoint = "/sdcard";
 constexpr const char* kProbePath = "/sdcard/SDPROBE.TXT";
 constexpr const char* kProbeText = "reTerminal Sticky SD probe\n";
-constexpr const char* kVolumeLabel = "FOLLOUP";
+// Shown as the drive name in USB drive mode; FAT labels are at most 11 characters.
+constexpr const char* kVolumeLabel = "KEEPSAKE";
 constexpr size_t kAllocationUnitSize = 16 * 1024;
 constexpr size_t kMaxFiles = 5;
 constexpr size_t kMaxLoggedEntries = 5;

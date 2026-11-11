@@ -34,6 +34,9 @@ constexpr const char* kNvsNamespace = "wifi";
 constexpr const char* kSsidKey = "ssid";
 constexpr const char* kPasswordKey = "password";
 constexpr const char* kApUrl = "http://192.168.4.1";
+// DHCP hostname, so the device shows up as "keepsake" in the router's client list. (The
+// keepsake.local mDNS name comes with the Library web app, #32.)
+constexpr const char* kStationHostname = "keepsake";
 constexpr int kConnectTimeoutSec = 60;
 // Consecutive automatic reconnect attempts before the loop gives up and waits for the
 // user. Every attempt is a full radio stop/start/connect cycle, so out of range an
@@ -1006,6 +1009,10 @@ void InitializeStack()
 
     s_sta_netif = esp_netif_create_default_wifi_sta();
     s_ap_netif = esp_netif_create_default_wifi_ap();
+    if (const esp_err_t err = esp_netif_set_hostname(s_sta_netif, kStationHostname);
+        err != ESP_OK) {
+        ESP_LOGW(kTag, "Setting the DHCP hostname failed: %s", esp_err_to_name(err));
+    }
 
     wifi_init_config_t wifi_init = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init));
