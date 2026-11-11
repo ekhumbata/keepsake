@@ -44,6 +44,9 @@ public:
     // The primary action button plays the audio once a transcript exists, and
     // otherwise offers to transcribe it.
     bool has_transcript() const { return has_transcript_; }
+    // The primary button plays the audio once a transcript exists, and always in no-key mode
+    // (#44); otherwise it asks Gemini to transcribe.
+    bool plays_audio() const;
     const std::vector<std::string>& topic_ids() const { return topic_ids_; }
     // Updates the in-memory topic_ids after a successful save, so re-opening "Edit topics"
     // without leaving the page shows the just-saved state rather than the stale one.

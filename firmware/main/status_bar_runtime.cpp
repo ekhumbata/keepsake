@@ -1,5 +1,7 @@
 #include "status_bar_runtime.h"
 
+#include "ai_features.h"
+
 #include <mutex>
 
 #include "esp_check.h"
@@ -73,8 +75,10 @@ epaper_ui::StatusBarState BuildState()
 
     const int pending_transcription_count =
         recording_archive_service::GetSnapshot().pending_transcription_count;
-    state.show_pending_transcription_icon = pending_transcription_count > 0;
-    if (pending_transcription_count > 0) {
+    // No-key mode (#44): recordings are complete as audio, so nothing is "waiting".
+    const bool show_pending = ai_features::Enabled() && pending_transcription_count > 0;
+    state.show_pending_transcription_icon = show_pending;
+    if (show_pending) {
         state.pending_transcription_badge_text = std::to_string(pending_transcription_count);
     }
 

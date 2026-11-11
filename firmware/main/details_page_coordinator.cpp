@@ -1,5 +1,7 @@
 #include "details_page_coordinator.h"
 
+#include "ai_features.h"
+
 #include "project_assets.h"
 #include "shared_page_interactions.h"
 #include "timeline_format.h"
@@ -11,6 +13,8 @@ using page_navigation::NavigationItemRole;
 
 constexpr int kScrollStepPercent = 10;
 constexpr const char* kNoTranscriptMessage = "No transcript available.";
+constexpr const char* kVoiceNoteMessage = "A voice note. Press Play to listen.";
+constexpr const char* kVoiceNoteMissingMessage = "This voice note's audio file is missing.";
 
 }  // namespace
 
@@ -68,6 +72,11 @@ void DetailsPageCoordinator::RefreshFromArchive(const std::vector<RecordingEntry
     UpdateNavigationModel();
 }
 
+bool DetailsPageCoordinator::plays_audio() const
+{
+    return has_transcript_ || !ai_features::Enabled();
+}
+
 void DetailsPageCoordinator::UpdateNavigationModel()
 {
     // The primary action button is present for a recording (Play once a transcript
@@ -75,7 +84,7 @@ void DetailsPageCoordinator::UpdateNavigationModel()
     // itself is gone -- there, "Play" would have nothing to do, so the control slot
     // (and its focus target) is dropped entirely, matching show_transcribe_button in
     // BuildState().
-    const bool want_primary = !(has_transcript_ && !has_audio_file_);
+    const bool want_primary = !(plays_audio() && !has_audio_file_);
     const bool have_primary =
         navigation_model_.IndexOfRole(NavigationItemRole::kDetailsPageTranscribeButton) >= 0;
     if (want_primary == have_primary) {
@@ -139,12 +148,17 @@ epaper_ui::DetailsPageState DetailsPageCoordinator::BuildState() const
     state.title_text = title_text_;
     state.recording_header = recording_header_;
     state.scroll_container.content_text = has_transcript_ ? transcript_text_ : std::string();
-    state.scroll_container.empty_state_message =
-        has_transcript_
-            ? std::string()
-            : (last_transcription_error_.empty()
-                   ? kNoTranscriptMessage
-                   : "Transcription failed: " + last_transcription_error_);
+    if (has_transcript_) {
+        state.scroll_container.empty_state_message = std::string();
+    } else if (!ai_features::Enabled()) {
+        // No-key mode: a voice note is complete as audio; nothing here should read as missing.
+        state.scroll_container.empty_state_message =
+            has_audio_file_ ? kVoiceNoteMessage : kVoiceNoteMissingMessage;
+    } else {
+        state.scroll_container.empty_state_message =
+            last_transcription_error_.empty() ? kNoTranscriptMessage
+                                              : "Transcription failed: " + last_transcription_error_;
+    }
     state.scroll_container.focused =
         IsRoleFocused(NavigationItemRole::kDetailsPageScrollContainer) || scroll_container_active_;
     state.scroll_container.active = scroll_container_active_;
@@ -159,8 +173,8 @@ epaper_ui::DetailsPageState DetailsPageCoordinator::BuildState() const
     // still named "transcribe" in the layout; only the label and intent vary.)
     // Hidden when a transcript exists but the audio itself is gone (e.g. removed via
     // USB-OTG SD access) -- "Play" would otherwise show and silently do nothing.
-    state.show_transcribe_button = !(has_transcript_ && !has_audio_file_);
-    state.transcribe_button.label_text = has_transcript_ ? "Play" : "Transcribe";
+    state.show_transcribe_button = !(plays_audio() && !has_audio_file_);
+    state.transcribe_button.label_text = plays_audio() ? "Play" : "Transcribe";
     state.transcribe_button.selected =
         IsRoleFocused(NavigationItemRole::kDetailsPageTranscribeButton);
     return state;

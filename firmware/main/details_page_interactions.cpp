@@ -38,8 +38,8 @@ ActivateResult HandlePrimaryActivate(DetailsPageCoordinator& coordinator)
     }
 
     if (coordinator.IsRoleFocused(NavigationItemRole::kDetailsPageTranscribeButton)) {
-        result.intent = coordinator.has_transcript() ? ActivateIntent::kPlayRecording
-                                                     : ActivateIntent::kTranscribe;
+        result.intent = coordinator.plays_audio() ? ActivateIntent::kPlayRecording
+                                                  : ActivateIntent::kTranscribe;
         result.handled = true;
         result.play_activate_cue = true;
         return result;

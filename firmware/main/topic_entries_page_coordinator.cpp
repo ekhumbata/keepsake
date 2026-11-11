@@ -1,5 +1,7 @@
 #include "topic_entries_page_coordinator.h"
 
+#include "ai_features.h"
+
 #include <algorithm>
 
 #include "project_assets.h"
@@ -121,7 +123,7 @@ void TopicEntriesPageCoordinator::Show(const std::vector<RecordingEntry>& record
     }
     std::vector<TimelineGroup> groups = BuildGroups(recordings);
     const int group_count = static_cast<int>(groups.size());
-    const bool with_summarize = AnyGroupHasEntries(groups);
+    const bool with_summarize = AnyGroupHasEntries(groups) && ai_features::Enabled();
     focus_.Show(std::move(groups),
                page_navigation::BuildTopicEntriesPageNavigationModel(group_count, with_summarize));
 }
@@ -130,7 +132,7 @@ void TopicEntriesPageCoordinator::RefreshFromArchive(const std::vector<Recording
 {
     std::vector<TimelineGroup> groups = BuildGroups(recordings);
     const int group_count = static_cast<int>(groups.size());
-    const bool with_summarize = AnyGroupHasEntries(groups);
+    const bool with_summarize = AnyGroupHasEntries(groups) && ai_features::Enabled();
     focus_.RefreshPreservingSelection(
         std::move(groups),
         page_navigation::BuildTopicEntriesPageNavigationModel(group_count, with_summarize));
