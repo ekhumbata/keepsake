@@ -21,7 +21,7 @@ epaper_ui::BookReaderPageState BuildStateLocked()
 
 void SavePositionLocked()
 {
-    text_reader_service::SavePosition(s_coordinator.filename(), s_coordinator.current_page_start());
+    s_coordinator.SavePosition();
 }
 
 }  // namespace

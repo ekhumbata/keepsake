@@ -49,22 +49,27 @@ std::string PositionSidecarPath(const std::string& filename)
     return BookPath(filename) + kPositionSuffix;
 }
 
-bool HasTxtExtension(const std::string& name)
+bool HasExtension(const std::string& name, const char* wanted)
 {
-    constexpr size_t kExtLen = 4;  // ".txt"
-    if (name.size() <= kExtLen) {
+    const size_t length = std::strlen(wanted);
+    if (name.size() <= length) {
         return false;
     }
-    std::string ext = name.substr(name.size() - kExtLen);
+    std::string ext = name.substr(name.size() - length);
     std::transform(ext.begin(), ext.end(), ext.begin(),
                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return ext == ".txt";
+    return ext == wanted;
+}
+
+bool HasBookExtension(const std::string& name)
+{
+    return HasExtension(name, ".txt") || HasExtension(name, ".epub");
 }
 
 // Filters out dotfiles: macOS in particular litters any folder it writes to over OTG/USB
 // mass storage with ".DS_Store" and, for every real file it copies onto a non-HFS+ volume
 // like this SD card's FAT32, a same-named "._<file>" AppleDouble resource-fork sidecar --
-// which would otherwise pass HasTxtExtension outright (e.g. "._Dracula.txt").
+// which would otherwise pass HasBookExtension outright (e.g. "._Dracula.txt").
 bool IsHiddenName(const std::string& name)
 {
     return !name.empty() && name.front() == '.';
@@ -109,7 +114,7 @@ std::vector<BookEntry> ListBooks()
         }
 
         const std::string name = entry->d_name;
-        if (IsHiddenName(name) || !HasTxtExtension(name)) {
+        if (IsHiddenName(name) || !HasBookExtension(name)) {
             continue;
         }
 
@@ -180,6 +185,54 @@ size_t LoadPosition(const std::string& filename)
     return offset < size_bytes ? offset : 0;
 }
 
+bool IsEpub(const std::string& filename)
+{
+    return HasExtension(filename, ".epub");
+}
+
+std::string FullPath(const std::string& filename)
+{
+    return BookPath(filename);
+}
+
+bool LoadEpubPosition(const std::string& filename, EpubPosition* out)
+{
+    if (out == nullptr) {
+        return false;
+    }
+    FILE* file = std::fopen(PositionSidecarPath(filename).c_str(), "rb");
+    if (file == nullptr) {
+        return false;
+    }
+    char text[64] = {};
+    const size_t bytes_read = std::fread(text, 1, sizeof(text) - 1, file);
+    std::fclose(file);
+    text[bytes_read] = '\0';
+    unsigned long spine = 0;
+    unsigned long block = 0;
+    unsigned long offset = 0;
+    if (std::sscanf(text, "epub %lu %lu %lu", &spine, &block, &offset) != 3) {
+        return false;
+    }
+    out->spine = static_cast<uint32_t>(spine);
+    out->block = static_cast<uint32_t>(block);
+    out->offset = static_cast<uint32_t>(offset);
+    return true;
+}
+
+void SaveEpubPosition(const std::string& filename, const EpubPosition& position)
+{
+    FILE* file = std::fopen(PositionSidecarPath(filename).c_str(), "wb");
+    if (file == nullptr) {
+        ESP_LOGW(kTag, "Save position failed to open sidecar for %s", filename.c_str());
+        return;
+    }
+    std::fprintf(file, "epub %lu %lu %lu\n", static_cast<unsigned long>(position.spine),
+                 static_cast<unsigned long>(position.block),
+                 static_cast<unsigned long>(position.offset));
+    std::fclose(file);
+}
+
 void SavePosition(const std::string& filename, size_t offset)
 {
     FILE* file = std::fopen(PositionSidecarPath(filename).c_str(), "wb");
@@ -194,7 +247,7 @@ void SavePosition(const std::string& filename, size_t offset)
 bool DeleteBook(const std::string& filename)
 {
     // Sidecar first: if the process is interrupted between the two removals, leaving a
-    // stray .pos behind is harmless (ListBooks only ever looks at .txt files), whereas
+    // stray .pos behind is harmless (ListBooks only ever looks at .txt/.epub files), whereas
     // leaving the book behind with its position already gone is a worse partial state.
     errno = 0;
     if (unlink(PositionSidecarPath(filename).c_str()) != 0 && errno != ENOENT) {

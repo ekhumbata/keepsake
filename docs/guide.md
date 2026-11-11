@@ -14,10 +14,10 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Plain-text books (`.txt`) | ✅ | Reads `.txt` files from the SD card's `books` folder and remembers your page |
-| EPUB books | 📋 [#26](https://github.com/ekhumbata/keepsake/issues/26) | Real e-books with chapters, bold/italic and a contents page |
+| EPUB books | 🚧 [#26](https://github.com/ekhumbata/keepsake/issues/26), [#28](https://github.com/ekhumbata/keepsake/issues/28) | Real e-books with chapters, headings, bold, lists; pages across chapters with progress (to be checked on the device). Italics, a contents menu and pictures still to come |
 | Reader with a book font | 📋 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata in three sizes, chapter + % footer, menu (contents, size, bookmark, go to %) |
 | Library with covers | 📋 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Every book in `books` (including subfolders), cover, author, progress, "Continue reading" on top |
-| Friendly file messages | 📋 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash |
+| Friendly file messages | 🚧 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash (shown as text in the reader today; the mascot card comes with the redesign) |
 | Add books over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
 | Add books from a phone | 📋 [#32](https://github.com/ekhumbata/keepsake/issues/32) | Open "Add books", go to `keepsake.local` on the phone, upload or search |
 | Free books (Project Gutenberg) | 📋 [#31](https://github.com/ekhumbata/keepsake/issues/31), [#33](https://github.com/ekhumbata/keepsake/issues/33) | Search and download public-domain books, from the phone or on the device |
@@ -95,7 +95,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 ### Add books over USB
 1. Plug Keepsake into a computer with a USB-C data cable.
 2. On Keepsake: **Settings → Storage → Enable OTG**. The SD card appears on the computer as a drive.
-3. Copy `.txt` books into the `books` folder (EPUB support is coming, [#26](https://github.com/ekhumbata/keepsake/issues/26)).
+3. Copy `.epub` or `.txt` books into the `books` folder.
 4. **Eject the drive on the computer first**, then on Keepsake choose **Disable OTG mode**.
 
 ### Add books from a phone
@@ -136,7 +136,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 | Frozen or not responding | Hold PWR for 6 s, then press PWR to start it again |
 | The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer) |
 | Wi-Fi won't connect | Make sure the network is 2.4 GHz. In Settings → Network, pick it again and re-enter the password, or turn on **Access Point** and use the setup page |
-| A book doesn't show up | Today it must be a `.txt` file directly inside `books` (not a subfolder) |
+| A book doesn't show up | It must be an `.epub` or `.txt` file directly inside `books` (not a subfolder) |
 | Notes aren't transcribed | Expected without a Gemini key; they're saved as audio |
 
 ## For Eric (development)

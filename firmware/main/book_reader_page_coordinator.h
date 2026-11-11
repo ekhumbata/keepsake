@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "book_reader/epub_session.h"
+#include "epaper_ui/book_page.h"
 #include "epaper_ui/book_reader_page.h"
 
 // Paginates a .txt file for the reader screen: greedily wraps text from a byte offset to fill
@@ -30,12 +32,22 @@ public:
     bool TurnPage(int delta, int portrait_width, int portrait_height);
 
     epaper_ui::BookReaderPageState BuildState() const;
+    // Persists the current place (byte offset for .txt, spine/block/offset for .epub).
+    void SavePosition() const;
 
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }
 
 private:
     void BuildPageAt(size_t offset, int portrait_width, int portrait_height);
+    // EPUBs go through book_reader::EpubSession (laid out with the UI fonts); .txt files keep
+    // the chunked PaginateBookText path above.
+    void ShowEpub(int portrait_width, int portrait_height);
+
+    bool epub_ = false;
+    bool epub_failed_ = false;  // couldn't open: page_lines_ holds the friendly message
+    epaper_ui::EpaperTextMeasurer measurer_ = {};
+    book_reader::EpubSession epub_session_ = {};
 
     std::string filename_ = {};
     size_t page_start_offset_ = 0;

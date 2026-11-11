@@ -20,7 +20,7 @@ struct BookEntry {
 // missing until this (or ListBooks) is called again.
 esp_err_t Init();
 
-// ".txt" files directly under the configured folder (no subfolder browsing), sorted the
+// Book files (".txt" and ".epub") directly under the configured folder (no subfolder browsing), sorted the
 // same way SdCard's own directory listing orders entries. Empty when the folder is
 // missing or the card isn't mounted -- not an error the caller needs to distinguish from
 // "no books yet".
@@ -39,6 +39,23 @@ uint64_t GetFileSize(const std::string& filename);
 // this clamps to.
 size_t LoadPosition(const std::string& filename);
 void SavePosition(const std::string& filename, size_t offset);
+
+// EPUBs: true for a ".epub" filename.
+bool IsEpub(const std::string& filename);
+// Absolute path of a book from ListBooks (for the EPUB engine, which opens files itself).
+std::string FullPath(const std::string& filename);
+
+// An EPUB's place, independent of font size: spine item + block + byte offset in the block
+// (book_reader::ReadingPosition). Stored in the same "<filename>.pos" sidecar as
+// "epub <spine> <block> <offset>"; LoadPosition() reads that line as 0, so the formats
+// can't be confused.
+struct EpubPosition {
+    uint32_t spine = 0;
+    uint32_t block = 0;
+    uint32_t offset = 0;
+};
+bool LoadEpubPosition(const std::string& filename, EpubPosition* out);
+void SaveEpubPosition(const std::string& filename, const EpubPosition& position);
 
 // Removes the book and its position sidecar (if any) from the configured folder. Returns
 // true if the book file was removed or was already gone; false on an actual I/O error.

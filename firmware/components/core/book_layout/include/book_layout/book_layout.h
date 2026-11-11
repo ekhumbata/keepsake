@@ -48,6 +48,8 @@ struct Span {
     std::string text;  // UTF-8, never contains '\n'
     uint8_t style = epub::kStyleNone;
     int x = 0;         // from the content area's left edge
+
+    bool operator==(const Span& other) const = default;
 };
 
 enum class LineKind : uint8_t {
@@ -69,10 +71,14 @@ struct Line {
     // stores.
     size_t block = 0;
     size_t offset = 0;
+
+    bool operator==(const Line& other) const = default;
 };
 
 struct Page {
     std::vector<Line> lines;
+
+    bool operator==(const Page& other) const = default;
 };
 
 struct Position {

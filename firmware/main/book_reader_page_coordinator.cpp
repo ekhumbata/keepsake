@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "book_formats/book_formats.h"
 #include "text_reader_service.h"
 
 namespace {
@@ -52,6 +53,11 @@ void BookReaderPageCoordinator::Show(const std::string& filename, int portrait_w
 {
     filename_ = filename;
     back_stack_.clear();
+    epub_ = text_reader_service::IsEpub(filename);
+    if (epub_) {
+        ShowEpub(portrait_width, portrait_height);
+        return;
+    }
     page_start_offset_ = text_reader_service::LoadPosition(filename);
 
     // Rebuild the back-stack for pages already read (0 .. saved position) by re-deriving each
@@ -76,8 +82,60 @@ void BookReaderPageCoordinator::Show(const std::string& filename, int portrait_w
     BuildPageAt(page_start_offset_, portrait_width, portrait_height);
 }
 
+void BookReaderPageCoordinator::ShowEpub(int portrait_width, int portrait_height)
+{
+    const epaper_ui::UiRect content =
+        epaper_ui::BookReaderContentBounds(portrait_width, portrait_height);
+    book_layout::LayoutOptions options;
+    options.width = content.width;
+    options.height = content.height;
+
+    text_reader_service::EpubPosition saved = {};
+    book_reader::ReadingPosition start = {};
+    if (text_reader_service::LoadEpubPosition(filename_, &saved)) {
+        start = {saved.spine, saved.block, saved.offset};
+    }
+    page_number_ = 1;
+    const epub::OpenError error =
+        epub_session_.Open(text_reader_service::FullPath(filename_), &measurer_, options, start);
+    epub_failed_ = error != epub::OpenError::kNone;
+    page_lines_.clear();
+    if (epub_failed_) {
+        const book_formats::Message message =
+            book_formats::MessageFor(book_formats::ProblemForOpenError(error));
+        page_lines_ = epaper_ui::PaginateBookText(
+                          portrait_width, portrait_height,
+                          std::string(message.title) + "\n\n" + message.body)
+                          .lines;
+    }
+}
+
+void BookReaderPageCoordinator::SavePosition() const
+{
+    if (!epub_) {
+        text_reader_service::SavePosition(filename_, page_start_offset_);
+        return;
+    }
+    if (epub_failed_ || !epub_session_.is_open()) {
+        return;
+    }
+    const book_reader::ReadingPosition position = epub_session_.position();
+    text_reader_service::SaveEpubPosition(filename_,
+                                          {position.spine, position.block, position.offset});
+}
+
 bool BookReaderPageCoordinator::TurnPage(int delta, int portrait_width, int portrait_height)
 {
+    if (epub_) {
+        if (epub_failed_ || delta == 0) {
+            return false;
+        }
+        const bool turned = delta > 0 ? epub_session_.NextPage() : epub_session_.PreviousPage();
+        if (turned) {
+            page_number_ = std::max(1, page_number_ + (delta > 0 ? 1 : -1));
+        }
+        return turned;
+    }
     if (delta > 0) {
         if (!has_more_after_) {
             return false;
@@ -107,5 +165,21 @@ epaper_ui::BookReaderPageState BookReaderPageCoordinator::BuildState() const
     state.title_text = filename_;
     state.page_lines = page_lines_;
     state.page_number = page_number_;
+    if (epub_ && !epub_failed_) {
+        if (!epub_session_.metadata().title.empty()) {
+            state.title_text = epaper_ui::ToDisplayText(epub_session_.metadata().title);
+        }
+        state.use_layout_page = true;
+        state.layout_page = epub_session_.page();
+        std::string label;
+        const std::string chapter = epaper_ui::ToDisplayText(epub_session_.chapter_title());
+        if (!chapter.empty()) {
+            label = chapter + " - ";
+        }
+        label += std::to_string(epub_session_.page_index() + 1) + "/" +
+                 std::to_string(epub_session_.page_count()) + " - " +
+                 std::to_string(epub_session_.percent()) + "%";
+        state.page_label = std::move(label);
+    }
     return state;
 }

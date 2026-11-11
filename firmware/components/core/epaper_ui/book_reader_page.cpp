@@ -1,5 +1,7 @@
 #include "epaper_ui/book_reader_page.h"
 
+#include "epaper_ui/book_page.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
@@ -260,6 +262,11 @@ BookReaderPageLayout PaginateBookText(int portrait_width, int portrait_height,
     return result;
 }
 
+UiRect BookReaderContentBounds(int portrait_width, int portrait_height)
+{
+    return BuildLayout(portrait_width, portrait_height).content;
+}
+
 void DrawBookReaderPage(uint8_t* framebuffer,
                         int raw_width,
                         int raw_height,
@@ -288,7 +295,12 @@ void DrawBookReaderPage(uint8_t* framebuffer,
 
     const int line_height = std::max(1, LineHeight(kBodyRole));
     int line_y = layout.content.y;
-    for (const std::string& line : state.page_lines) {
+    if (state.use_layout_page) {
+        DrawBookLayoutPage(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                           layout.content.x, layout.content.y, state.layout_page);
+    }
+    for (const std::string& line : state.use_layout_page ? std::vector<std::string>{}
+                                                         : state.page_lines) {
         if (line_y + line_height > layout.content.bottom()) {
             break;
         }
@@ -297,7 +309,10 @@ void DrawBookReaderPage(uint8_t* framebuffer,
         line_y += line_height;
     }
 
-    const std::string page_label = "Page " + std::to_string(state.page_number);
+    const std::string page_label =
+        !state.page_label.empty()
+            ? FitLabelText(kPageIndicatorRole, state.page_label, layout.page_indicator.width)
+            : "Page " + std::to_string(state.page_number);
     DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
                        layout.page_indicator.x, layout.page_indicator.y, page_label,
                        kPageIndicatorRole, design::color::kBlack);
