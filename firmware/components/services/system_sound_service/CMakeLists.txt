@@ -7,7 +7,7 @@ idf_component_register(
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "."
     REQUIRES audio_hal
-    PRIV_REQUIRES esp_audio_codec esp_timer
+    PRIV_REQUIRES cpu_boost esp_audio_codec esp_timer
     EMBED_FILES
         "sounds/select.mp3"
         "sounds/tap.mp3"

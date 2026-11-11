@@ -43,6 +43,9 @@ CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
 
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+# Frequency scaling (idle low, full speed while a cpu_boost::ScopedBoost is held); see the
+# "Keepsake power management" menu. Automatic light sleep stays off (#55).
+CONFIG_PM_ENABLE=y
 
 # Audio: ES8311 codec over the esp_codec_dev / esp_audio_codec managed components.
 CONFIG_CODEC_I2C_BACKWARD_COMPATIBLE=n

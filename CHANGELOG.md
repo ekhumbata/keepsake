@@ -8,6 +8,15 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Added
+
+- **CPU frequency scaling** (power management, #16). The CPU idles at 80 MHz and runs
+  at 240 MHz only while something a person is waiting on is happening: drawing the
+  screen, handling a button, playing a feedback sound. Saves battery while idle;
+  page turns and button response should feel the same (to be confirmed on the
+  device). New "Keepsake power management" menuconfig options; automatic light
+  sleep is still off.
+
 ### Changed
 
 - **Rebranded to Keepsake** (user-facing only). The boot screen shows a

@@ -30,6 +30,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 #include "chroninkle_task_config.h"
+#include "cpu_boost.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -1454,6 +1455,9 @@ void DisplayTask(void*)
                  RefreshScopeName(command.refresh_request.scope),
                  command.source);
         std::lock_guard<std::mutex> lock(s_panel_mutex);
+        // Full speed while rendering and driving the panel. (The panel's BUSY wait could
+        // run at the idle clock; splitting that out is part of the display audit, #18.)
+        const cpu_boost::ScopedBoost boost("display");
         if (s_display_sleeping) {
             if (command.type == DisplayCommandType::kSetScreen) {
                 s_current_screen.store(command.screen, std::memory_order_relaxed);
