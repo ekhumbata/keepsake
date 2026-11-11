@@ -63,7 +63,7 @@ update) · 💤 later
 | Charging screen + low-battery nudges | 📋 [#84](https://github.com/ekhumbata/keepsake/issues/84) | Mochi while charging; gentle warnings at 20/10/5% |
 | Battery saver + profiles | 🎁 [#58](https://github.com/ekhumbata/keepsake/issues/58) | Always fresh / Balanced / Max battery |
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |
-| Provisioning file | 📋 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself |
+| Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device; only the first Wi-Fi network is used until [#43](https://github.com/ekhumbata/keepsake/issues/43)) |
 | Several saved networks | 📋 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5; friendly "Let's reconnect" when a password changes |
 | Over-the-air updates | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Updates from GitHub Releases, with automatic rollback |
 | Crash reports | 📋 [#41](https://github.com/ekhumbata/keepsake/issues/41) | Saved to the SD card for Eric |
@@ -91,7 +91,19 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
   zone and an optional Gemini key can be set there too.
 - Keepsake only works with **2.4 GHz** Wi-Fi (most routers have one). Work or hotel networks with a sign-in page won't
   work.
-- **Planned:** a provisioning file pre-loads everything ([#42](https://github.com/ekhumbata/keepsake/issues/42)).
+- **Or with a provisioning file** ([#42](https://github.com/ekhumbata/keepsake/issues/42)), which is how the gift is set up:
+  see [Pre-load the setup](#pre-load-the-setup-provisioning-file).
+
+### Pre-load the setup (provisioning file)
+1. Copy [`provision.example.json`](../provision.example.json) **somewhere outside the repo** and fill it in: Wi-Fi
+   networks (first one is used for now), `timezone` (e.g. `Europe/London`), and optionally the friend's name, birthday
+   (`MM-DD`), a welcome message, a weather location and a Gemini key. Delete the lines you don't need.
+2. Put it on the SD card as `.keepsake/provision.json` (the `.keepsake` folder is hidden on some computers).
+3. Start Keepsake. It imports the file before Wi-Fi starts, shows **All set up!**, then **overwrites and deletes the
+   file** so no passwords stay on the card.
+4. If something in it is wrong, nothing is imported: Keepsake shows **The setup file has a problem** and writes
+   `.keepsake/provision-problems.txt` next to it, listing each problem. Fix the file and restart.
+- Never commit a filled-in copy (`provision.json` is in `.gitignore`).
 
 ### Add books over USB
 1. Plug Keepsake into a computer with a USB-C data cable.

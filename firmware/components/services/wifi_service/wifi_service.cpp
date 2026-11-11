@@ -1873,6 +1873,16 @@ bool StartNetworkScan()
     return true;
 }
 
+bool SaveNetwork(const std::string& ssid, const std::string& password)
+{
+    if (ssid.empty() || !SaveCredentials(ssid, password)) {
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(s_state_mutex);
+    s_active_credentials = s_saved_credentials;
+    return true;
+}
+
 bool ClearSavedCredentials()
 {
     return ClearCredentialsFromNvs();

@@ -38,6 +38,7 @@
 #include "page_input_runtime.h"
 #include "power_key_runtime.h"
 #include "power_service.h"
+#include "provisioning_service.h"
 #include "project_assets.h"
 #include "recording_session_service.h"
 #include "recording_service.h"
@@ -2054,6 +2055,25 @@ void InitGeminiService()
     }
 }
 
+// Result of importing the provisioning file at boot (#42), shown once the first screen is up.
+provisioning_service::Outcome s_provisioning_outcome = {};
+
+void ShowProvisioningOutcome()
+{
+    if (s_provisioning_outcome.message.empty()) {
+        return;
+    }
+    const bool good = s_provisioning_outcome.status == provisioning_service::Status::kImported;
+    const esp_err_t err = overlay_runtime::ShowToastForDuration(
+        BuildToast(s_provisioning_outcome.message.c_str(),
+                   good ? EmbeddedIconId::kCheck : EmbeddedIconId::kClose),
+        4000);
+    FlushOverlayFeedback();
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Provisioning toast failed: %s", esp_err_to_name(err));
+    }
+}
+
 void InitWifiService()
 {
     wifi_service::SetEventHandler(HandleWifiEvent, nullptr);
@@ -2080,6 +2100,9 @@ void InitWifiService()
     if (const esp_err_t jobs_err = net_jobs_service::Init(); jobs_err != ESP_OK) {
         ESP_LOGW(kTag, "Network jobs init failed: %s", esp_err_to_name(jobs_err));
     }
+    // A provisioning file on the SD card (#42) sets the network (and more) before Wi-Fi starts,
+    // so the first connection already uses it. Its toast waits for the first screen.
+    s_provisioning_outcome = provisioning_service::ImportFromSdCard();
     if (net_jobs_service::OnDemandEnabled()) {
         // Wi-Fi on demand: boot with the radio off; jobs (including the periodic sync just
         // registered) bring it up when there is work.
@@ -2322,6 +2345,7 @@ void Run()
                  esp_err_to_name(initial_err));
     }
     s_startup_complete.store(true, std::memory_order_relaxed);
+    ShowProvisioningOutcome();
 }
 
 }  // namespace app_shell
