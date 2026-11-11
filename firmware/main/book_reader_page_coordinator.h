@@ -46,6 +46,10 @@ public:
     int CurrentContentsIndex() const;
     bool GoToContentsEntry(size_t index);
 
+    // Lays the open book out again after the text size changed (#28), staying on the passage
+    // being read.
+    void Relayout(int portrait_width, int portrait_height);
+
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }
 

@@ -63,6 +63,20 @@ epub::OpenError EpubSession::Open(std::unique_ptr<epub::ByteSource> source,
     return epub::OpenError::kNone;
 }
 
+bool EpubSession::Relayout(const book_layout::LayoutOptions& options)
+{
+    if (!book_) {
+        return false;
+    }
+    const ReadingPosition at = position();
+    options_ = options;
+    LoadChapter(at.spine);
+    if (!pages_.empty()) {
+        page_index_ = book_layout::PageForPosition(pages_, {at.block, at.offset});
+    }
+    return true;
+}
+
 bool EpubSession::LoadChapter(size_t spine_index)
 {
     spine_index_ = spine_index;

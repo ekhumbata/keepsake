@@ -35,7 +35,7 @@ except ImportError as exc:  # pragma: no cover
 
 UI_SIZES = [22, 26, 32, 38, 46, 55, 165]
 UI_WEIGHTS = [("SemiBold", 600), ("Bold", 700), ("Black", 900)]
-BOOK_SIZES = [22]
+BOOK_SIZES = [19, 22, 26]
 BOOK_STYLES = [
     ("Regular", "Literata[opsz,wght].ttf", 400),
     ("Bold", "Literata[opsz,wght].ttf", 700),

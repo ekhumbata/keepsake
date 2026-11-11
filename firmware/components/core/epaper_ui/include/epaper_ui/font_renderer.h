@@ -14,6 +14,15 @@ namespace epaper_ui {
 int MeasureText(design::TypographyRole role, std::string_view text);
 int LineHeight(design::TypographyRole role);
 
+// Book text size (#28): which Literata cut the kBook* roles draw with (19, 22 or 26 px). One
+// setting for the whole UI, set by the reader before it lays out a page; measuring and drawing
+// both read it, so layout always matches what's drawn.
+enum class BookTextSize : uint8_t { kSmall = 0, kMedium = 1, kLarge = 2 };
+inline constexpr int kBookTextSizeCount = 3;
+void SetBookTextSize(BookTextSize size);
+BookTextSize GetBookTextSize();
+const char* BookTextSizeName(BookTextSize size);  // "Small", "Medium", "Large"
+
 namespace font_renderer_detail {
 
 struct FontSelection {
@@ -64,22 +73,46 @@ inline FontSelection MakeFontSelection(const design::TypographySpec& spec,
     };
 }
 
+inline FontSelection BookFontSelection(design::TypographyRole role)
+{
+    struct Cuts {
+        const epaper_font::BitmapFont* regular;
+        const epaper_font::BitmapFont* bold;
+        const epaper_font::BitmapFont* italic;
+    };
+    Cuts cuts = {&epaper_fonts::kBook22Regular, &epaper_fonts::kBook22Bold,
+                 &epaper_fonts::kBook22Italic};
+    switch (GetBookTextSize()) {
+        case BookTextSize::kSmall:
+            cuts = {&epaper_fonts::kBook19Regular, &epaper_fonts::kBook19Bold,
+                    &epaper_fonts::kBook19Italic};
+            break;
+        case BookTextSize::kLarge:
+            cuts = {&epaper_fonts::kBook26Regular, &epaper_fonts::kBook26Bold,
+                    &epaper_fonts::kBook26Italic};
+            break;
+        case BookTextSize::kMedium:
+        default:
+            break;
+    }
+    const epaper_font::BitmapFont* font = cuts.regular;
+    if (role == design::TypographyRole::kBookBold) {
+        font = cuts.bold;
+    } else if (role == design::TypographyRole::kBookItalic) {
+        font = cuts.italic;
+    }
+    return {.font = font, .tracking = 0, .scale_numerator = 1, .scale_denominator = 1,
+            .line_height_override = 0};
+}
+
 inline FontSelection FontForRole(design::TypographyRole role)
 {
     const design::TypographySpec spec = design::TypographySpecForRole(role);
-    // Book text (Literata) has its own fonts: regular, bold and italic at one size for now.
-    switch (role) {
-        case design::TypographyRole::kBookBody:
-            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Regular,
-                                     epaper_fonts::kBook22Regular, epaper_fonts::kBook22Regular);
-        case design::TypographyRole::kBookBold:
-            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Bold,
-                                     epaper_fonts::kBook22Bold, epaper_fonts::kBook22Bold);
-        case design::TypographyRole::kBookItalic:
-            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Italic,
-                                     epaper_fonts::kBook22Italic, epaper_fonts::kBook22Italic);
-        default:
-            break;
+    // Book text (Literata) has its own fonts: regular, bold and italic, drawn unscaled at the
+    // reader's text size.
+    if (role == design::TypographyRole::kBookBody || role == design::TypographyRole::kBookBold ||
+        role == design::TypographyRole::kBookItalic) {
+        return BookFontSelection(role);
     }
     if (spec.size == design::typography::k22) {
         return MakeFontSelection(spec, 22, epaper_fonts::kUi22SemiBold,

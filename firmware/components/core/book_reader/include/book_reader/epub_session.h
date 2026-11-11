@@ -45,6 +45,10 @@ public:
     // Jumps to a table-of-contents entry. False for an entry outside the reading order.
     bool GoToTocEntry(size_t toc_index);
 
+    // Lays the current chapter out again (new page size, or the measurer's fonts changed: text
+    // size, #28) and lands on the page holding the start of the page that was showing.
+    bool Relayout(const book_layout::LayoutOptions& options);
+
     const book_layout::Page& page() const;
     ReadingPosition position() const;  // start of the current page: what to save
     size_t spine_index() const { return spine_index_; }

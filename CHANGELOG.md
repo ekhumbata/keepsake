@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Added
+
+- **Text size for books** (#28). The reader menu has **Text size**: Small, Medium or
+  Large (Literata at 19, 22 or 26 px). Changing it keeps you on the same passage and
+  is remembered on the device. `.txt` books now use Literata too, so the size applies
+  to them as well.
+
 ### Changed
 
 - **Works fully without a Gemini key** (#44). With no key set, a recording is a

@@ -21,6 +21,7 @@
 #include "epaper_ui/book_list_page.h"
 #include "epaper_ui/book_page.h"
 #include "epaper_ui/book_reader_page.h"
+#include "epaper_ui/font_renderer.h"
 #include "epaper_ui/card_modal.h"
 #include "epaper_ui/dashboard_page.h"
 #include "epaper_ui/details_page.h"
@@ -307,27 +308,35 @@ std::map<std::string, Renderer> Screens()
                 .lines;
         DrawBookReaderPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
-    screens["book_reader_epub"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
-        const epub::Chapter chapter = epub::ParseXhtml(
-            "<h1>Chapter One</h1>"
-            "<p>The kettle began to sing just as the rain arrived, and <b>Mira</b> decided the "
-            "day was <i>officially</i> a reading day.</p>"
-            "<p>She wrote three things on a card:<br/>tea<br/>blanket<br/>book</p>"
-            "<ul><li>Find the lamp</li><li>Move the cat gently</li></ul><hr/>"
-            "<h2>A Second Part</h2><p>Caf\xC3\xA9 plans and a \xE2\x80\x9Cquick\xE2\x80\x9D nap.</p>",
-            "a.xhtml");
-        const UiRect content = BookReaderContentBounds(pw, ph);
-        book_layout::LayoutOptions options;
-        options.width = content.width;
-        options.height = content.height;
-        const auto pages = book_layout::PaginateChapter(chapter, EpaperTextMeasurer(), options);
-        BookReaderPageState state = {};
-        state.title_text = "A Rainy Day Sampler";
-        state.use_layout_page = true;
-        state.layout_page = pages.front();
-        state.page_label = "Chapter One - 1/" + std::to_string(pages.size()) + " - 4%";
-        DrawBookReaderPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
-    });
+    // The same chapter at each text size (#28).
+    const auto epub_reader = [&page](BookTextSize size) {
+        return page([size](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            SetBookTextSize(size);
+            const epub::Chapter chapter = epub::ParseXhtml(
+                "<h1>Chapter One</h1>"
+                "<p>The kettle began to sing just as the rain arrived, and <b>Mira</b> decided the "
+                "day was <i>officially</i> a reading day.</p>"
+                "<p>She wrote three things on a card:<br/>tea<br/>blanket<br/>book</p>"
+                "<ul><li>Find the lamp</li><li>Move the cat gently</li></ul><hr/>"
+                "<h2>A Second Part</h2><p>Caf\xC3\xA9 plans and a \xE2\x80\x9Cquick\xE2\x80\x9D nap.</p>",
+                "a.xhtml");
+            const UiRect content = BookReaderContentBounds(pw, ph);
+            book_layout::LayoutOptions options;
+            options.width = content.width;
+            options.height = content.height;
+            const auto pages = book_layout::PaginateChapter(chapter, EpaperTextMeasurer(), options);
+            BookReaderPageState state = {};
+            state.title_text = "A Rainy Day Sampler";
+            state.use_layout_page = true;
+            state.layout_page = pages.front();
+            state.page_label = "Chapter One - 1/" + std::to_string(pages.size()) + " - 4%";
+            DrawBookReaderPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+            SetBookTextSize(BookTextSize::kMedium);
+        });
+    };
+    screens["book_reader_epub"] = epub_reader(BookTextSize::kMedium);
+    screens["book_reader_epub_small"] = epub_reader(BookTextSize::kSmall);
+    screens["book_reader_epub_large"] = epub_reader(BookTextSize::kLarge);
 
     // Overlays, drawn over Home the way the app composites them.
     const auto over_home = [&screens](auto draw_overlay) {
