@@ -1,0 +1,33 @@
+menu "Keepsake power management"
+
+    config KEEPSAKE_PM_DFS
+        bool "Scale the CPU frequency down when idle"
+        depends on PM_ENABLE
+        default y
+        help
+            Runs the CPU at KEEPSAKE_PM_MIN_CPU_FREQ_MHZ while nothing needs speed, and at
+            the full default CPU frequency while a cpu_boost::ScopedBoost is held (screen
+            rendering, input handling, recording). ESP-IDF's frequency scaling does not
+            follow load on its own: without a held boost the CPU stays at the minimum, so
+            any latency-sensitive work must hold one. Drivers (SPI, I2S, SDMMC, Wi-Fi) keep
+            the APB clock up during their transfers by themselves.
+
+    config KEEPSAKE_PM_MIN_CPU_FREQ_MHZ
+        int "Idle CPU frequency (MHz)"
+        depends on KEEPSAKE_PM_DFS
+        range 80 240
+        default 80
+        help
+            80 keeps the APB clock at 80 MHz, which every peripheral here expects. 40 (XTAL)
+            is not offered: it would slow the APB clock too.
+
+    config KEEPSAKE_DEV_NO_AUTO_SLEEP
+        bool "Dev build: never use automatic light sleep"
+        default n
+        help
+            Automatic light sleep (#55) drops the USB-Serial/JTAG console whenever the chip
+            sleeps. Turn this on for development builds to keep the console usable once
+            automatic light sleep exists. It has no effect today: automatic light sleep is
+            not enabled yet, only frequency scaling.
+
+endmenu

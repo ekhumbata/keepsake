@@ -24,6 +24,7 @@
 #include "feedback_service.h"
 #include "footer_runtime.h"
 #include "chroninkle_task_config.h"
+#include "cpu_boost.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gemini_service.h"
@@ -2206,6 +2207,11 @@ void Run()
     ESP_LOGI(kTag, "Reset reason: %s (%d)", ResetReasonName(reset_reason),
              static_cast<int>(reset_reason));
     ESP_ERROR_CHECK(power_service::EnablePowerHold());
+    // Frequency scaling (idle at a low clock, full speed while boosted). A failure only
+    // costs battery, never function, so it is logged rather than fatal.
+    if (const esp_err_t err = cpu_boost::Init(); err != ESP_OK) {
+        ESP_LOGW(kTag, "CPU frequency scaling unavailable: %s", esp_err_to_name(err));
+    }
     ConfirmPendingOtaImage();
     ESP_ERROR_CHECK(power_service::Init());
     power_service::LogDebugStatus();

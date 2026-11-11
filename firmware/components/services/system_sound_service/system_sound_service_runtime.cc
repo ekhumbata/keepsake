@@ -5,6 +5,8 @@
 #include <esp_log.h>
 #include <esp_timer.h>
 
+#include "cpu_boost.h"
+
 namespace system_sound_service_internal {
 
 SystemSoundServiceImpl& SystemSoundServiceImpl::GetInstance() {
@@ -146,7 +148,12 @@ void SystemSoundServiceImpl::PlaybackTask() {
             }
             const SoundCue cue = static_cast<SoundCue>(
                 pending_cue_.load(std::memory_order_acquire));
-            PlayCueNow(cue, generation);
+            {
+                // Feedback sounds are part of the interaction (and a cue's first play
+                // decodes its MP3), so they run at full speed.
+                const cpu_boost::ScopedBoost boost("sound");
+                PlayCueNow(cue, generation);
+            }
             last_processed_generation = generation;
             if (request_generation_.load(std::memory_order_acquire) == generation) {
                 break;

@@ -16,6 +16,9 @@
 >   `design_tokens`, `project_assets`, `page_navigation`), `drivers/` (hardware) and `services/` (`*_service`,
 >   `task_config`). `webserver/` is now `web/` and `scripts/` is now `tools/`. Upstream-era docs and history
 >   (`CHANGELOG.md`, `docs/todo-archive.md`, `docs/specs/v2/`) still use the old paths.
+> - **Power:** the CPU idles at 80 MHz (`cpu_boost`, #16). Work a person waits on (rendering,
+>   input handling, feedback sounds) must hold a `cpu_boost::ScopedBoost`, or it runs at a third
+>   of the speed. Background work (sync, transcription, waits) doesn't.
 > - The rest of this file is Chroninkle's original guide. It's still accurate for the inherited code until the
 >   "Agent docs" issue rewrites it.
 

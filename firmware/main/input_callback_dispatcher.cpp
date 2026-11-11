@@ -8,6 +8,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "chroninkle_task_config.h"
+#include "cpu_boost.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -59,6 +60,8 @@ void WorkerTask(void*) {
             }
 
             if (callback) {
+                // A person is waiting on every input callback: run it at full speed.
+                const cpu_boost::ScopedBoost boost("input");
                 callback();
             }
         }
