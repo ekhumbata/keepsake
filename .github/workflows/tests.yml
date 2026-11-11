@@ -39,7 +39,9 @@ jobs:
           cmake --build build/fuzz
       - name: Fuzz (60 s per target)
         run: |
-          mkdir -p build/fuzz/findings
+          mkdir -p build/fuzz/findings build/fuzz/corpus/fuzz_epub_book
+          # Start the whole-book fuzzer from the generated test shelf (valid EPUB structure).
+          cp build/fuzz/fixtures/*.epub build/fuzz/corpus/fuzz_epub_book/
           status=0
           for target in build/fuzz/fuzz_*; do
             [ -x "$target" ] || continue
