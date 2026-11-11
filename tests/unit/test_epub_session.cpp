@@ -274,3 +274,32 @@ TEST_CASE("a bookmarked place can be found again, even after the text size chang
     CHECK_FALSE(closed.GoTo(mark));
     CHECK_FALSE(closed.IsOnCurrentPage(mark));
 }
+
+TEST_CASE("holding the rocker jumps by chapter")
+{
+    EpubSession session;
+    REQUIRE(session.Open(Fixture("epub2_ncx.epub"), &kMeasurer, TinyPage()) == epub::OpenError::kNone);
+    REQUIRE(session.spine_index() == 0);
+    CHECK_FALSE(session.PreviousChapter());  // already at the very start
+
+    REQUIRE(session.NextChapter());
+    const size_t second = session.spine_index();
+    CHECK(second > 0);
+    CHECK(session.page_index() == 0);
+    CHECK_FALSE(session.NextChapter());  // epub2_ncx has two readable chapters
+
+    // Part way into a chapter, "previous" goes back to its start first...
+    REQUIRE(session.NextPage());
+    REQUIRE(session.page_index() > 0);
+    REQUIRE(session.PreviousChapter());
+    CHECK(session.spine_index() == second);
+    CHECK(session.page_index() == 0);
+    // ...then to the chapter before.
+    REQUIRE(session.PreviousChapter());
+    CHECK(session.spine_index() == 0);
+    CHECK(session.page_index() == 0);
+
+    EpubSession closed;
+    CHECK_FALSE(closed.NextChapter());
+    CHECK_FALSE(closed.PreviousChapter());
+}

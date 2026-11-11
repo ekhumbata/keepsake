@@ -26,6 +26,9 @@ esp_err_t OpenBook(const std::string& filename);
 // roving focus -- the reader has nothing else on screen to focus. Matches every other screen's
 // MoveFocus signature so page_input_runtime's per-screen dispatch stays uniform.
 page_actions::FocusMoveOutcome MoveFocus(int delta);
+// Rocker hold (#28): jumps a chapter forward (direction > 0) or back to the start of this one
+// (or the previous one). Not handled for .txt books.
+page_actions::FocusMoveOutcome JumpChapter(int direction);
 
 // Always empty: with UP/DOWN dedicated to page turns, no footer role is reachable from this
 // screen by roving focus -- Home is only reachable after leaving the reader for the book list.

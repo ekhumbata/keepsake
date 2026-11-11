@@ -15,7 +15,7 @@ update) · 💤 later
 |---|---|---|
 | Plain-text books (`.txt`) | ✅ | Reads `.txt` files from the SD card's `books` folder and remembers your page |
 | EPUB books | 🚧 [#26](https://github.com/ekhumbata/keepsake/issues/26), [#28](https://github.com/ekhumbata/keepsake/issues/28) | Real e-books with chapters, headings, bold, lists; pages across chapters with progress (to be checked on the device). Pictures still to come |
-| Reader with a book font | 🚧 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata at three text sizes, chapter + % footer and a menu with Contents, bookmarks and Go to % are in |
+| Reader with a book font | 🚧 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata at three text sizes, chapter + % footer and a menu with Contents, bookmarks and Go to %, and hold-to-skip-chapter are in |
 | Library with covers | 🚧 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Titles, progress and "reading now" first are in, subfolders too; covers still to come |
 | Friendly file messages | 🚧 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash (shown as text in the reader today; the mascot card comes with the redesign) |
 | Add books over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |

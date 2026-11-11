@@ -352,6 +352,19 @@ bool BookReaderPageCoordinator::TurnPage(int delta, int portrait_width, int port
     return false;
 }
 
+bool BookReaderPageCoordinator::JumpChapter(int direction)
+{
+    if (!epub_ || epub_failed_ || direction == 0) {
+        return false;
+    }
+    const bool moved =
+        direction > 0 ? epub_session_.NextChapter() : epub_session_.PreviousChapter();
+    if (moved) {
+        page_number_ = static_cast<int>(epub_session_.page_index()) + 1;
+    }
+    return moved;
+}
+
 epaper_ui::BookReaderPageState BookReaderPageCoordinator::BuildState() const
 {
     epaper_ui::BookReaderPageState state = {};
