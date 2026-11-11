@@ -19,6 +19,10 @@
 > - **Power:** the CPU idles at 80 MHz (`cpu_boost`, #16). Work a person waits on (rendering,
 >   input handling, feedback sounds) must hold a `cpu_boost::ScopedBoost`, or it runs at a third
 >   of the speed. Background work (sync, transcription, waits) doesn't.
+> - **Network work** goes through `net_jobs_service::Submit()` (#17): background work as
+>   `kBackground` jobs, anything a person is waiting on as `kUser`. With
+>   `CONFIG_KEEPSAKE_WIFI_ON_DEMAND` (off by default until checked on the board) the jobs decide
+>   when the radio is on; don't hold Wi-Fi up any other way.
 > - The rest of this file is Chroninkle's original guide. It's still accurate for the inherited code until the
 >   "Agent docs" issue rewrites it.
 
