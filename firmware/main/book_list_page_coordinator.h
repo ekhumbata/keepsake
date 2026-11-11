@@ -24,8 +24,11 @@ public:
     // Index into the book list currently backing this page, or -1 when focus isn't on a row.
     int FocusedBookIndex() const;
 
+    // `continue_cover` is the cover of books[0] when that's the book being read (#27), or an
+    // empty thumbnail.
     epaper_ui::BookListPageState BuildState(
-        const std::vector<text_reader_service::BookEntry>& books) const;
+        const std::vector<text_reader_service::BookEntry>& books,
+        const cover_image::Thumbnail& continue_cover = {}) const;
 
     const page_navigation::NavigationModel& navigation_model() const { return navigation_model_; }
     const page_navigation::RovingFocus& focus() const { return focus_; }

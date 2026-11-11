@@ -259,6 +259,11 @@ The Home screen's **Books** item opens the on-device reader for **EPUB** (`.epub
 books and plain `.txt` files. Copy them onto the SD card's `books` folder (over USB
 mass storage, from Settings > Storage) and they'll show up here.
 
+- When you're partway through a book, the top of the Books screen shows it under
+  **Continue reading**: its cover (for EPUBs that have one, in black and white),
+  title, author and a bar showing how far you've got. The first time a cover is shown
+  it can take a moment to prepare; after that it's remembered in a hidden `.cache`
+  folder inside `books` (safe to delete).
 - Selecting **Books** shows your shelf: every book in that folder **and its
   subfolders**, by title, with how far you've read (for example `Emma - 42%`, or
   `Done`). The book you read most recently is at the top, then the others you've

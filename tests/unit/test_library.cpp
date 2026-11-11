@@ -125,3 +125,15 @@ TEST_CASE("bookmarks file round-trips and shrugs off junk")
     CHECK(library::ParseBookmarks("keepsake-bookmarks 9\n0\t0\t0\t0\tx\n").empty());
     CHECK(library::ParseBookmarks("").empty());
 }
+
+TEST_CASE("cover cache names change with the book, not between calls")
+{
+    const std::string a = library::CoverCacheName("Austen/Emma.epub", 1000, 1700000000, 84, 126);
+    CHECK(a.size() == 16 + 5);
+    CHECK(a.substr(16) == ".kcov");
+    CHECK(a == library::CoverCacheName("Austen/Emma.epub", 1000, 1700000000, 84, 126));
+    CHECK(a != library::CoverCacheName("Austen/Emma.epub", 1001, 1700000000, 84, 126));
+    CHECK(a != library::CoverCacheName("Austen/Emma.epub", 1000, 1700000001, 84, 126));
+    CHECK(a != library::CoverCacheName("Austen/Persuasion.epub", 1000, 1700000000, 84, 126));
+    CHECK(a != library::CoverCacheName("Austen/Emma.epub", 1000, 1700000000, 60, 90));
+}

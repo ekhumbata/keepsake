@@ -254,6 +254,29 @@ std::string ShelfLabel(const BookRecord& record)
     return title;
 }
 
+std::string CoverCacheName(std::string_view path, uint64_t size_bytes, int64_t modified_time,
+                           int width, int height)
+{
+    // FNV-1a, 64-bit, over everything that should give a different cover file.
+    uint64_t hash = 14695981039346656037ull;
+    const auto mix = [&hash](std::string_view bytes) {
+        for (const char c : bytes) {
+            hash ^= static_cast<unsigned char>(c);
+            hash *= 1099511628211ull;
+        }
+    };
+    mix(path);
+    mix("|" + std::to_string(size_bytes) + "|" + std::to_string(modified_time) + "|" +
+        std::to_string(width) + "x" + std::to_string(height));
+    static constexpr char kHex[] = "0123456789abcdef";
+    std::string name(16, '0');
+    for (int i = 15; i >= 0; --i) {
+        name[static_cast<size_t>(i)] = kHex[hash & 0xF];
+        hash >>= 4;
+    }
+    return name + ".kcov";
+}
+
 bool BookmarkBefore(const Bookmark& a, const Bookmark& b)
 {
     if (a.spine != b.spine) {
