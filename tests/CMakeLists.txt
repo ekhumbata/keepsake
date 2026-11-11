@@ -63,6 +63,21 @@ add_executable(unit_tests ${KEEPSAKE_UNIT_TEST_SOURCES})
 target_link_libraries(unit_tests PRIVATE keepsake_core doctest::doctest)
 target_compile_options(unit_tests PRIVATE ${KEEPSAKE_WARNINGS} ${KEEPSAKE_SANITIZER_FLAGS})
 
+# The EPUB test shelf is generated at build time (tests/fixtures/make_epubs.py, original text
+# only), so no binary fixtures are committed.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(KEEPSAKE_FIXTURE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fixtures")
+add_custom_command(
+    OUTPUT "${KEEPSAKE_FIXTURE_DIR}/epub2_ncx.epub"
+    COMMAND Python3::Interpreter "${CMAKE_CURRENT_LIST_DIR}/fixtures/make_epubs.py"
+            "${KEEPSAKE_FIXTURE_DIR}"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/fixtures/make_epubs.py"
+    COMMENT "Generating EPUB test fixtures"
+)
+add_custom_target(keepsake_fixtures DEPENDS "${KEEPSAKE_FIXTURE_DIR}/epub2_ncx.epub")
+add_dependencies(unit_tests keepsake_fixtures)
+target_compile_definitions(unit_tests PRIVATE KEEPSAKE_FIXTURE_DIR="${KEEPSAKE_FIXTURE_DIR}")
+
 enable_testing()
 add_test(NAME unit_tests COMMAND unit_tests)
 
