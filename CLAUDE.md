@@ -54,8 +54,18 @@ lives in `docs/waveshare-epaper-hardware-spec.md`.
 
 ## Commands
 
-This is an ESP-IDF project; there is no unit test suite. **Do not automatically
-run builds** — only build when the user explicitly asks, and reuse the
+**Host unit tests + fuzzers** (`tests/`, see `tests/README.md`) cover the portable
+`firmware/components/core/` code and are cheap to run any time, in any session:
+
+```bash
+cmake -S tests -B build/tests -G Ninja && cmake --build build/tests && ctest --test-dir build/tests --output-on-failure
+```
+
+CI (`.github/workflows/`) runs `firmware.yml` (ESP-IDF v5.5 build, fails on any warning,
+uploads the images), `tests.yml` (unit tests under ASan/UBSan + a 60 s fuzz per target) and
+`web.yml` (lint, build, and a check that the embedded portal matches the build) on every PR.
+
+**Do not automatically run firmware builds** — only build when the user explicitly asks, and reuse the
 existing `firmware/build/` directory rather than creating a new one (see `AGENTS.md`).
 All `idf.py` commands below run from `firmware/` (or pass `-C firmware`).
 

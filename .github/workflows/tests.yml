@@ -1,0 +1,59 @@
+name: tests
+
+# Host unit tests (doctest, ASan + UBSan) and a short libFuzzer run for the portable
+# firmware/components/core/ code. See tests/README.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - name: Configure
+        run: cmake -S tests -B build/tests -G Ninja
+      - name: Build
+        run: cmake --build build/tests
+      - name: Run
+        run: ctest --test-dir build/tests --output-on-failure
+
+  fuzz:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang + sanitizer runtimes
+        run: sudo apt-get update && sudo apt-get install -y ninja-build clang-18 libclang-rt-18-dev
+      - name: Build fuzzers
+        run: |
+          cmake -S tests -B build/fuzz -G Ninja -DKEEPSAKE_FUZZ=ON \
+            -DCMAKE_CXX_COMPILER=clang++-18
+          cmake --build build/fuzz
+      - name: Fuzz (60 s per target)
+        run: |
+          mkdir -p build/fuzz/findings
+          status=0
+          for target in build/fuzz/fuzz_*; do
+            [ -x "$target" ] || continue
+            name=$(basename "$target")
+            echo "::group::$name"
+            mkdir -p "build/fuzz/corpus/$name"
+            "$target" -max_total_time=60 -max_len=4096 \
+              -artifact_prefix="build/fuzz/findings/$name-" "build/fuzz/corpus/$name" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+      - name: Upload fuzz findings
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-findings-${{ github.sha }}
+          path: build/fuzz/findings/
