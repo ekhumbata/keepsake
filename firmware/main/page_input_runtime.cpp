@@ -1284,6 +1284,19 @@ ButtonResult HandleBookReaderButtonEvent(const button_service::ButtonEventInfo& 
         return result;
     }
 
+    // Holding the rocker (#28): by then the press has already turned one page; the hold
+    // carries on to the next chapter (down) or back to the start of this one (up).
+    if (event.event == button_service::ButtonEvent::kLongPressStart &&
+        (event.button == button_service::ButtonId::kDown ||
+         event.button == button_service::ButtonId::kUp)) {
+        const FocusMoveResult moved = ApplyBookReaderMoveResult(book_reader_page_runtime::JumpChapter(
+            event.button == button_service::ButtonId::kDown ? 1 : -1));
+        result.handled = true;
+        result.interaction_result =
+            moved.handled ? moved.interaction_result : MakeConsumedResult(false);
+        return result;
+    }
+
     if (!button_service::IsSelectButton(event.button)) {
         return result;
     }

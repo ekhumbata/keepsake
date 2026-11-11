@@ -42,6 +42,12 @@ public:
     bool NextPage();
     bool PreviousPage();
 
+    // Chapter jumps (rocker hold, #28). Next: the first page of the next readable chapter.
+    // Previous: the first page of this chapter, or of the previous one when already there.
+    // False when there's nowhere to go.
+    bool NextChapter();
+    bool PreviousChapter();
+
     // Jumps to a table-of-contents entry. False for an entry outside the reading order.
     bool GoToTocEntry(size_t toc_index);
 

@@ -123,6 +123,28 @@ page_actions::FocusMoveOutcome MoveFocus(int delta)
     return result;
 }
 
+page_actions::FocusMoveOutcome JumpChapter(int direction)
+{
+    page_actions::FocusMoveOutcome result = {};
+    bool moved = false;
+    {
+        const cpu_boost::ScopedBoost boost("chapter");
+        std::lock_guard<std::mutex> lock(s_mutex);
+        moved = s_coordinator.JumpChapter(direction);
+        if (moved) {
+            SavePositionLocked();
+        }
+    }
+    if (!moved) {
+        return result;
+    }
+    result.handled = true;
+    result.play_navigation_cue = true;
+    result.apply_page_state = true;
+    result.sync_footer_projection = false;
+    return result;
+}
+
 footer_runtime::ProjectionState BuildFooterProjectionState()
 {
     return {};

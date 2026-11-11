@@ -33,6 +33,10 @@ public:
     // or delta < 0 with an empty back-stack).
     bool TurnPage(int delta, int portrait_width, int portrait_height);
 
+    // Rocker hold (#28): direction > 0 jumps to the next chapter, < 0 to the start of this
+    // one (or the previous one). EPUB only; false for .txt or when there's nowhere to go.
+    bool JumpChapter(int direction);
+
     epaper_ui::BookReaderPageState BuildState() const;
     // Persists the current place (byte offset for .txt, spine/block/offset for .epub).
     void SavePosition() const;
