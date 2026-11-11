@@ -7,8 +7,10 @@ All text is original filler written for these tests. Run by CMake at build time:
 
 from __future__ import annotations
 
+import struct
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 
 CONTAINER = """<?xml version="1.0" encoding="UTF-8"?>
@@ -73,9 +75,30 @@ def write_epub(path: Path, files: list[tuple[str, str | bytes]], *, compress: bo
 
 
 # A 1x1 PNG, enough to be a file.
-PNG = bytes.fromhex(
-    "89504e470d0a1a0a0000000d4948445200000001000000010806000000"
-    "1f15c4890000000d49444154789c6360000000000200010be7c2e90000000049454e44ae426082")
+def make_png(width: int, height: int) -> bytes:
+    """A small grayscale cover (stdlib only): black top third, a mid-gray square below."""
+    rows = []
+    for y in range(height):
+        row = bytearray([0])  # filter: none
+        for x in range(width):
+            if y < height // 3:
+                row.append(0)
+            elif height // 2 <= y < height * 5 // 6 and width // 4 <= x < width * 3 // 4:
+                row.append(128)
+            else:
+                row.append(255)
+        rows.append(bytes(row))
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + kind + data +
+                struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF))
+
+    header = struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0)  # 8-bit grayscale
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) +
+            chunk(b"IDAT", zlib.compress(b"".join(rows))) + chunk(b"IEND", b""))
+
+
+PNG = make_png(60, 90)
 
 
 def epub2_files() -> list[tuple[str, str | bytes]]:
