@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "book_list_page_coordinator.h"
+#include "cpu_boost.h"
 #include "epaper_ui/select_modal.h"
 #include "esp_log.h"
 #include "overlay_runtime.h"
@@ -33,6 +34,8 @@ BookListPageCoordinator s_coordinator = {};
 // than on every render, matching the "browse a single fixed folder" scope (no live file-add
 // notifications to react to).
 std::vector<text_reader_service::BookEntry> s_books = {};
+// Cover of the book being read (s_books[0]), for the Continue reading card (#27).
+cover_image::Thumbnail s_continue_cover = {};
 bool s_pending_reader = false;
 std::string s_pending_filename;
 
@@ -91,7 +94,7 @@ bool FooterProjectionChangedForFocusIndexes(int old_focus_index, int new_focus_i
 
 epaper_ui::BookListPageState BuildStateLocked()
 {
-    return s_coordinator.BuildState(s_books);
+    return s_coordinator.BuildState(s_books, s_continue_cover);
 }
 
 }  // namespace
@@ -182,7 +185,17 @@ void ResetFocus()
     footer_runtime::ProjectionState projection = {};
     {
         std::lock_guard<std::mutex> lock(s_mutex);
+        // Opening the shelf is work a person waits on; the first visit to a book's cover
+        // decodes it (cached after that).
+        const cpu_boost::ScopedBoost boost("book list");
         s_books = text_reader_service::ListBooks();
+        s_continue_cover = {};
+        if (!s_books.empty() && s_books.front().last_opened > 0) {
+            (void)text_reader_service::LoadCover(s_books.front().filename,
+                                                 epaper_ui::kContinueCoverWidth,
+                                                 epaper_ui::kContinueCoverHeight,
+                                                 &s_continue_cover);
+        }
         s_coordinator.Show(static_cast<int>(s_books.size()));
         projection = BuildFooterProjectionStateLocked();
     }

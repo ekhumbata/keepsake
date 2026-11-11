@@ -43,6 +43,12 @@ void SortForShelf(std::vector<BookRecord>* records);
 // "Emma - 42%" for a started book, "Emma" otherwise. Progress shows as "Done" at 100%.
 std::string ShelfLabel(const BookRecord& record);
 
+// Cover cache file name (#27) for a book as it is now: changes when the book's size or
+// modification time changes (or the thumbnail size), so a replaced book gets a fresh cover.
+// "<16 hex digits>.kcov".
+std::string CoverCacheName(std::string_view path, uint64_t size_bytes, int64_t modified_time,
+                           int width, int height);
+
 // A bookmark (#28): a place in one book. For an EPUB the place is spine item + block + byte
 // offset in the block (book_reader::ReadingPosition); for a .txt it's the byte offset alone
 // (spine and block 0). Either way, places sort in reading order.

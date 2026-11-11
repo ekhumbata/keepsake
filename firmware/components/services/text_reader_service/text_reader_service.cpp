@@ -27,6 +27,10 @@ constexpr const char* kPositionSuffix = ".pos";
 constexpr const char* kBookmarksSuffix = ".bm";
 constexpr size_t kMaxBookmarksBytes = 64u * 1024u;
 constexpr const char* kIndexFileName = ".library";
+// Cover thumbnails (#27), one small file per book and size; hidden, so the scan skips it.
+constexpr const char* kCoverCacheFolder = ".cache";
+constexpr size_t kMaxCoverImageBytes = 4u * 1024u * 1024u;
+constexpr size_t kMaxCoverCacheBytes = 64u * 1024u;
 constexpr int kMaxFolderDepth = 4;
 constexpr size_t kMaxBooks = 2000;
 constexpr size_t kMaxIndexBytes = 512u * 1024u;
@@ -389,6 +393,84 @@ void SavePosition(const std::string& filename, size_t offset)
     }
     std::fprintf(file, "%zu\n", offset);
     std::fclose(file);
+}
+
+namespace {
+
+bool ReadSmallFile(const std::string& path, size_t max_bytes, std::string* out)
+{
+    FILE* file = std::fopen(path.c_str(), "rb");
+    if (file == nullptr) {
+        return false;
+    }
+    out->clear();
+    char buffer[512];
+    size_t read = 0;
+    while ((read = std::fread(buffer, 1, sizeof(buffer), file)) > 0 && out->size() <= max_bytes) {
+        out->append(buffer, read);
+    }
+    std::fclose(file);
+    return true;
+}
+
+void WriteSmallFile(const std::string& path, const std::string& data)
+{
+    FILE* file = std::fopen(path.c_str(), "wb");
+    if (file == nullptr) {
+        ESP_LOGW(kTag, "Writing %s failed", path.c_str());
+        return;
+    }
+    std::fwrite(data.data(), 1, data.size(), file);
+    std::fclose(file);
+}
+
+}  // namespace
+
+bool LoadCover(const std::string& filename, int box_width, int box_height,
+               cover_image::Thumbnail* out)
+{
+    *out = cover_image::Thumbnail{};
+    if (!IsEpub(filename)) {
+        return false;
+    }
+    struct stat st = {};
+    if (stat(BookPath(filename).c_str(), &st) != 0) {
+        return false;
+    }
+    const std::string folder = JoinPath(FolderPath(), kCoverCacheFolder);
+    const std::string cache_path = JoinPath(
+        folder, library::CoverCacheName(filename, static_cast<uint64_t>(st.st_size),
+                                        static_cast<int64_t>(st.st_mtime), box_width, box_height));
+
+    std::string cached;
+    if (ReadSmallFile(cache_path, kMaxCoverCacheBytes, &cached)) {
+        // An empty file records "this book has no usable cover", so it isn't tried every time.
+        return !cached.empty() && cover_image::Parse(cached, out);
+    }
+
+    // First time for this book: decode it (slow, once) and cache the result either way.
+    std::string encoded;
+    epub::OpenError error = epub::OpenError::kNone;
+    const auto book = epub::EpubBook::Open(
+        std::make_unique<epub::FileByteSource>(BookPath(filename)), &error);
+    if (book != nullptr && !book->metadata().cover_path.empty()) {
+        (void)book->ReadFile(book->metadata().cover_path, kMaxCoverImageBytes, &encoded);
+    }
+    const cover_image::Result result =
+        encoded.empty() ? cover_image::Result::kEmpty
+                        : cover_image::MakeThumbnail(encoded, box_width, box_height, out);
+    if (result != cover_image::Result::kOk) {
+        *out = cover_image::Thumbnail{};
+    }
+    if (mkdir(folder.c_str(), 0775) != 0 && errno != EEXIST) {
+        ESP_LOGW(kTag, "Create cover cache folder failed: errno=%d", errno);
+        return result == cover_image::Result::kOk;
+    }
+    WriteSmallFile(cache_path,
+                   result == cover_image::Result::kOk ? cover_image::Serialize(*out) : std::string());
+    ESP_LOGI(kTag, "Cover for %s: %s", filename.c_str(),
+             result == cover_image::Result::kOk ? "cached" : "none");
+    return result == cover_image::Result::kOk;
 }
 
 std::vector<library::Bookmark> LoadBookmarks(const std::string& filename)

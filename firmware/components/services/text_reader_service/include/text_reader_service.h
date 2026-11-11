@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "cover_image/cover_image.h"
 #include "esp_err.h"
 #include "library/library.h"
 
@@ -68,6 +69,13 @@ struct EpubPosition {
 };
 bool LoadEpubPosition(const std::string& filename, EpubPosition* out);
 void SaveEpubPosition(const std::string& filename, const EpubPosition& position);
+
+// The book's cover (#27) as a 1-bit thumbnail fitting box_width x box_height. EPUBs only. The
+// first call decodes the cover out of the book (slow: up to a second or two) and caches the
+// result under "<books>/.cache/", so later calls just read a small file. False when the book has
+// no usable cover.
+bool LoadCover(const std::string& filename, int box_width, int box_height,
+               cover_image::Thumbnail* out);
 
 // Bookmarks (#28), in a "<filename>.bm" sidecar next to the book (library's bookmarks format).
 // Empty when there are none or the file can't be read; saving an empty list removes the file.

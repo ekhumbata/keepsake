@@ -296,6 +296,41 @@ std::map<std::string, Renderer> Screens()
         state.navigation_focus_index = 0;
         DrawBookListPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
+    screens["book_list_continue"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        BookListPageState state = {};
+        state.continue_reading.visible = true;
+        state.continue_reading.title_text = "A Rainy Day Sampler";
+        state.continue_reading.author_text = "Test Author";
+        state.continue_reading.progress_percent = 42;
+        // A made-up cover (dark sky, a pale moon, a gradient hill), dithered like a real one.
+        std::vector<uint8_t> gray(static_cast<size_t>(kContinueCoverWidth) * kContinueCoverHeight);
+        for (int y = 0; y < kContinueCoverHeight; ++y) {
+            for (int x = 0; x < kContinueCoverWidth; ++x) {
+                const int dx = x - 56;
+                const int dy = y - 34;
+                uint8_t v = static_cast<uint8_t>(40 + y);  // sky lightening downwards
+                if (dx * dx + dy * dy < 14 * 14) {
+                    v = 235;  // moon
+                }
+                if (y > 90 - (x / 6)) {
+                    v = static_cast<uint8_t>(110 + (x * 100) / kContinueCoverWidth);  // hill
+                }
+                gray[static_cast<size_t>(y) * kContinueCoverWidth + static_cast<size_t>(x)] = v;
+            }
+        }
+        state.continue_reading.cover =
+            cover_image::Dither(gray, kContinueCoverWidth, kContinueCoverHeight);
+        for (const char* name : {"A Rainy Day Sampler - 42%", "The Lighthouse Keeper's Cat - 7%",
+                                 "Garden notes"}) {
+            SelectItemState item = {};
+            item.label_text = name;
+            state.books_list.items.push_back(item);
+        }
+        state.books_list.focused = true;
+        state.books_list.selected_item_index = 0;
+        state.navigation_focus_index = 0;
+        DrawBookListPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
     screens["book_reader_txt"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         BookReaderPageState state = {};
         state.title_text = "garden_notes.txt";

@@ -10,6 +10,10 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Continue reading, with the cover** (#27). The top of the Books screen shows the book
+  you're reading: its cover (dithered to black and white), title, author and a progress
+  bar. Covers are decoded once and kept in `books/.cache/`.
+
 - **`.txt` books in any common encoding** (#27). UTF-16 (Notepad's "Unicode") and old
   Windows/Latin-1 files used to show as garbage; the encoding is now detected when the
   book opens. Accented letters no longer split words in two (`naive`, not `nai ve`).

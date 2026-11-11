@@ -1,5 +1,7 @@
 #include "book_list_page_coordinator.h"
 
+#include <algorithm>
+
 #include "epaper_ui/book_page.h"
 #include "library/library.h"
 
@@ -54,10 +56,22 @@ int BookListPageCoordinator::FocusedBookIndex() const
 }
 
 epaper_ui::BookListPageState BookListPageCoordinator::BuildState(
-    const std::vector<text_reader_service::BookEntry>& books) const
+    const std::vector<text_reader_service::BookEntry>& books,
+    const cover_image::Thumbnail& continue_cover) const
 {
     epaper_ui::BookListPageState state = {};
     state.navigation_focus_index = focus_.index();
+
+    // The shelf puts the book being read first; it also gets the card with its cover.
+    if (!books.empty() && books.front().last_opened > 0 && books.front().progress_percent < 100) {
+        const text_reader_service::BookEntry& reading = books.front();
+        state.continue_reading.visible = true;
+        state.continue_reading.title_text = epaper_ui::ToDisplayText(
+            reading.title.empty() ? library::TitleFromPath(reading.filename) : reading.title);
+        state.continue_reading.author_text = epaper_ui::ToDisplayText(reading.author);
+        state.continue_reading.progress_percent = std::max(0, reading.progress_percent);
+        state.continue_reading.cover = continue_cover;
+    }
 
     const int focused_index = FocusedBookIndex();
     state.books_list.items.reserve(books.size());
