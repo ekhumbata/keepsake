@@ -10,11 +10,12 @@
 #include "epaper_ui/overlay_geometry.h"
 
 // Bridges book_layout to this UI's bitmap fonts: measuring for layout and drawing a laid-out
-// page (#28). Today's fonts are Inter, ASCII only, with no italic; Literata replaces them in
-// #28's font step without changing this interface.
+// page (#28). The bitmap fonts are ASCII only for now (ToDisplayText bridges the gap); #104
+// will let the friend pick their own fonts without changing this interface.
 namespace epaper_ui {
 
-// Font for a line role + span style (bold picks the bold weight; italic has no font yet).
+// Font for a line role + span style: body text is Literata (regular/bold/italic), headings
+// use the interface font (Nunito).
 design::TypographyRole BookTypographyRole(book_layout::TextRole role, uint8_t style);
 
 // UTF-8 -> what the ASCII bitmap fonts can draw: typographic quotes, dashes, ellipsis, spaces

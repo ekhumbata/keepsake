@@ -67,33 +67,47 @@ inline FontSelection MakeFontSelection(const design::TypographySpec& spec,
 inline FontSelection FontForRole(design::TypographyRole role)
 {
     const design::TypographySpec spec = design::TypographySpecForRole(role);
+    // Book text (Literata) has its own fonts: regular, bold and italic at one size for now.
+    switch (role) {
+        case design::TypographyRole::kBookBody:
+            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Regular,
+                                     epaper_fonts::kBook22Regular, epaper_fonts::kBook22Regular);
+        case design::TypographyRole::kBookBold:
+            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Bold,
+                                     epaper_fonts::kBook22Bold, epaper_fonts::kBook22Bold);
+        case design::TypographyRole::kBookItalic:
+            return MakeFontSelection(spec, 22, epaper_fonts::kBook22Italic,
+                                     epaper_fonts::kBook22Italic, epaper_fonts::kBook22Italic);
+        default:
+            break;
+    }
     if (spec.size == design::typography::k22) {
-        return MakeFontSelection(spec, 22, epaper_fonts::kInter22SemiBold,
-                                 epaper_fonts::kInter22Bold, epaper_fonts::kInter22Black);
+        return MakeFontSelection(spec, 22, epaper_fonts::kUi22SemiBold,
+                                 epaper_fonts::kUi22Bold, epaper_fonts::kUi22Black);
     }
     if (spec.size == design::typography::k26) {
-        return MakeFontSelection(spec, 26, epaper_fonts::kInter26SemiBold,
-                                 epaper_fonts::kInter26Bold, epaper_fonts::kInter26Black);
+        return MakeFontSelection(spec, 26, epaper_fonts::kUi26SemiBold,
+                                 epaper_fonts::kUi26Bold, epaper_fonts::kUi26Black);
     }
     if (spec.size == design::typography::k32) {
-        return MakeFontSelection(spec, 32, epaper_fonts::kInter32SemiBold,
-                                 epaper_fonts::kInter32Bold, epaper_fonts::kInter32Black);
+        return MakeFontSelection(spec, 32, epaper_fonts::kUi32SemiBold,
+                                 epaper_fonts::kUi32Bold, epaper_fonts::kUi32Black);
     }
     if (spec.size == design::typography::k38) {
-        return MakeFontSelection(spec, 38, epaper_fonts::kInter38SemiBold,
-                                 epaper_fonts::kInter38Bold, epaper_fonts::kInter38Black);
+        return MakeFontSelection(spec, 38, epaper_fonts::kUi38SemiBold,
+                                 epaper_fonts::kUi38Bold, epaper_fonts::kUi38Black);
     }
     if (spec.size == design::typography::k46) {
-        return MakeFontSelection(spec, 46, epaper_fonts::kInter46SemiBold,
-                                 epaper_fonts::kInter46Bold, epaper_fonts::kInter46Black);
+        return MakeFontSelection(spec, 46, epaper_fonts::kUi46SemiBold,
+                                 epaper_fonts::kUi46Bold, epaper_fonts::kUi46Black);
     }
     if (spec.size == design::typography::k55) {
-        return MakeFontSelection(spec, 55, epaper_fonts::kInter55SemiBold,
-                                 epaper_fonts::kInter55Bold, epaper_fonts::kInter55Black);
+        return MakeFontSelection(spec, 55, epaper_fonts::kUi55SemiBold,
+                                 epaper_fonts::kUi55Bold, epaper_fonts::kUi55Black);
     }
 
-    return MakeFontSelection(spec, 165, epaper_fonts::kInter165SemiBold,
-                             epaper_fonts::kInter165Bold, epaper_fonts::kInter165Black);
+    return MakeFontSelection(spec, 165, epaper_fonts::kUi165SemiBold,
+                             epaper_fonts::kUi165Bold, epaper_fonts::kUi165Black);
 }
 
 }  // namespace font_renderer_detail

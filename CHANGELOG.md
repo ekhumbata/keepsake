@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **New fonts** (#19): the interface uses **Nunito**, a rounded, friendly face, and
+  books are set in **Literata**, a typeface made for reading on screens, with real
+  **bold** and *italic* in book text (italics showed as plain text before). Both are
+  open-source (SIL OFL).
+
 ### Added
 
 - **EPUB books** (#26, #28). `.epub` files in the `books` folder now show up in

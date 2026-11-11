@@ -26,6 +26,10 @@ enum class TypographyRole : uint8_t {
     kInputValue,
     kLabelSmall,
     kDisplayXL,
+    // Book text in the reader (Literata). Interface text uses the roles above (Nunito).
+    kBookBody,
+    kBookBold,
+    kBookItalic,
 };
 
 namespace spacing {
@@ -115,6 +119,11 @@ constexpr TypographySpec TypographySpecForRole(TypographyRole role)
             return {typography::k26, font_weight::kSemibold, 1, 0};
         case TypographyRole::kDisplayXL:
             return {typography::k165, font_weight::kBlack, 1, 0};
+        case TypographyRole::kBookBody:
+        case TypographyRole::kBookItalic:
+            return {typography::k22, font_weight::kSemibold, 1, 0};
+        case TypographyRole::kBookBold:
+            return {typography::k22, font_weight::kBold, 1, 0};
     }
 
     return {};
