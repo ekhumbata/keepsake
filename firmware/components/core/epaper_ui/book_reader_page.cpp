@@ -77,40 +77,24 @@ size_t FindNextBreak(const std::string& text, size_t from)
     return std::string::npos;
 }
 
-// Collapses every run of '\r'/'\n' to spaces, except a run with 2+ '\n's (a blank line in the
-// source -- a paragraph break), which keeps exactly one '\n' as a marker and blanks the rest.
-// Byte-length preserving (in-place, no insert/erase) so byte offsets tracked against the
-// original text stay valid. A lone '\n' remains just a normal word-break afterward (same as a
-// space); a surviving '\n' unambiguously means "paragraph break" to the line-wrap loop below.
-void NormalizeLineBreaks(std::string& text)
+// Raw file bytes -> what the fonts can draw (ASCII stand-ins for accented letters, curly
+// quotes, dashes ...), remembering for each output byte which raw byte it came from, so
+// pagination can report how much of the file it used. Whitespace is tidied on the way: this is
+// a reflowing reader, so each run of spaces, tabs and line breaks becomes one space, except a
+// run holding a blank line (2+ '\n', so CRLF files work too), which becomes a single '\n'
+// paragraph marker. Stops before a character cut off at the end of `raw`; `*decoded_end` is
+// where it stopped.
+bool IsSpaceCodepoint(uint32_t codepoint)
 {
-    size_t i = 0;
-    while (i < text.size()) {
-        if (text[i] != '\r' && text[i] != '\n') {
-            ++i;
-            continue;
-        }
-        const size_t run_start = i;
-        int newline_count = 0;
-        while (i < text.size() && (text[i] == '\r' || text[i] == '\n')) {
-            if (text[i] == '\n') {
-                ++newline_count;
-            }
-            ++i;
-        }
-        for (size_t j = run_start; j < i; ++j) {
-            text[j] = ' ';
-        }
-        if (newline_count >= 2) {
-            text[run_start] = '\n';
-        }
+    switch (codepoint) {
+        case ' ': case '\t': case '\n': case '\r': case 0x0B: case 0x0C:
+        case 0x00A0: case 0x2002: case 0x2003: case 0x2009:
+            return true;
+        default:
+            return false;
     }
 }
 
-// Raw file bytes -> what the fonts can draw (ASCII stand-ins for accented letters, curly
-// quotes, dashes ...), remembering for each output byte which raw byte it came from, so
-// pagination can report how much of the file it used. Stops before a character cut off at the
-// end of `raw`; `*decoded_end` is where it stopped.
 std::string DecodeForDisplay(const std::string& raw, book_formats::TextEncoding encoding,
                              std::vector<size_t>* source, size_t* decoded_end)
 {
@@ -119,19 +103,41 @@ std::string DecodeForDisplay(const std::string& raw, book_formats::TextEncoding 
     source->clear();
     source->reserve(raw.size() + 1);
     size_t pos = 0;
+    constexpr size_t kNoRun = static_cast<size_t>(-1);
+    size_t run_start = kNoRun;  // where the current run of whitespace began
+    int run_newlines = 0;
+    const auto flush_run = [&]() {
+        if (run_start == kNoRun) {
+            return;
+        }
+        text.push_back(run_newlines >= 2 ? '\n' : ' ');
+        source->push_back(run_start);
+        run_start = kNoRun;
+    };
     while (pos < raw.size()) {
         uint32_t codepoint = 0;
         size_t length = 0;
         if (!book_formats::DecodeCharacter(raw, pos, encoding, &codepoint, &length)) {
             break;
         }
-        if (codepoint < 0x20 && codepoint != '\n' && codepoint != '\r' && codepoint != '\t') {
-            codepoint = ' ';  // stray control characters (and UTF-16's NULs, if misdetected)
+        if (IsSpaceCodepoint(codepoint)) {
+            if (run_start == kNoRun) {
+                run_start = pos;
+                run_newlines = 0;
+            }
+            run_newlines += codepoint == '\n' ? 1 : 0;
+            pos += length;
+            continue;
+        }
+        flush_run();
+        if (codepoint < 0x20) {
+            codepoint = '?';  // other control characters (and UTF-16's NULs, if misdetected)
         }
         AppendDisplayCodepoint(codepoint, &text);
         source->resize(text.size(), pos);
         pos += length;
     }
+    flush_run();
     *decoded_end = pos;
     source->push_back(pos);  // text.size() maps to the end of what was decoded
     return text;
@@ -159,20 +165,16 @@ BookReaderPageLayout PaginateBookText(int portrait_width, int portrait_height,
 
     // This is a reflowing reader -- original line breaks are not preserved verbatim -- so
     // hard-wrapped source newlines (every .txt file exported from Project Gutenberg et al.
-    // hard-wraps at ~70-80 columns) are normalized to spaces up front, while an actual blank
-    // line (a paragraph break) survives as a single '\n' marker the loop below reacts to.
-    // The text is first decoded to what the fonts draw, with a map back to raw byte offsets
-    // (`source`), so consumed_bytes still lines up with offsets in the file; normalizing is
-    // length-preserving on top of that. Without the newline normalization, epaper_font::MeasureText (which
-    // deliberately stops at the first '\r'/'\n', a safety behavior other single-line UI
-    // callers rely on) silently under-reports the width of any multi-word span that has a
-    // source newline in it -- which is nearly every span in a real book -- so the "is this
-    // line too wide yet" check never trips and the algorithm swallows the entire input buffer
-    // into one unbreakable "line".
+    // hard-wraps at ~70-80 columns) become spaces, while an actual blank line (a paragraph
+    // break) survives as a single '\n' marker the loop below reacts to (DecodeForDisplay).
+    // The decoded text keeps a map back to raw byte offsets (`source`), so consumed_bytes
+    // still lines up with offsets in the file. Without the newline normalization,
+    // epaper_font::MeasureText (which deliberately stops at the first '\r'/'\n', a safety
+    // behavior other single-line UI callers rely on) would under-report the width of any
+    // multi-word span with a source newline in it, and the line-width check would never trip.
     std::vector<size_t> source;
     size_t decoded_end = 0;
     std::string text = DecodeForDisplay(raw_text, encoding, &source, &decoded_end);
-    NormalizeLineBreaks(text);
 
     size_t start = 0;
     while (start < text.size() && static_cast<int>(result.lines.size()) < max_lines) {
@@ -206,7 +208,7 @@ BookReaderPageLayout PaginateBookText(int portrait_width, int portrait_height,
             pos = word_end + 1;
         }
 
-        // NormalizeLineBreaks leaves '\n' nowhere except as this marker, so its presence right
+        // DecodeForDisplay leaves '\n' nowhere except as this marker, so its presence right
         // at the line's end boundary is unambiguous, however the loop above stopped.
         const bool paragraph_break_follows = best_end < text.size() && text[best_end] == '\n';
         result.lines.push_back(text.substr(start, best_end - start));

@@ -8,6 +8,12 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **No more double spaces in `.txt` books** (#90). Files saved on Windows (CRLF line
+  endings), tabs and runs of spaces now show as single spaces; blank lines still start
+  a new paragraph.
+
 ### Added
 
 - **Several saved Wi-Fi networks** (#43). Keepsake remembers up to five networks,
