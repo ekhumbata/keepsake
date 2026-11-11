@@ -3,54 +3,31 @@
 from __future__ import annotations
 
 import math
-import platform
-import re
 import sys
-from ctypes import (
-    CDLL,
-    POINTER,
-    Structure,
-    addressof,
-    c_bool,
-    c_char_p,
-    c_double,
-    c_int,
-    c_long,
-    c_size_t,
-    c_uint16,
-    c_uint32,
-    c_uint8,
-    c_void_p,
-)
 from dataclasses import dataclass
 from pathlib import Path
 
-
-if platform.system() != "Darwin":
-    raise SystemExit("font generation is only supported on macOS")
-
-
-class CGPoint(Structure):
-    _fields_ = [("x", c_double), ("y", c_double)]
-
-
-class CGSize(Structure):
-    _fields_ = [("width", c_double), ("height", c_double)]
+try:
+    import freetype
+except ImportError as exc:  # pragma: no cover - environment check
+    raise SystemExit(
+        "font generation needs freetype-py: pip install -r tools/requirements.txt"
+    ) from exc
 
 
-class CGRect(Structure):
-    _fields_ = [("origin", CGPoint), ("size", CGSize)]
-
-
-class CGAffineTransform(Structure):
-    _fields_ = [
-        ("a", c_double),
-        ("b", c_double),
-        ("c", c_double),
-        ("d", c_double),
-        ("tx", c_double),
-        ("ty", c_double),
-    ]
+# Rasterizes TTF/OTF glyphs into the packed 1-bpp ASCII bitmap fonts in
+# firmware/components/core/epaper_ui/generated_epaper_fonts.cpp, using FreeType (any OS).
+#
+# It reproduces the semantics of the original macOS CoreText generator so existing fonts keep
+# their metrics:
+# - `size` is the em size in pixels (CoreText points at 72 dpi)
+# - ascent/descent/leading come from the font's horizontal header, rounded up
+# - each glyph's box is its exact, unhinted outline bounding box, rounded outward to pixels;
+#   the bitmap is a non-antialiased render of the unhinted outline (a pixel is black when its
+#   centre is inside the outline)
+# - the advance is the unhinted advance, rounded up
+# Output is not byte-identical to CoreText's (the two rasterizers differ on edge pixels);
+# see docs/asset-generation.md for the measured difference.
 
 
 @dataclass(frozen=True)
@@ -74,83 +51,9 @@ class FontGenError(RuntimeError):
     pass
 
 
-CORE_GRAPHICS = CDLL(
-    "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics"
-)
-CORE_TEXT = CDLL("/System/Library/Frameworks/CoreText.framework/CoreText")
-
-kCTFontOrientationHorizontal = 0
-kCGInterpolationNone = 1
-kCGImageAlphaNone = 0
 kAsciiFirst = 32
 kAsciiLast = 126
-kIdentityTransform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-
-CORE_GRAPHICS.CGDataProviderCreateWithFilename.argtypes = [c_char_p]
-CORE_GRAPHICS.CGDataProviderCreateWithFilename.restype = c_void_p
-CORE_GRAPHICS.CGFontCreateWithDataProvider.argtypes = [c_void_p]
-CORE_GRAPHICS.CGFontCreateWithDataProvider.restype = c_void_p
-CORE_GRAPHICS.CGColorSpaceCreateDeviceGray.argtypes = []
-CORE_GRAPHICS.CGColorSpaceCreateDeviceGray.restype = c_void_p
-CORE_GRAPHICS.CGBitmapContextCreate.argtypes = [
-    c_void_p,
-    c_size_t,
-    c_size_t,
-    c_size_t,
-    c_size_t,
-    c_void_p,
-    c_uint32,
-]
-CORE_GRAPHICS.CGBitmapContextCreate.restype = c_void_p
-CORE_GRAPHICS.CGContextSetGrayFillColor.argtypes = [c_void_p, c_double, c_double]
-CORE_GRAPHICS.CGContextFillRect.argtypes = [c_void_p, CGRect]
-CORE_GRAPHICS.CGContextSetShouldAntialias.argtypes = [c_void_p, c_bool]
-CORE_GRAPHICS.CGContextSetAllowsAntialiasing.argtypes = [c_void_p, c_bool]
-CORE_GRAPHICS.CGContextSetInterpolationQuality.argtypes = [c_void_p, c_int]
-CORE_GRAPHICS.CGContextSetTextMatrix.argtypes = [c_void_p, CGAffineTransform]
-
-CORE_TEXT.CTFontCreateWithGraphicsFont.argtypes = [
-    c_void_p,
-    c_double,
-    c_void_p,
-    c_void_p,
-]
-CORE_TEXT.CTFontCreateWithGraphicsFont.restype = c_void_p
-CORE_TEXT.CTFontGetGlyphsForCharacters.argtypes = [
-    c_void_p,
-    POINTER(c_uint16),
-    POINTER(c_uint16),
-    c_long,
-]
-CORE_TEXT.CTFontGetGlyphsForCharacters.restype = c_bool
-CORE_TEXT.CTFontGetAdvancesForGlyphs.argtypes = [
-    c_void_p,
-    c_uint32,
-    POINTER(c_uint16),
-    POINTER(CGSize),
-    c_long,
-]
-CORE_TEXT.CTFontGetBoundingRectsForGlyphs.argtypes = [
-    c_void_p,
-    c_uint32,
-    POINTER(c_uint16),
-    POINTER(CGRect),
-    c_long,
-]
-CORE_TEXT.CTFontGetBoundingRectsForGlyphs.restype = CGRect
-CORE_TEXT.CTFontGetAscent.argtypes = [c_void_p]
-CORE_TEXT.CTFontGetAscent.restype = c_double
-CORE_TEXT.CTFontGetDescent.argtypes = [c_void_p]
-CORE_TEXT.CTFontGetDescent.restype = c_double
-CORE_TEXT.CTFontGetLeading.argtypes = [c_void_p]
-CORE_TEXT.CTFontGetLeading.restype = c_double
-CORE_TEXT.CTFontDrawGlyphs.argtypes = [
-    c_void_p,
-    POINTER(c_uint16),
-    POINTER(CGPoint),
-    c_long,
-    c_void_p,
-]
+k26Dot6 = 64.0
 
 
 def parse_args(argv: list[str]) -> tuple[Path, list[FontSpec]]:
@@ -162,7 +65,7 @@ def parse_args(argv: list[str]) -> tuple[Path, list[FontSpec]]:
     output_path = Path(argv[2])
     specs: list[FontSpec] = []
     for raw in argv[3:]:
-        parts = raw.split(":", 2)
+        parts = raw.rsplit(":", 2)
         if len(parts) != 3:
             raise FontGenError(f"invalid font spec: {raw}")
         try:
@@ -174,139 +77,96 @@ def parse_args(argv: list[str]) -> tuple[Path, list[FontSpec]]:
     return output_path, specs
 
 
-def load_font(spec: FontSpec) -> c_void_p:
-    provider = CORE_GRAPHICS.CGDataProviderCreateWithFilename(
-        spec.path.encode("utf-8")
-    )
-    if not provider:
-        raise FontGenError(f"unable to load font: {spec.path}")
-
-    cg_font = CORE_GRAPHICS.CGFontCreateWithDataProvider(provider)
-    if not cg_font:
-        raise FontGenError(f"unable to create CGFont: {spec.path}")
-
-    ct_font = CORE_TEXT.CTFontCreateWithGraphicsFont(cg_font, spec.size, None, None)
-    if not ct_font:
-        raise FontGenError(f"unable to create CTFont: {spec.path}")
-
-    return ct_font
+def load_font(spec: FontSpec) -> "freetype.Face":
+    try:
+        face = freetype.Face(spec.path)
+    except freetype.FT_Exception as exc:
+        raise FontGenError(f"unable to load font: {spec.path}") from exc
+    # 72 dpi makes one point one pixel, matching CoreText's CTFontCreateWithGraphicsFont(size).
+    face.set_char_size(int(round(spec.size * k26Dot6)), 0, 72, 72)
+    return face
 
 
-def resolve_glyph(font: c_void_p, character: int) -> int:
-    code_unit = c_uint16(character)
-    glyph = c_uint16()
-    ok = CORE_TEXT.CTFontGetGlyphsForCharacters(font, code_unit, glyph, 1)
-    if ok:
-        return glyph.value
+def font_metrics(face: "freetype.Face", size: float) -> tuple[int, int, int]:
+    """ascent, descent, leading in pixels (each rounded up), like CTFontGetAscent & co."""
+    scale = size / face.units_per_EM
+    hhea_ascent = face.ascender
+    hhea_descent = -face.descender
+    hhea_gap = max(0, face.height - (face.ascender - face.descender))
+    ascent = max(1, math.ceil(hhea_ascent * scale - 1e-9))
+    descent = max(0, math.ceil(hhea_descent * scale - 1e-9))
+    leading = max(0, math.ceil(hhea_gap * scale - 1e-9))
+    return ascent, descent, leading
+
+
+def resolve_glyph(face: "freetype.Face", character: int) -> int:
+    index = face.get_char_index(character)
+    if index:
+        return index
     if character != ord("?"):
-        return resolve_glyph(font, ord("?"))
+        return resolve_glyph(face, ord("?"))
     raise FontGenError("font is missing fallback glyph '?'")
 
 
-def glyph_advance(font: c_void_p, glyph_value: int) -> int:
-    glyph = c_uint16(glyph_value)
-    advance = CGSize()
-    CORE_TEXT.CTFontGetAdvancesForGlyphs(
-        font, kCTFontOrientationHorizontal, glyph, advance, 1
-    )
-    return max(1, math.ceil(advance.width))
+def render_glyph(face: "freetype.Face", character: int) -> GlyphRecord:
+    glyph_index = resolve_glyph(face, character)
+    face.load_glyph(glyph_index, freetype.FT_LOAD_NO_HINTING | freetype.FT_LOAD_NO_BITMAP)
+    slot = face.glyph
 
+    # linearHoriAdvance is the unhinted advance in 16.16 pixels.
+    advance = max(1, math.ceil(slot.linearHoriAdvance / 65536.0 - 1e-9))
 
-def glyph_bounds(font: c_void_p, glyph_value: int) -> tuple[int, int, int, int]:
-    glyph = c_uint16(glyph_value)
-    bounds = CGRect()
-    CORE_TEXT.CTFontGetBoundingRectsForGlyphs(
-        font, kCTFontOrientationHorizontal, glyph, bounds, 1
-    )
-    min_x = math.floor(bounds.origin.x)
-    max_x = math.ceil(bounds.origin.x + bounds.size.width)
-    min_y = math.floor(bounds.origin.y)
-    max_y = math.ceil(bounds.origin.y + bounds.size.height)
-    return min_x, max_x, min_y, max_y
+    outline = slot.outline
+    if outline.n_points == 0 or outline.n_contours == 0:
+        return GlyphRecord(0, 0, 0, 0, advance, [])
 
+    bbox = outline.get_bbox()  # exact bounding box, 26.6 pixels, y up
+    min_x = math.floor(bbox.xMin / k26Dot6)
+    max_x = math.ceil(bbox.xMax / k26Dot6)
+    min_y = math.floor(bbox.yMin / k26Dot6)
+    max_y = math.ceil(bbox.yMax / k26Dot6)
+    width = max(0, max_x - min_x)
+    height = max(0, max_y - min_y)
+    if width == 0 or height == 0:
+        return GlyphRecord(0, 0, min_x, max_y, advance, [])
 
-def create_bitmap_context(width: int, height: int) -> tuple[c_void_p, object]:
-    bytes_per_row = width
-    buffer_size = width * height
-    pixels = (c_uint8 * buffer_size)(*([0xFF] * buffer_size))
-    colorspace = CORE_GRAPHICS.CGColorSpaceCreateDeviceGray()
-    context = CORE_GRAPHICS.CGBitmapContextCreate(
-        addressof(pixels),
-        width,
-        height,
-        8,
-        bytes_per_row,
-        colorspace,
-        kCGImageAlphaNone,
-    )
-    if not context:
-        raise FontGenError("unable to create bitmap context")
+    slot.render(freetype.FT_RENDER_MODE_MONO)
+    bitmap = slot.bitmap
+    # The rendered bitmap covers the outline's control box rounded out to whole pixels, which
+    # contains the exact box above; copy the overlap into a canvas of exactly that box.
+    left = slot.bitmap_left
+    top = slot.bitmap_top
+    pitch = abs(bitmap.pitch)
+    buffer = bitmap.buffer
 
-    CORE_GRAPHICS.CGContextSetGrayFillColor(context, 1.0, 1.0)
-    CORE_GRAPHICS.CGContextFillRect(
-        context, CGRect(CGPoint(0.0, 0.0), CGSize(float(width), float(height)))
-    )
-    CORE_GRAPHICS.CGContextSetShouldAntialias(context, False)
-    CORE_GRAPHICS.CGContextSetAllowsAntialiasing(context, False)
-    CORE_GRAPHICS.CGContextSetInterpolationQuality(context, kCGInterpolationNone)
-    CORE_GRAPHICS.CGContextSetGrayFillColor(context, 0.0, 1.0)
-    CORE_GRAPHICS.CGContextSetTextMatrix(context, kIdentityTransform)
-    return context, pixels
-
-
-def pack_bitmap(
-    pixels: object, width: int, height: int, bytes_per_row: int
-) -> list[int]:
     packed: list[int] = []
     current_byte = 0
     bit_index = 0
-
     for row in range(height):
+        src_row = row + (top - max_y)
         for col in range(width):
-            sample = pixels[row * bytes_per_row + col]
-            if sample < 128:
+            src_col = col + (min_x - left)
+            black = False
+            if 0 <= src_row < bitmap.rows and 0 <= src_col < bitmap.width:
+                byte = buffer[src_row * pitch + (src_col >> 3)]
+                black = (byte & (0x80 >> (src_col & 7))) != 0
+            if black:
                 current_byte |= 0x80 >> bit_index
             bit_index += 1
             if bit_index == 8:
                 packed.append(current_byte)
                 current_byte = 0
                 bit_index = 0
-
     if bit_index:
         packed.append(current_byte)
-    return packed
 
-
-def render_glyph(font: c_void_p, character: int) -> GlyphRecord:
-    glyph_value = resolve_glyph(font, character)
-    advance = glyph_advance(font, glyph_value)
-    min_x, max_x, min_y, max_y = glyph_bounds(font, glyph_value)
-
-    width = max(0, max_x - min_x)
-    height = max(0, max_y - min_y)
-    if width == 0 or height == 0:
-        return GlyphRecord(
-            width=0,
-            height=0,
-            bearing_x=min_x,
-            bearing_y=max_y,
-            advance=advance,
-            bitmap=[],
-        )
-
-    context, pixels = create_bitmap_context(width, height)
-    glyph = c_uint16(glyph_value)
-    position = CGPoint(float(-min_x), float(-min_y))
-    CORE_TEXT.CTFontDrawGlyphs(font, glyph, position, 1, context)
-
-    bitmap = pack_bitmap(pixels, width, height, width)
     return GlyphRecord(
         width=width,
         height=height,
         bearing_x=min_x,
         bearing_y=max_y,
         advance=advance,
-        bitmap=bitmap,
+        bitmap=packed,
     )
 
 
@@ -339,9 +199,7 @@ def generate_source(specs: list[FontSpec]) -> str:
 
     for spec in specs:
         font = load_font(spec)
-        ascent = max(1, math.ceil(CORE_TEXT.CTFontGetAscent(font)))
-        descent = max(0, math.ceil(CORE_TEXT.CTFontGetDescent(font)))
-        leading = max(0, math.ceil(CORE_TEXT.CTFontGetLeading(font)))
+        ascent, descent, leading = font_metrics(font, spec.size)
         line_height = max(1, ascent + descent + leading)
 
         all_bitmap_bytes: list[int] = []

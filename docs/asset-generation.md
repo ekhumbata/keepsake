@@ -13,8 +13,30 @@ can use generated monochrome image and bitmap-font assets.
   ever restructured, since the generated bitmap fonts compiled from it into
   the firmware are a derivative of the font under that license.
 
-The current scripts are macOS-oriented because they use `sips` for PNG
-conversion and CoreGraphics/CoreText for font rasterization.
+The scripts run on any OS (Linux, macOS, Windows/WSL). They need Python 3.10+ with
+Pillow (PNG loading) and freetype-py (font rasterization):
+
+```bash
+pip install -r tools/requirements.txt
+```
+
+### Fidelity vs. the original macOS pipeline
+
+Chroninkle's generators used macOS `sips` and CoreGraphics/CoreText. Keepsake ported them
+to Pillow and FreeType (#12), keeping the output format. Measured against the files that
+pipeline committed:
+
+- **Logos, images, footer icons, all headers:** byte-identical.
+- **36 px icons** (44 px sources scaled down): Pillow's bicubic filter is the closest match to
+  `sips`. 12 of 58 icons are identical; elsewhere 3.2% of ink pixels differ, all on edges.
+- **Fonts:** line height and ascent match for all 21 Inter fonts. Glyph boxes and advances
+  can differ by ±1 px (the rasterizers round outline edges differently). Pixel difference:
+  0.1–0.6% at 55 px and up, 3–14% at 22–46 px (mostly 1 px shifts). Side by side, the text
+  looks the same; FreeType sets the small sizes a few px wider over a full line.
+
+The committed Inter fonts and 36 px icons were **not** regenerated, so the UI keeps its exact
+current widths. Regenerating them is safe but will shift some labels by a pixel; do it
+together with the redesign's font/icon changes (#19, #21), not as a drive-by.
 
 ## Scripts
 

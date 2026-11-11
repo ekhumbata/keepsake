@@ -20,8 +20,10 @@ The generators emit monochrome C++ assets for the SSD1677 e-paper UI:
 - `generate_epaper_project_assets.py`: manifest-driven wrapper for all project
   image assets
 
-The PNG generators use macOS `sips`, and the font generator uses macOS
-CoreGraphics/CoreText through `ctypes`.
+The generators run on any OS: PNGs are loaded with Pillow and fonts are rasterized with
+FreeType (`pip install -r tools/requirements.txt`). See "Fidelity vs. the original macOS
+pipeline" in `docs/asset-generation.md` for how the output compares with the old
+`sips`/CoreText version.
 
 For normal UI work, update `assets/epaper_assets.json` and run:
 
