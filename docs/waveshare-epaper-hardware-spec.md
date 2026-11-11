@@ -238,6 +238,7 @@ signals on this board and must keep a Boot-safe default level at reset:
 
 ```bash
 source $IDF_PATH/export.sh
+cd firmware
 idf.py set-target esp32s3
 idf.py build
 idf.py flash monitor

@@ -176,7 +176,7 @@ footer_runtime::LayoutState FooterLayoutForScreen(display_service::ScreenId scre
     // and just get in the way of the one icon that matters -- the way back to Home. Mic
     // (press-and-hold-to-record) stays visible everywhere either way, since it's the core action
     // and was never part of this visibility split. Each page's NavigationModel mirrors this same
-    // split (see AddFooterItems in components/page_navigation/navigation_model.cpp) so roving
+    // split (see AddFooterItems in components/core/page_navigation/navigation_model.cpp) so roving
     // focus can't land on an icon the user can't see.
     //
     // WiFi and Time no longer have footer icons of their own -- they're reached from the

@@ -26,7 +26,7 @@ CoreGraphics/CoreText through `ctypes`.
 For normal UI work, update `assets/epaper_assets.json` and run:
 
 ```bash
-python3 scripts/generate_epaper_project_assets.py
+python3 tools/generate_epaper_project_assets.py
 ```
 
 The lower-level scripts remain available for quick one-off experiments.
@@ -34,19 +34,19 @@ The lower-level scripts remain available for quick one-off experiments.
 Examples:
 
 ```bash
-python3 scripts/generate_epaper_icons.py \
-  --output-header components/project_assets/generated_epaper_icons.h \
-  --output-source components/project_assets/generated_epaper_icons.cpp \
+python3 tools/generate_epaper_icons.py \
+  --output-header firmware/components/core/project_assets/generated_epaper_icons.h \
+  --output-source firmware/components/core/project_assets/generated_epaper_icons.cpp \
   assets/icons/home.png:kHome \
   assets/icons/settings.png:kSettings
 
-python3 scripts/generate_epaper_logos.py \
-  --output-header components/project_assets/generated_epaper_logos.h \
-  --output-source components/project_assets/generated_epaper_logos.cpp \
+python3 tools/generate_epaper_logos.py \
+  --output-header firmware/components/core/project_assets/generated_epaper_logos.h \
+  --output-source firmware/components/core/project_assets/generated_epaper_logos.cpp \
   assets/logos/folloup-logo.png:kFollowupLogo
 
-python3 scripts/generate_epaper_fonts.py \
-  --output components/epaper_ui/generated_epaper_fonts.cpp \
+python3 tools/generate_epaper_fonts.py \
+  --output firmware/components/core/epaper_ui/generated_epaper_fonts.cpp \
   fonts/Inter_18pt-SemiBold.ttf:kInter22SemiBold:22
 ```
 

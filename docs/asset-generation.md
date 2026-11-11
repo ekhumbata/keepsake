@@ -18,15 +18,15 @@ conversion and CoreGraphics/CoreText for font rasterization.
 
 ## Scripts
 
-- `scripts/generate_epaper_icons.py`
-- `scripts/generate_epaper_footer_icons.py`
-- `scripts/generate_epaper_logos.py`
-- `scripts/generate_epaper_fonts.py`
-- `scripts/generate_epaper_assets_common.py`
-- `scripts/generate_epaper_project_assets.py`
+- `tools/generate_epaper_icons.py`
+- `tools/generate_epaper_footer_icons.py`
+- `tools/generate_epaper_logos.py`
+- `tools/generate_epaper_fonts.py`
+- `tools/generate_epaper_assets_common.py`
+- `tools/generate_epaper_project_assets.py`
 
 The generated image assets depend on
-`components/project_assets/asset_types.h`, which defines the shared packed
+`firmware/components/core/project_assets/asset_types.h`, which defines the shared packed
 monochrome image type.
 
 ## Project Asset Manifest
@@ -35,38 +35,38 @@ The scalable path is `assets/epaper_assets.json`. Add new source assets there,
 then regenerate the project asset component with:
 
 ```bash
-python3 scripts/generate_epaper_project_assets.py
+python3 tools/generate_epaper_project_assets.py
 ```
 
 That command regenerates:
 
-- `components/project_assets/asset_manifest.h`
-- `components/project_assets/project_assets.h`
-- `components/project_assets/project_assets.cpp`
-- `components/project_assets/generated_epaper_icons.h/.cpp`
-- `components/project_assets/generated_epaper_footer_icons.h/.cpp`
-- `components/project_assets/generated_epaper_logos.h/.cpp`
+- `firmware/components/core/project_assets/asset_manifest.h`
+- `firmware/components/core/project_assets/project_assets.h`
+- `firmware/components/core/project_assets/project_assets.cpp`
+- `firmware/components/core/project_assets/generated_epaper_icons.h/.cpp`
+- `firmware/components/core/project_assets/generated_epaper_footer_icons.h/.cpp`
+- `firmware/components/core/project_assets/generated_epaper_logos.h/.cpp`
 
-`components/project_assets/CMakeLists.txt` already compiles all generated image
+`firmware/components/core/project_assets/CMakeLists.txt` already compiles all generated image
 sources, including the empty icon/footer generated files. Adding future icons
 should not require changing CMake.
 
 ## Embedded Bitmap Fonts
 
-Bitmap font generation is now compiled through `components/epaper_ui/`:
+Bitmap font generation is now compiled through `firmware/components/core/epaper_ui/`:
 
-- `components/epaper_ui/generated_epaper_fonts.cpp`
-- `components/epaper_ui/include/epaper_ui/generated_epaper_fonts.h`
+- `firmware/components/core/epaper_ui/generated_epaper_fonts.cpp`
+- `firmware/components/core/epaper_ui/include/epaper_ui/generated_epaper_fonts.h`
 
 The current renderer uses the same Inter font sizes and weights expected by the
 ported `followup` design-token roles.
 
-Regenerate the font source with `scripts/generate_epaper_fonts.py`, then keep
+Regenerate the font source with `tools/generate_epaper_fonts.py`, then keep
 the small public header in sync if new symbols are added.
 
 ## Embedded Logo Assets
 
-Logo assets are currently embedded through `components/project_assets/`:
+Logo assets are currently embedded through `firmware/components/core/project_assets/`:
 
 - `EmbeddedLogoId::kAlxvLabsLogo`
 - `EmbeddedLogoId::kFollowupLogo`
@@ -74,7 +74,7 @@ Logo assets are currently embedded through `components/project_assets/`:
 They are listed in `assets/epaper_assets.json`. Regenerate them with:
 
 ```bash
-python3 scripts/generate_epaper_project_assets.py
+python3 tools/generate_epaper_project_assets.py
 ```
 
 UI code should include `project_assets.h` and use
@@ -90,13 +90,13 @@ To add a new icon:
 
 1. Add the source PNG to `assets/icons/`.
 2. Add an entry to the `icons` array in `assets/epaper_assets.json`.
-3. Run `python3 scripts/generate_epaper_project_assets.py`.
+3. Run `python3 tools/generate_epaper_project_assets.py`.
 
 Example:
 
 ```bash
-python3 scripts/generate_epaper_fonts.py \
-  --output components/epaper_ui/generated_epaper_fonts.cpp \
+python3 tools/generate_epaper_fonts.py \
+  --output firmware/components/core/epaper_ui/generated_epaper_fonts.cpp \
   fonts/Inter_18pt-SemiBold.ttf:kInter22SemiBold:22 \
   fonts/Inter_18pt-Bold.ttf:kInter22Bold:22 \
   fonts/Inter_18pt-Black.ttf:kInter22Black:22 \
