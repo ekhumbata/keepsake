@@ -48,7 +48,7 @@
 
 
 // Waveshare shares one I2C bus (GPIO41 SDA / GPIO42 SCL) across the AXP2101 PMIC,
-// QMI8658 IMU, PCF85063 RTC, and SHTC3 (unused). Neither pin is a strapping pin.
+// QMI8658 IMU, PCF85063 RTC, and SHTC3 (climate_service). Neither pin is a strapping pin.
 #define WAVESHARE_SENSOR_I2C_PORT       I2C_NUM_1
 #define WAVESHARE_SENSOR_I2C_SCL_PIN    GPIO_NUM_42
 #define WAVESHARE_SENSOR_I2C_SDA_PIN    GPIO_NUM_41
@@ -57,6 +57,8 @@
 #define WAVESHARE_PMIC_IRQ_PIN          GPIO_NUM_38
 
 #define WAVESHARE_PCF85063_I2C_ADDR      0x51
+
+#define WAVESHARE_SHTC3_I2C_ADDR        0x70
 
 #define WAVESHARE_QMI8658_I2C_ADDR      0x6B
 #define WAVESHARE_IMU_INT_PIN           GPIO_NUM_40
