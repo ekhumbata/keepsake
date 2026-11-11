@@ -150,7 +150,6 @@ TEST_CASE("typographic punctuation is transliterated without changing byte offse
     REQUIRE(layout.lines.size() == 1);
     CHECK(layout.consumed_bytes == text.size());
     CHECK(layout.lines[0].find('\xE2') == std::string::npos);
-    // Replacements are padded with spaces to keep byte offsets, so check pieces, not spacing.
     CHECK(layout.lines[0].find('"') != std::string::npos);
     CHECK(layout.lines[0].find("Hello") != std::string::npos);
     CHECK(layout.lines[0].find("--") != std::string::npos);
@@ -159,9 +158,12 @@ TEST_CASE("typographic punctuation is transliterated without changing byte offse
 
 TEST_CASE("a multi-byte character cut by a chunk boundary does not break pagination")
 {
-    // The coordinator reads fixed-size chunks, so a chunk can end mid-sequence.
+    // The coordinator reads fixed-size chunks, so a chunk can end mid-sequence. The cut
+    // character isn't consumed: the next read starts at it and gets all of it.
     const std::string text = "ends with a cut \xE2\x80";
     const auto layout = epaper_ui::PaginateBookText(kPortraitWidth, kPortraitHeight, text);
-    CHECK(layout.consumed_bytes == text.size());
+    CHECK(layout.consumed_bytes == text.size() - 2);
     CHECK(layout.text_exhausted);
+    REQUIRE(layout.lines.size() == 1);
+    CHECK(layout.lines[0] == "ends with a cut");
 }

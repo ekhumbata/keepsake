@@ -297,6 +297,10 @@ mass storage, from Settings > Storage) and they'll show up here.
   - **Back to books** returns to the shelf.
   - **Close** goes back to the page.
 - Tap the Record button to leave the reading view and return to the book list.
+- `.txt` books can be saved in any of the usual ways (UTF-8, the UTF-16 that Windows
+  Notepad calls "Unicode", or older Windows/Latin-1 files); Keepsake works out which
+  when it opens the book. Accented letters and curly quotes show as their plain
+  versions (`cafe`, `"quoted"`) until the fonts gain more characters.
 - For `.txt` books you can page back all the way to the start at any time, including
   right after reopening; reopening one you've read a long way into may take a moment
   while it re-figures out where earlier pages started.

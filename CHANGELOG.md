@@ -10,6 +10,10 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **`.txt` books in any common encoding** (#27). UTF-16 (Notepad's "Unicode") and old
+  Windows/Latin-1 files used to show as garbage; the encoding is now detected when the
+  book opens. Accented letters no longer split words in two (`naive`, not `nai ve`).
+
 - **Bookmarks** (#28). The reader menu has **Add bookmark** / **Remove bookmark** and,
   once a book has some, **Bookmarks** to jump back to one. A bookmarked page shows a
   small ribbon in the top right corner. They're kept in a `.bm` file next to the book

@@ -211,4 +211,179 @@ Message MessageFor(Problem problem)
     return {"Keepsake can't read this file", ""};
 }
 
+namespace {
+
+// Windows-1252's 0x80-0x9F row (0 = unassigned).
+constexpr uint16_t kCp1252High[32] = {
+    0x20AC, 0, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+    0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0, 0x017D, 0,
+    0, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+    0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0, 0x017E, 0x0178,
+};
+
+constexpr uint32_t kReplacement = 0xFFFD;
+
+// Length of the UTF-8 sequence starting with `lead`, or 0 for a byte that can't start one.
+size_t Utf8Length(unsigned char lead)
+{
+    if (lead < 0x80) {
+        return 1;
+    }
+    if (lead >= 0xC2 && lead <= 0xDF) {
+        return 2;
+    }
+    if (lead >= 0xE0 && lead <= 0xEF) {
+        return 3;
+    }
+    if (lead >= 0xF0 && lead <= 0xF4) {
+        return 4;
+    }
+    return 0;
+}
+
+}  // namespace
+
+TextEncoding DetectTextEncoding(std::string_view head)
+{
+    const auto byte = [&head](size_t i) { return static_cast<unsigned char>(head[i]); };
+    if (head.size() >= 2 && byte(0) == 0xFF && byte(1) == 0xFE) {
+        return TextEncoding::kUtf16Le;
+    }
+    if (head.size() >= 2 && byte(0) == 0xFE && byte(1) == 0xFF) {
+        return TextEncoding::kUtf16Be;
+    }
+    if (head.size() >= 3 && byte(0) == 0xEF && byte(1) == 0xBB && byte(2) == 0xBF) {
+        return TextEncoding::kUtf8;
+    }
+
+    // UTF-16 without a BOM: mostly-ASCII text has a NUL in every other byte.
+    size_t pairs = 0;
+    size_t zero_even = 0;
+    size_t zero_odd = 0;
+    for (size_t i = 0; i + 1 < head.size(); i += 2) {
+        ++pairs;
+        zero_even += byte(i) == 0 ? 1 : 0;
+        zero_odd += byte(i + 1) == 0 ? 1 : 0;
+    }
+    if (pairs >= 2) {
+        if (zero_odd * 10 >= pairs * 4 && zero_even * 10 < pairs) {
+            return TextEncoding::kUtf16Le;
+        }
+        if (zero_even * 10 >= pairs * 4 && zero_odd * 10 < pairs) {
+            return TextEncoding::kUtf16Be;
+        }
+    }
+
+    // Valid UTF-8 (allowing a sequence cut off by the end of `head`)?
+    size_t i = 0;
+    while (i < head.size()) {
+        const size_t length = Utf8Length(byte(i));
+        if (length == 0) {
+            return TextEncoding::kLatin1;
+        }
+        for (size_t k = 1; k < length; ++k) {
+            if (i + k >= head.size()) {
+                return TextEncoding::kUtf8;  // cut off at the end: fine
+            }
+            if ((byte(i + k) & 0xC0) != 0x80) {
+                return TextEncoding::kLatin1;
+            }
+        }
+        i += length;
+    }
+    return TextEncoding::kUtf8;
+}
+
+bool DecodeCharacter(std::string_view text, size_t pos, TextEncoding encoding,
+                     uint32_t* codepoint, size_t* length)
+{
+    if (pos >= text.size()) {
+        return false;
+    }
+    const auto byte = [&text](size_t i) { return static_cast<unsigned char>(text[i]); };
+    switch (encoding) {
+        case TextEncoding::kLatin1: {
+            const unsigned char b = byte(pos);
+            uint32_t cp = b;
+            if (b >= 0x80 && b <= 0x9F) {
+                cp = kCp1252High[b - 0x80] != 0 ? kCp1252High[b - 0x80] : kReplacement;
+            }
+            *codepoint = cp;
+            *length = 1;
+            return true;
+        }
+        case TextEncoding::kUtf16Le:
+        case TextEncoding::kUtf16Be: {
+            const bool le = encoding == TextEncoding::kUtf16Le;
+            const auto unit = [&](size_t at) -> uint32_t {
+                return le ? (byte(at) | (byte(at + 1) << 8)) : ((byte(at) << 8) | byte(at + 1));
+            };
+            if (pos + 2 > text.size()) {
+                return false;
+            }
+            const uint32_t first = unit(pos);
+            if (first >= 0xD800 && first <= 0xDBFF) {
+                if (pos + 4 > text.size()) {
+                    return false;
+                }
+                const uint32_t second = unit(pos + 2);
+                if (second >= 0xDC00 && second <= 0xDFFF) {
+                    *codepoint = 0x10000 + ((first - 0xD800) << 10) + (second - 0xDC00);
+                    *length = 4;
+                    return true;
+                }
+            }
+            *codepoint = (first >= 0xD800 && first <= 0xDFFF) ? kReplacement : first;
+            *length = 2;
+            return true;
+        }
+        case TextEncoding::kUtf8:
+        default: {
+            const size_t length_needed = Utf8Length(byte(pos));
+            if (length_needed == 0) {
+                *codepoint = kReplacement;
+                *length = 1;
+                return true;
+            }
+            if (pos + length_needed > text.size()) {
+                // Cut off at the end of the buffer, unless it's already malformed.
+                for (size_t k = 1; pos + k < text.size(); ++k) {
+                    if ((byte(pos + k) & 0xC0) != 0x80) {
+                        *codepoint = kReplacement;
+                        *length = 1;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            uint32_t cp = length_needed == 1   ? byte(pos)
+                          : length_needed == 2 ? (byte(pos) & 0x1F)
+                          : length_needed == 3 ? (byte(pos) & 0x0F)
+                                               : (byte(pos) & 0x07);
+            for (size_t k = 1; k < length_needed; ++k) {
+                if ((byte(pos + k) & 0xC0) != 0x80) {
+                    *codepoint = kReplacement;
+                    *length = 1;
+                    return true;
+                }
+                cp = (cp << 6) | (byte(pos + k) & 0x3F);
+            }
+            *codepoint = cp;
+            *length = length_needed;
+            return true;
+        }
+    }
+}
+
+const char* TextEncodingName(TextEncoding encoding)
+{
+    switch (encoding) {
+        case TextEncoding::kUtf16Le: return "UTF-16LE";
+        case TextEncoding::kUtf16Be: return "UTF-16BE";
+        case TextEncoding::kLatin1: return "Windows-1252";
+        case TextEncoding::kUtf8:
+        default: return "UTF-8";
+    }
+}
+
 }  // namespace book_formats

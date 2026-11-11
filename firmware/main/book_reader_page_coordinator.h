@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "book_formats/book_formats.h"
 #include "book_reader/epub_session.h"
 #include "epaper_ui/book_page.h"
 #include "epaper_ui/book_reader_page.h"
@@ -73,6 +74,8 @@ private:
     void ShowEpub(int portrait_width, int portrait_height);
 
     bool epub_ = false;
+    // .txt only: detected from the file's first bytes when it's opened (#27).
+    book_formats::TextEncoding encoding_ = book_formats::TextEncoding::kUtf8;
     bool epub_failed_ = false;  // couldn't open: page_lines_ holds the friendly message
     epaper_ui::EpaperTextMeasurer measurer_ = {};
     book_reader::EpubSession epub_session_ = {};

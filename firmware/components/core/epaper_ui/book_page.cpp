@@ -63,6 +63,15 @@ const char* AsciiFor(uint32_t codepoint)
 
 }  // namespace
 
+void AppendDisplayCodepoint(uint32_t codepoint, std::string* out)
+{
+    if (codepoint < 0x80) {
+        out->push_back(static_cast<char>(codepoint));
+        return;
+    }
+    AppendAscii(codepoint, out);
+}
+
 std::string ToDisplayText(std::string_view utf8)
 {
     std::string out;

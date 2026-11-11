@@ -13,7 +13,7 @@ update) · 💤 later
 
 | Feature | Status | What it is |
 |---|---|---|
-| Plain-text books (`.txt`) | ✅ | Reads `.txt` files from the SD card's `books` folder and remembers your page |
+| Plain-text books (`.txt`) | ✅ | Reads `.txt` files from the SD card's `books` folder (UTF-8, UTF-16 or Latin-1, detected automatically) and remembers your page |
 | EPUB books | 🚧 [#26](https://github.com/ekhumbata/keepsake/issues/26), [#28](https://github.com/ekhumbata/keepsake/issues/28) | Real e-books with chapters, headings, bold, lists; pages across chapters with progress (to be checked on the device). Pictures still to come |
 | Reader with a book font | 🚧 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata at three text sizes, chapter + % footer and a menu with Contents, bookmarks and Go to % are in |
 | Library with covers | 🚧 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Titles, progress and "reading now" first are in, subfolders too; covers still to come |

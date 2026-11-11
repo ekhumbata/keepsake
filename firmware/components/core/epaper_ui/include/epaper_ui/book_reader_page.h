@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "book_formats/book_formats.h"
 #include "book_layout/book_layout.h"
 #include "epaper_ui/global_footer.h"
 #include "epaper_ui/overlay_geometry.h"
@@ -46,8 +47,13 @@ struct BookReaderPageLayout {
 // Greedily word-wraps `text` (word-wrap only; this is a reflowing text reader, not a formatted
 // one -- original line breaks are not preserved) into whatever whole lines fit the reader's
 // content area, stopping once that line budget is filled or `text` runs out.
-BookReaderPageLayout PaginateBookText(int portrait_width, int portrait_height,
-                                      const std::string& text);
+//
+// `text` is raw file bytes in `encoding` (#27); it's turned into what the fonts can draw before
+// wrapping, and consumed_bytes still counts raw bytes. A character cut off at the end of
+// `text` isn't consumed (read on and call again).
+BookReaderPageLayout PaginateBookText(
+    int portrait_width, int portrait_height, const std::string& text,
+    book_formats::TextEncoding encoding = book_formats::TextEncoding::kUtf8);
 
 // The rectangle page text is drawn into (portrait coordinates): what EPUB layout targets.
 UiRect BookReaderContentBounds(int portrait_width, int portrait_height);

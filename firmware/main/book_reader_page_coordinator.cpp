@@ -15,6 +15,12 @@ constexpr int kMaxChunkReadsPerPage = 4;
 // Go to 100% in a .txt lands about this far before the end, roughly the last page.
 constexpr uint64_t kEndBackoffBytes = 1500;
 
+bool IsUtf16(book_formats::TextEncoding encoding)
+{
+    return encoding == book_formats::TextEncoding::kUtf16Le ||
+           encoding == book_formats::TextEncoding::kUtf16Be;
+}
+
 }  // namespace
 
 BookReaderPageCoordinator::BookReaderPageCoordinator() = default;
@@ -28,17 +34,19 @@ void BookReaderPageCoordinator::BuildPageAt(size_t offset, int portrait_width, i
     // Heap-allocated rather than a stack buffer: this runs on whatever task dispatches button
     // input, and that task's stack budget isn't sized with a 4 KB local in mind.
     std::vector<char> chunk(kReadChunkBytes);
+    bool hit_end_of_file = false;
     for (int attempt = 0; attempt < kMaxChunkReadsPerPage; ++attempt) {
         const size_t bytes_read =
             text_reader_service::ReadChunk(filename_, read_offset, chunk.data(), chunk.size());
         if (bytes_read == 0) {
+            hit_end_of_file = true;
             break;  // end of file
         }
         buffer.append(chunk.data(), bytes_read);
         read_offset += bytes_read;
 
-        layout = epaper_ui::PaginateBookText(portrait_width, portrait_height, buffer);
-        const bool hit_end_of_file = bytes_read < chunk.size();
+        layout = epaper_ui::PaginateBookText(portrait_width, portrait_height, buffer, encoding_);
+        hit_end_of_file = bytes_read < chunk.size();
         if (!layout.text_exhausted || hit_end_of_file) {
             break;  // page filled, or there's nothing more to read regardless
         }
@@ -47,6 +55,10 @@ void BookReaderPageCoordinator::BuildPageAt(size_t offset, int portrait_width, i
 
     page_lines_ = layout.lines;
     next_page_start_offset_ = offset + layout.consumed_bytes;
+    if (hit_end_of_file && layout.text_exhausted) {
+        // Whatever's left is a broken last character: nothing more to show.
+        next_page_start_offset_ = offset + buffer.size();
+    }
     has_more_after_ = next_page_start_offset_ < text_reader_service::GetFileSize(filename_);
 }
 
@@ -60,7 +72,15 @@ void BookReaderPageCoordinator::Show(const std::string& filename, int portrait_w
         ShowEpub(portrait_width, portrait_height);
         return;
     }
+    {
+        char head[book_formats::kSniffBytes];
+        const size_t got = text_reader_service::ReadChunk(filename, 0, head, sizeof(head));
+        encoding_ = book_formats::DetectTextEncoding(std::string_view(head, got));
+    }
     page_start_offset_ = text_reader_service::LoadPosition(filename);
+    if (IsUtf16(encoding_)) {
+        page_start_offset_ &= ~static_cast<size_t>(1);  // whole UTF-16 units only
+    }
 
     // Rebuild the back-stack for pages already read (0 .. saved position) by re-deriving each
     // one the same deterministic way a fresh read would, so paging backward works immediately
@@ -134,13 +154,21 @@ bool BookReaderPageCoordinator::GoToPercent(int percent, int portrait_width, int
         target = size > kEndBackoffBytes ? size - kEndBackoffBytes : 0;
     }
     size_t offset = static_cast<size_t>(target);
+    if (IsUtf16(encoding_)) {
+        offset &= ~static_cast<size_t>(1);  // whole UTF-16 units only
+    }
     if (offset > 0) {
         // Start on a word: skip to just past the next space or line break.
         char chunk[256];
         const size_t got = text_reader_service::ReadChunk(filename_, offset, chunk, sizeof(chunk));
-        for (size_t i = 0; i < got; ++i) {
-            if (chunk[i] == ' ' || chunk[i] == '\n' || chunk[i] == '\t') {
-                offset += i + 1;
+        const std::string_view text(chunk, got);
+        size_t pos = 0;
+        uint32_t codepoint = 0;
+        size_t length = 0;
+        while (book_formats::DecodeCharacter(text, pos, encoding_, &codepoint, &length)) {
+            pos += length;
+            if (codepoint == ' ' || codepoint == '\n' || codepoint == '\t') {
+                offset += pos;
                 break;
             }
         }
