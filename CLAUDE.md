@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+> **This repo is Keepsake** (`ekhumbata/keepsake`), a fork of Chroninkle being turned into a cozy e-paper reader +
+> ambient companion (a gift device). **Read `docs/plan.md` first**: it is the plan of record, and it wins over
+> anything Chroninkle-specific below.
+> - **Issues/PRs:** always `--repo ekhumbata/keepsake`, never `mach1na/chroninkle` (the upstream). Work is
+>   tracked as milestones + issues there; see "Progress tracking" in `docs/plan.md`.
+> - **Workflow:** one issue → one branch (`NN-short-name`) → one PR with `Closes #NN`. End every session with a
+>   comment on the issue saying what's done and what's left.
+> - **Never commit personal data or secrets** (the friend's name, birthday, Wi-Fi, API keys). The repo is public.
+> - Ignore the `v2-dev` / `docs/specs/v2/` process below; it's Chroninkle's, not Keepsake's.
+> - The rest of this file is Chroninkle's original guide. It's still accurate for the inherited code until the
+>   "Agent docs" issue rewrites it.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
@@ -338,7 +350,7 @@ personal credentials afterward, and no risk of a release accidentally shipping t
 
 ### Issue tracker
 
-GitHub Issues on `mach1na/chroninkle` via `gh` (always pass `--repo mach1na/chroninkle`; the fork otherwise defaults to the upstream). Long-form V2 specs stay in `docs/specs/v2/`. See `docs/agents/issue-tracker.md`.
+GitHub Issues on `ekhumbata/keepsake` via `gh` (always pass `--repo ekhumbata/keepsake`; the fork otherwise defaults to the upstream). Milestones, labels and workflow: "Progress tracking" in `docs/plan.md`.
 
 ### Triage labels
 
