@@ -5,6 +5,7 @@
 #include "epub_engine/inflate.h"
 
 #include <array>
+#include <memory>
 
 namespace epub {
 namespace {
@@ -211,12 +212,14 @@ InflateStatus InflateFixed(BitReader& reader, size_t max_output, std::string* ou
     for (int i = 144; i < 256; ++i) lengths[i] = 9;
     for (int i = 256; i < 280; ++i) lengths[i] = 7;
     for (int i = 280; i < kMaxLiteralCodes; ++i) lengths[i] = 8;
-    Huffman literals;
+    // Tables on the heap: this runs on small task stacks (the input task has 8 KB).
+    auto tables = std::make_unique<std::array<Huffman, 2>>();
+    Huffman& literals = (*tables)[0];
     BuildHuffman(&literals, lengths.data(), kMaxLiteralCodes);
 
     std::array<uint8_t, kMaxDistanceCodes> distance_lengths = {};
     distance_lengths.fill(5);
-    Huffman distances;
+    Huffman& distances = (*tables)[1];
     BuildHuffman(&distances, distance_lengths.data(), kMaxDistanceCodes);
     return InflateCodes(reader, literals, distances, max_output, out);
 }
@@ -239,7 +242,8 @@ InflateStatus InflateDynamic(BitReader& reader, size_t max_output, std::string* 
     if (reader.overrun()) {
         return InflateStatus::kCorrupt;
     }
-    Huffman code_length_code;
+    auto tables = std::make_unique<std::array<Huffman, 3>>();  // heap: small task stacks
+    Huffman& code_length_code = (*tables)[2];
     if (!BuildHuffman(&code_length_code, code_lengths.data(), 19)) {
         return InflateStatus::kCorrupt;
     }
@@ -280,8 +284,8 @@ InflateStatus InflateDynamic(BitReader& reader, size_t max_output, std::string* 
         return InflateStatus::kCorrupt;  // no end-of-block code
     }
 
-    Huffman literals;
-    Huffman distances;
+    Huffman& literals = (*tables)[0];
+    Huffman& distances = (*tables)[1];
     if (!BuildHuffman(&literals, lengths.data(), literal_count) ||
         !BuildHuffman(&distances, lengths.data() + literal_count, distance_count)) {
         return InflateStatus::kCorrupt;
