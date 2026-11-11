@@ -72,6 +72,33 @@ epub::OpenError EpubSession::Open(std::unique_ptr<epub::ByteSource> source,
     return epub::OpenError::kNone;
 }
 
+bool EpubSession::NextChapter()
+{
+    size_t next = 0;
+    if (!is_open() || !FindReadable(spine_index_, +1, &next)) {
+        return false;
+    }
+    LoadChapter(next);
+    return true;
+}
+
+bool EpubSession::PreviousChapter()
+{
+    if (!is_open()) {
+        return false;
+    }
+    if (page_index_ > 0) {
+        page_index_ = 0;
+        return true;
+    }
+    size_t previous = 0;
+    if (!FindReadable(spine_index_, -1, &previous)) {
+        return false;
+    }
+    LoadChapter(previous);
+    return true;
+}
+
 bool EpubSession::GoTo(ReadingPosition place)
 {
     if (!is_open() || place.spine >= book_->spine().size()) {

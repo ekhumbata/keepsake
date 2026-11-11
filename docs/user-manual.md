@@ -270,7 +270,9 @@ mass storage, from Settings > Storage) and they'll show up here.
   - **Delete** — removes the book (and your saved place for it) from the SD card,
     after a confirmation. There's no undo.
 - In the reading view, tilting the rocker turns the page forward (down) or back
-  (up). Each book remembers where you were, so leaving and reopening it picks up
+  (up). In an EPUB, **holding** a tilt skips by chapter: hold down to jump to the
+  start of the next chapter, hold up to go back to the start of this one (or, if
+  you're already there, the one before). Each book remembers where you were, so leaving and reopening it picks up
   where you stopped.
 - **EPUB books** show their title at the top and, at the bottom, the chapter name,
   the page within that chapter, and how far through the whole book you are (for
