@@ -9,6 +9,8 @@
 >   comment on the issue saying what's done and what's left.
 > - **Never commit personal data or secrets** (the friend's name, birthday, Wi-Fi, API keys). The repo is public.
 > - Ignore the `v2-dev` / `docs/specs/v2/` process below; it's Chroninkle's, not Keepsake's.
+> - **`docs/guide.md`** is the feature list (✅/🚧/📋/🎁/💤, linked to issues) + how-tos. A PR that changes
+>   user-visible behavior updates it (and the feature's status) in the same PR.
 > - **Repo layout (#7):** the ESP-IDF project lives in `firmware/` (run `idf.py` there, or `idf.py -C firmware …`
 >   from the root). Components are split into `firmware/components/core/` (portable, no ESP-IDF: `epaper_ui`,
 >   `design_tokens`, `project_assets`, `page_navigation`), `drivers/` (hardware) and `services/` (`*_service`,
