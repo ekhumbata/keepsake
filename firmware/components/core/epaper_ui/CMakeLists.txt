@@ -6,7 +6,7 @@ idf_component_register(
          "settings_topics_page.cpp" "topics_browse_page.cpp" "topic_entries_page.cpp" "topic_summary_page.cpp"
          "book_list_page.cpp" "book_reader_page.cpp" "book_page.cpp"
     INCLUDE_DIRS "include"
-    REQUIRES book_layout design_tokens project_assets
+    REQUIRES book_formats book_layout design_tokens project_assets
 )
 
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)

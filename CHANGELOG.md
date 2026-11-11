@@ -10,6 +10,10 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **`.txt` books in any common encoding** (#27). UTF-16 (Notepad's "Unicode") and old
+  Windows/Latin-1 files used to show as garbage; the encoding is now detected when the
+  book opens. Accented letters no longer split words in two (`naive`, not `nai ve`).
+
 - **Hold to skip a chapter** (#28). In an EPUB, holding the rocker down jumps to the
   next chapter; holding it up goes back to the start of this chapter, or the one
   before if you're already there.

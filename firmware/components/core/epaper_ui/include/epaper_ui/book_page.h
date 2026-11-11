@@ -22,6 +22,8 @@ design::TypographyRole BookTypographyRole(book_layout::TextRole role, uint8_t st
 // and Latin-1 letters become their closest ASCII; anything else becomes '?' (one per character,
 // not one per byte). Used for both measuring and drawing, so layout matches what's drawn.
 std::string ToDisplayText(std::string_view utf8);
+// One code point -> its ASCII stand-in, appended to `out` (may append nothing, e.g. a BOM).
+void AppendDisplayCodepoint(uint32_t codepoint, std::string* out);
 
 class EpaperTextMeasurer final : public book_layout::TextMeasurer {
 public:

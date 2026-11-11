@@ -2,6 +2,7 @@
 #define BOOK_FORMATS_BOOK_FORMATS_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <string_view>
 
 #include "epub_engine/epub_book.h"
@@ -33,6 +34,29 @@ constexpr size_t kSniffBytes = 1024;
 
 // `head` is the first min(file size, kSniffBytes) bytes of the file.
 Detection Detect(std::string_view file_name, std::string_view head);
+
+// Plain-text encodings (#27). Windows-1252 stands in for "Latin-1": it's what old .txt files
+// from Windows and Project Gutenberg's 8-bit files use, and it's a superset of ISO-8859-1's
+// printable range.
+enum class TextEncoding {
+    kUtf8,     // also plain ASCII, with or without a BOM
+    kUtf16Le,
+    kUtf16Be,
+    kLatin1,   // Windows-1252
+};
+
+// Guesses a .txt file's encoding from its first bytes: a BOM if there is one, then NUL bytes
+// on alternate positions (UTF-16 without a BOM), then whether the bytes are valid UTF-8 (a
+// sequence cut off at the end of `head` is fine). Anything else is Latin-1.
+TextEncoding DetectTextEncoding(std::string_view head);
+
+// Decodes the character at `pos`: its code point and length in bytes. False when the bytes
+// at `pos` are an incomplete character at the end of `text` (read more and try again). A
+// malformed byte decodes as U+FFFD with length 1 (UTF-16: a lone surrogate, length 2).
+bool DecodeCharacter(std::string_view text, size_t pos, TextEncoding encoding,
+                     uint32_t* codepoint, size_t* length);
+
+const char* TextEncodingName(TextEncoding encoding);
 
 enum class Problem {
     kNone,
