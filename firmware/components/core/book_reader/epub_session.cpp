@@ -72,6 +72,26 @@ epub::OpenError EpubSession::Open(std::unique_ptr<epub::ByteSource> source,
     return epub::OpenError::kNone;
 }
 
+bool EpubSession::GoTo(ReadingPosition place)
+{
+    if (!is_open() || place.spine >= book_->spine().size()) {
+        return false;
+    }
+    LoadChapter(place.spine);
+    if (!pages_.empty()) {
+        page_index_ = book_layout::PageForPosition(pages_, {place.block, place.offset});
+    }
+    return true;
+}
+
+bool EpubSession::IsOnCurrentPage(ReadingPosition place) const
+{
+    if (!is_open() || pages_.empty() || place.spine != spine_index_) {
+        return false;
+    }
+    return book_layout::PageForPosition(pages_, {place.block, place.offset}) == page_index_;
+}
+
 bool EpubSession::Relayout(const book_layout::LayoutOptions& options)
 {
     if (!book_) {

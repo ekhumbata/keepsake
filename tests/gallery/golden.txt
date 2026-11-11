@@ -2,6 +2,7 @@
 # Regenerate after an intended UI change, and look at the PNGs first:
 #   build/tests/screen_gallery --out build/tests/gallery --golden tests/gallery/golden.txt --update
 book_list 104c37df
+book_reader_bookmarked d51caa09
 book_reader_epub ac49f7c0
 book_reader_epub_large 6eeca66e
 book_reader_epub_small ad7adb05

@@ -1,6 +1,7 @@
 #ifndef LIBRARY_LIBRARY_H_
 #define LIBRARY_LIBRARY_H_
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -41,6 +42,37 @@ void SortForShelf(std::vector<BookRecord>* records);
 
 // "Emma - 42%" for a started book, "Emma" otherwise. Progress shows as "Done" at 100%.
 std::string ShelfLabel(const BookRecord& record);
+
+// A bookmark (#28): a place in one book. For an EPUB the place is spine item + block + byte
+// offset in the block (book_reader::ReadingPosition); for a .txt it's the byte offset alone
+// (spine and block 0). Either way, places sort in reading order.
+struct Bookmark {
+    uint32_t spine = 0;
+    uint32_t block = 0;
+    uint64_t offset = 0;
+    int percent = 0;      // how far through the book, when it was made
+    std::string label;    // what to show in the list: chapter title or the page's first words
+
+    bool operator==(const Bookmark& other) const = default;
+};
+
+inline constexpr size_t kMaxBookmarks = 100;
+
+// True when `a` comes before `b` in the book.
+bool BookmarkBefore(const Bookmark& a, const Bookmark& b);
+
+// Adds `bookmark` in reading order, replacing one at the same place. False when the list is
+// already at kMaxBookmarks (and the place is new).
+bool AddBookmark(std::vector<Bookmark>* bookmarks, Bookmark bookmark);
+
+// "41% - Chapter Two", or "41%" without a label.
+std::string BookmarkListLabel(const Bookmark& bookmark);
+
+// The per-book bookmarks file: a version header, then one bookmark per line, tab-separated,
+// escaped like the index. Malformed lines are skipped; the result is in reading order, at
+// most kMaxBookmarks.
+std::string SerializeBookmarks(const std::vector<Bookmark>& bookmarks);
+std::vector<Bookmark> ParseBookmarks(std::string_view text);
 
 }  // namespace library
 

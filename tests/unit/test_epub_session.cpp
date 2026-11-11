@@ -249,3 +249,28 @@ TEST_CASE("progress weighs chapters by size and only counts the reading order")
     EpubSession closed;
     CHECK_FALSE(closed.GoToPercent(50));
 }
+
+TEST_CASE("a bookmarked place can be found again, even after the text size changes")
+{
+    ScalableMeasurer measurer;
+    EpubSession session;
+    REQUIRE(session.Open(Fixture("epub2_ncx.epub"), &measurer, TinyPage()) == epub::OpenError::kNone);
+    REQUIRE(session.NextPage());
+    REQUIRE(session.NextPage());
+    const ReadingPosition mark = session.position();
+    CHECK(session.IsOnCurrentPage(mark));
+
+    REQUIRE(session.GoToPercent(100));
+    CHECK_FALSE(session.IsOnCurrentPage(mark));
+
+    measurer.char_width = 13;  // bigger text, different pages
+    REQUIRE(session.Relayout(TinyPage()));
+    REQUIRE(session.GoTo(mark));
+    CHECK(session.IsOnCurrentPage(mark));
+    CHECK(session.spine_index() == mark.spine);
+
+    CHECK_FALSE(session.GoTo(ReadingPosition{9999, 0, 0}));
+    EpubSession closed;
+    CHECK_FALSE(closed.GoTo(mark));
+    CHECK_FALSE(closed.IsOnCurrentPage(mark));
+}

@@ -8,6 +8,7 @@ namespace library {
 namespace {
 
 constexpr std::string_view kIndexHeader = "keepsake-library 1";
+constexpr std::string_view kBookmarksHeader = "keepsake-bookmarks 1";
 
 std::string Lower(std::string_view text)
 {
@@ -47,6 +48,54 @@ std::string Unescape(std::string_view text)
         out.push_back(next == 't' ? '\t' : next == 'n' ? '\n' : next == 'r' ? '\r' : next);
     }
     return out;
+}
+
+// Calls `on_line` for each line after a header line that must equal `header`; false (and no
+// calls) for a missing or unknown header.
+template <typename OnLine>
+bool ForEachLine(std::string_view text, std::string_view header, OnLine on_line)
+{
+    size_t start = 0;
+    bool first = true;
+    while (start < text.size()) {
+        size_t end = text.find('\n', start);
+        if (end == std::string_view::npos) {
+            end = text.size();
+        }
+        std::string_view line = text.substr(start, end - start);
+        start = end + 1;
+        if (!line.empty() && line.back() == '\r') {
+            line.remove_suffix(1);
+        }
+        if (first) {
+            first = false;
+            if (line != header) {
+                return false;
+            }
+            continue;
+        }
+        on_line(line);
+    }
+    return !first;
+}
+
+// Up to `max_fields` tab-separated fields (one more is returned if the line has extra tabs,
+// so callers can reject it).
+std::vector<std::string_view> SplitTabs(std::string_view line, size_t max_fields)
+{
+    std::vector<std::string_view> fields;
+    size_t field_start = 0;
+    while (fields.size() <= max_fields) {
+        const size_t tab = line.find('\t', field_start);
+        fields.push_back(line.substr(field_start, tab == std::string_view::npos
+                                                      ? std::string_view::npos
+                                                      : tab - field_start));
+        if (tab == std::string_view::npos) {
+            break;
+        }
+        field_start = tab + 1;
+    }
+    return fields;
 }
 
 bool ParseInt(std::string_view text, int64_t* out)
@@ -203,6 +252,81 @@ std::string ShelfLabel(const BookRecord& record)
         return title + " - " + std::to_string(record.progress_percent) + "%";
     }
     return title;
+}
+
+bool BookmarkBefore(const Bookmark& a, const Bookmark& b)
+{
+    if (a.spine != b.spine) {
+        return a.spine < b.spine;
+    }
+    if (a.block != b.block) {
+        return a.block < b.block;
+    }
+    return a.offset < b.offset;
+}
+
+bool AddBookmark(std::vector<Bookmark>* bookmarks, Bookmark bookmark)
+{
+    const auto at = std::lower_bound(bookmarks->begin(), bookmarks->end(), bookmark,
+                                     BookmarkBefore);
+    if (at != bookmarks->end() && !BookmarkBefore(bookmark, *at)) {
+        *at = std::move(bookmark);  // same place: refresh its label and percent
+        return true;
+    }
+    if (bookmarks->size() >= kMaxBookmarks) {
+        return false;
+    }
+    bookmarks->insert(at, std::move(bookmark));
+    return true;
+}
+
+std::string BookmarkListLabel(const Bookmark& bookmark)
+{
+    std::string label = std::to_string(std::clamp(bookmark.percent, 0, 100)) + "%";
+    if (!bookmark.label.empty()) {
+        label += " - " + bookmark.label;
+    }
+    return label;
+}
+
+std::string SerializeBookmarks(const std::vector<Bookmark>& bookmarks)
+{
+    std::string out(kBookmarksHeader);
+    out.push_back('\n');
+    for (const Bookmark& b : bookmarks) {
+        out += std::to_string(b.spine) + '\t' + std::to_string(b.block) + '\t' +
+               std::to_string(b.offset) + '\t' + std::to_string(b.percent) + '\t' +
+               Escape(b.label) + '\n';
+    }
+    return out;
+}
+
+std::vector<Bookmark> ParseBookmarks(std::string_view text)
+{
+    std::vector<Bookmark> bookmarks;
+    ForEachLine(text, kBookmarksHeader, [&bookmarks](std::string_view line) {
+        const std::vector<std::string_view> fields = SplitTabs(line, 5);
+        if (fields.size() != 5) {
+            return;
+        }
+        int64_t spine = 0;
+        int64_t block = 0;
+        int64_t offset = 0;
+        int64_t percent = 0;
+        if (!ParseInt(fields[0], &spine) || !ParseInt(fields[1], &block) ||
+            !ParseInt(fields[2], &offset) || !ParseInt(fields[3], &percent) || spine < 0 ||
+            block < 0 || offset < 0 || spine > UINT32_MAX || block > UINT32_MAX) {
+            return;
+        }
+        Bookmark bookmark;
+        bookmark.spine = static_cast<uint32_t>(spine);
+        bookmark.block = static_cast<uint32_t>(block);
+        bookmark.offset = static_cast<uint64_t>(offset);
+        bookmark.percent = static_cast<int>(std::clamp<int64_t>(percent, 0, 100));
+        bookmark.label = Unescape(fields[4]);
+        (void)AddBookmark(&bookmarks, std::move(bookmark));
+    });
+    return bookmarks;
 }
 
 }  // namespace library

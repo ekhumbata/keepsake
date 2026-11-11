@@ -67,3 +67,61 @@ TEST_CASE("shelf labels show progress")
     CHECK(library::ShelfLabel({"x.epub", "Emma", "", 0, 0, 5, 100}) == "Emma - Done");
     CHECK(library::ShelfLabel({"my_book.txt", "", "", 0, 0, 0, -1}) == "My book");
 }
+
+TEST_CASE("bookmarks stay in reading order and one per place")
+{
+    using library::Bookmark;
+    std::vector<Bookmark> marks;
+    CHECK(library::AddBookmark(&marks, Bookmark{2, 5, 10, 60, "Chapter Three"}));
+    CHECK(library::AddBookmark(&marks, Bookmark{0, 1, 0, 3, "Preface"}));
+    CHECK(library::AddBookmark(&marks, Bookmark{2, 5, 4, 59, "Chapter Three"}));
+    REQUIRE(marks.size() == 3);
+    CHECK(marks[0].label == "Preface");
+    CHECK(marks[1].offset == 4);
+    CHECK(marks[2].offset == 10);
+
+    // Same place again: replaced, not duplicated.
+    CHECK(library::AddBookmark(&marks, Bookmark{2, 5, 10, 61, "Three"}));
+    REQUIRE(marks.size() == 3);
+    CHECK(marks[2].label == "Three");
+    CHECK(marks[2].percent == 61);
+
+    CHECK(library::BookmarkListLabel(marks[0]) == "3% - Preface");
+    CHECK(library::BookmarkListLabel(Bookmark{0, 0, 120, 7, ""}) == "7%");
+}
+
+TEST_CASE("bookmark list is capped")
+{
+    std::vector<library::Bookmark> marks;
+    for (size_t i = 0; i < library::kMaxBookmarks; ++i) {
+        REQUIRE(library::AddBookmark(&marks, library::Bookmark{0, 0, i, 0, ""}));
+    }
+    CHECK_FALSE(library::AddBookmark(&marks, library::Bookmark{0, 0, 999999, 0, ""}));
+    CHECK(library::AddBookmark(&marks, library::Bookmark{0, 0, 5, 1, "again"}));  // replace ok
+    CHECK(marks.size() == library::kMaxBookmarks);
+}
+
+TEST_CASE("bookmarks file round-trips and shrugs off junk")
+{
+    using library::Bookmark;
+    const std::vector<Bookmark> marks = {
+        {0, 0, 1234, 12, "Tabs\tand\nnewlines \\ too"},
+        {3, 7, 0, 80, ""},
+    };
+    const std::string text = library::SerializeBookmarks(marks);
+    CHECK(library::ParseBookmarks(text) == marks);
+
+    const std::string messy = "keepsake-bookmarks 1\r\n"
+                              "not\ta\tbookmark\n"
+                              "1\t2\t3\t150\tclamped\r\n"
+                              "-1\t0\t0\t5\tnegative\n"
+                              "0\t0\t9\t5\textra\tfield\n"
+                              "\n";
+    const std::vector<Bookmark> parsed = library::ParseBookmarks(messy);
+    REQUIRE(parsed.size() == 1);
+    CHECK(parsed[0].percent == 100);
+    CHECK(parsed[0].label == "clamped");
+
+    CHECK(library::ParseBookmarks("keepsake-bookmarks 9\n0\t0\t0\t0\tx\n").empty());
+    CHECK(library::ParseBookmarks("").empty());
+}

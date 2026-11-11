@@ -45,6 +45,12 @@ public:
     // Jumps to a table-of-contents entry. False for an entry outside the reading order.
     bool GoToTocEntry(size_t toc_index);
 
+    // Jumps to a saved place (a bookmark), landing on the page that holds it. False for a
+    // place outside the book.
+    bool GoTo(ReadingPosition place);
+    // True when `place` is on the page showing now.
+    bool IsOnCurrentPage(ReadingPosition place) const;
+
     // Lays the current chapter out again (new page size, or the measurer's fonts changed: text
     // size, #28) and lands on the page holding the start of the page that was showing.
     bool Relayout(const book_layout::LayoutOptions& options);

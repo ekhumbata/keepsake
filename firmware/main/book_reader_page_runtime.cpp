@@ -9,8 +9,10 @@
 #include "app_state_service.h"
 #include "book_reader_page_coordinator.h"
 #include "cpu_boost.h"
+#include "epaper_ui/book_page.h"
 #include "epaper_ui/font_renderer.h"
 #include "esp_log.h"
+#include "library/library.h"
 #include "overlay_runtime.h"
 #include "text_reader_service.h"
 #include "ui_refresh_runtime.h"
@@ -22,17 +24,30 @@ std::mutex s_mutex;
 BookReaderPageCoordinator s_coordinator = {};
 std::atomic<bool> s_pending_back{false};
 
-enum class MenuAction : uint8_t { kContents, kGoTo, kTextSize, kBackToBooks, kClose };
-enum class MenuStage : uint8_t { kNone, kMenu, kContents, kGoTo, kTextSize };
+enum class MenuAction : uint8_t {
+    kContents,
+    kToggleBookmark,
+    kBookmarks,
+    kGoTo,
+    kTextSize,
+    kBackToBooks,
+    kClose,
+};
+enum class MenuStage : uint8_t { kNone, kMenu, kContents, kBookmarks, kGoTo, kTextSize };
 // Go to... offers 0%, 10%, ... 100%.
 constexpr int kGoToStepPercent = 10;
 constexpr int kGoToChoices = 100 / kGoToStepPercent + 1;
 MenuStage s_menu_stage = MenuStage::kNone;
 std::vector<MenuAction> s_menu_actions;
 
+// The open book's bookmarks (#28), loaded on open and saved on every change.
+std::vector<library::Bookmark> s_bookmarks;
+
 epaper_ui::BookReaderPageState BuildStateLocked()
 {
-    return s_coordinator.BuildState();
+    epaper_ui::BookReaderPageState state = s_coordinator.BuildState();
+    state.bookmarked = s_coordinator.BookmarkOnPage(s_bookmarks) >= 0;
+    return state;
 }
 
 void SavePositionLocked()
@@ -79,6 +94,7 @@ esp_err_t OpenBook(const std::string& filename)
             static_cast<epaper_ui::BookTextSize>(app_state_service::ReaderTextSize()));
         s_coordinator.Show(filename, display_service::PortraitWidth(),
                            display_service::PortraitHeight());
+        s_bookmarks = text_reader_service::LoadBookmarks(filename);
         SavePositionLocked();
         RecordOpenedLocked();
     }
@@ -150,6 +166,15 @@ bool ShowMenu()
             modal.items.push_back({"Contents"});
             s_menu_actions.push_back(MenuAction::kContents);
         }
+        if (s_coordinator.CanBookmark()) {
+            const bool on_page = s_coordinator.BookmarkOnPage(s_bookmarks) >= 0;
+            modal.items.push_back({on_page ? "Remove bookmark" : "Add bookmark"});
+            s_menu_actions.push_back(MenuAction::kToggleBookmark);
+        }
+        if (!s_bookmarks.empty()) {
+            modal.items.push_back({"Bookmarks (" + std::to_string(s_bookmarks.size()) + ")"});
+            s_menu_actions.push_back(MenuAction::kBookmarks);
+        }
         modal.items.push_back({"Go to..."});
         s_menu_actions.push_back(MenuAction::kGoTo);
         modal.items.push_back(
@@ -187,6 +212,35 @@ bool ShowContentsLocked(epaper_ui::SelectModalState* modal)
     modal->selected_index = s_coordinator.CurrentContentsIndex();
     s_menu_stage = MenuStage::kContents;
     return true;
+}
+
+void ShowBookmarksLocked(epaper_ui::SelectModalState* modal)
+{
+    modal->title_text = "Bookmarks";
+    const library::Bookmark here = s_coordinator.CurrentBookmark();
+    int nearest = 0;
+    for (size_t i = 0; i < s_bookmarks.size(); ++i) {
+        modal->items.push_back(
+            {epaper_ui::ToDisplayText(library::BookmarkListLabel(s_bookmarks[i]))});
+        if (!library::BookmarkBefore(here, s_bookmarks[i])) {
+            nearest = static_cast<int>(i);  // the last one at or before this page
+        }
+    }
+    modal->selected_index = nearest;
+    s_menu_stage = MenuStage::kBookmarks;
+}
+
+// Adds a bookmark for this page, or removes the one that's on it.
+void ToggleBookmarkLocked()
+{
+    const int on_page = s_coordinator.BookmarkOnPage(s_bookmarks);
+    if (on_page >= 0) {
+        s_bookmarks.erase(s_bookmarks.begin() + on_page);
+    } else if (!library::AddBookmark(&s_bookmarks, s_coordinator.CurrentBookmark())) {
+        ESP_LOGW("BookReaderRuntime", "Bookmark list is full");
+        return;
+    }
+    text_reader_service::SaveBookmarks(s_coordinator.filename(), s_bookmarks);
 }
 
 void ShowGoToLocked(epaper_ui::SelectModalState* modal)
@@ -260,6 +314,26 @@ bool HandleMenuSelection(int selected_index)
         return true;
     }
 
+    if (stage == MenuStage::kBookmarks) {
+        bool moved = false;
+        {
+            const cpu_boost::ScopedBoost boost("bookmark");
+            std::lock_guard<std::mutex> lock(s_mutex);
+            if (selected_index >= 0 && selected_index < static_cast<int>(s_bookmarks.size())) {
+                moved = s_coordinator.GoToBookmark(
+                    s_bookmarks[static_cast<size_t>(selected_index)],
+                    display_service::PortraitWidth(), display_service::PortraitHeight());
+                if (moved) {
+                    SavePositionLocked();
+                }
+            }
+        }
+        if (moved) {
+            (void)UpdateDisplayStateAndRequestRefresh(display_service::RefreshMode::kPartial);
+        }
+        return true;
+    }
+
     if (stage == MenuStage::kGoTo) {
         if (selected_index < 0 || selected_index >= kGoToChoices) {
             return true;  // dismissed
@@ -311,6 +385,24 @@ bool HandleMenuSelection(int selected_index)
             if (show) {
                 ShowSubmenu(modal);
             }
+            break;
+        }
+        case MenuAction::kToggleBookmark: {
+            {
+                std::lock_guard<std::mutex> lock(s_mutex);
+                ToggleBookmarkLocked();
+            }
+            // The ribbon appears or goes away.
+            (void)UpdateDisplayStateAndRequestRefresh(display_service::RefreshMode::kPartial);
+            break;
+        }
+        case MenuAction::kBookmarks: {
+            epaper_ui::SelectModalState modal = {};
+            {
+                std::lock_guard<std::mutex> lock(s_mutex);
+                ShowBookmarksLocked(&modal);
+            }
+            ShowSubmenu(modal);
             break;
         }
         case MenuAction::kGoTo: {

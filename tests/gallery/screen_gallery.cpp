@@ -308,6 +308,17 @@ std::map<std::string, Renderer> Screens()
                 .lines;
         DrawBookReaderPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
+    screens["book_reader_bookmarked"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        BookReaderPageState state = {};
+        state.title_text = "The Lighthouse Keeper's Very Long Almanac";
+        state.bookmarked = true;
+        state.page_number = 12;
+        state.page_lines =
+            PaginateBookText(pw, ph, "Bookmarked: the ribbon hangs from the top corner, and "
+                                     "the title makes room for it.")
+                .lines;
+        DrawBookReaderPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
     // The same chapter at each text size (#28).
     const auto epub_reader = [&page](BookTextSize size) {
         return page([size](uint8_t* fb, int rw, int rh, int pw, int ph) {
