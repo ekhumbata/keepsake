@@ -17,6 +17,7 @@ The generators emit monochrome C++ assets for the SSD1677 e-paper UI:
 - `generate_epaper_footer_icons.py`: fixed `44x44` footer icon assets
 - `generate_epaper_logos.py`: aspect-ratio-preserving logo assets
 - `generate_epaper_fonts.py`: packed ASCII bitmap fonts from TTF files
+- `generate_keepsake_fonts.py`: regenerates every firmware font (Nunito, Literata) via the above
 - `generate_epaper_project_assets.py`: manifest-driven wrapper for all project
   image assets
 
@@ -47,9 +48,7 @@ python3 tools/generate_epaper_logos.py \
   --output-source firmware/components/core/project_assets/generated_epaper_logos.cpp \
   assets/logos/folloup-logo.png:kFollowupLogo
 
-python3 tools/generate_epaper_fonts.py \
-  --output firmware/components/core/epaper_ui/generated_epaper_fonts.cpp \
-  fonts/Inter_18pt-SemiBold.ttf:kInter22SemiBold:22
+python3 tools/generate_keepsake_fonts.py   # all firmware fonts (Nunito UI, Literata books)
 ```
 
 Do not hand-edit generated asset files once they are added. Update the source

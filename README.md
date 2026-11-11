@@ -91,5 +91,7 @@ Thank you to ALXV and mach1na for the design and implementation Keepsake grows f
 Internal identifiers (`CONFIG_CHRONINKLE_*`, the `chroninkle` CMake project, source symbols) deliberately keep their
 upstream names so upstream fixes can still be cherry-picked.
 
-The on-device UI's bitmap fonts are generated from [Inter](https://github.com/rsms/inter), © The Inter Project Authors,
-licensed under the [SIL Open Font License 1.1](fonts/OFL.txt).
+The on-device bitmap fonts are generated from [Nunito](https://github.com/googlefonts/nunito) (interface) and
+[Literata](https://github.com/googlefonts/literata) (book text), © their project authors, under the SIL Open Font
+License 1.1 (`fonts/nunito/OFL.txt`, `fonts/literata/OFL.txt`). [Quicksand](https://github.com/andrew-paglinawan/QuicksandFamily)
+(`fonts/quicksand/`, OFL with the reserved font name "Quicksand") is included unmodified for the font picker (#104).

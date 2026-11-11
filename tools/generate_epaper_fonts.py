@@ -191,7 +191,7 @@ def emit_byte_array(values: list[int], indent: str) -> str:
 
 def generate_source(specs: list[FontSpec]) -> str:
     out = [
-        '#include "generated_epaper_fonts.h"',
+        '#include "epaper_ui/generated_epaper_fonts.h"',
         "",
         "namespace epaper_fonts {",
         "",

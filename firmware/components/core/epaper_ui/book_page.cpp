@@ -120,8 +120,14 @@ design::TypographyRole BookTypographyRole(book_layout::TextRole role, uint8_t st
         case book_layout::TextRole::kBody:
         case book_layout::TextRole::kPreformatted:
         default:
-            return (style & epub::kStyleBold) ? design::TypographyRole::kLabelSmallBold
-                                              : design::TypographyRole::kBody;
+            // Literata for reading; bold wins over italic (there's no bold-italic cut yet).
+            if (style & epub::kStyleBold) {
+                return design::TypographyRole::kBookBold;
+            }
+            if (style & epub::kStyleItalic) {
+                return design::TypographyRole::kBookItalic;
+            }
+            return design::TypographyRole::kBookBody;
     }
 }
 
