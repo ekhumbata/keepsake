@@ -274,6 +274,11 @@ mass storage, from Settings > Storage) and they'll show up here.
 - If a book can't be opened, the reader says why in plain words instead: it's
   locked by the store or library it came from (DRM), it's damaged (try copying it
   again), or it isn't a book Keepsake can read.
+- **Press the rocker in** while reading to open the reader menu:
+  - **Contents** (EPUB books) lists the chapters, with the one you're in
+    highlighted; pick one to jump straight to it.
+  - **Back to books** returns to the shelf.
+  - **Close** goes back to the page.
 - Tap the Record button to leave the reading view and return to the book list.
 - For `.txt` books you can page back all the way to the start at any time, including
   right after reopening; reopening one you've read a long way into may take a moment

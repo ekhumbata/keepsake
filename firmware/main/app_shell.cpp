@@ -1572,6 +1572,8 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
                 overlay_result.select_modal_selected_index) &&
             !book_list_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
+            !book_reader_page_runtime::HandleMenuSelection(
+                overlay_result.select_modal_selected_index) &&
             !details_page_runtime::HandleTopicsSelectionSubmit(
                 overlay_result.select_modal_checked_items)) {
             (void)recording_session_service::SubmitTagSelection(
@@ -1579,6 +1581,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         }
         ShowDetailsScreenIfRequested();
         ShowBookReaderScreenIfRequested();
+        HandleBookReaderBackIfRequested();
     }
     if (overlay_result.request_delete_topic) {
         (void)settings_topics_page_runtime::DeleteConfirmedTopic();

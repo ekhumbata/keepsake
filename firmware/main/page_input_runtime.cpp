@@ -1289,10 +1289,14 @@ ButtonResult HandleBookReaderButtonEvent(const button_service::ButtonEventInfo& 
     }
 
     switch (event.event) {
+        case button_service::ButtonEvent::kSingleClick:
+            // The rocker press opens the reader menu (Contents, Back to books).
+            result.handled = true;
+            result.interaction_result = MakeConsumedResult(book_reader_page_runtime::ShowMenu());
+            return result;
         case button_service::ButtonEvent::kPressDown:
         case button_service::ButtonEvent::kPressUp:
         case button_service::ButtonEvent::kPressRepeat:
-        case button_service::ButtonEvent::kSingleClick:
         case button_service::ButtonEvent::kLongPressStart:
         case button_service::ButtonEvent::kLongPressUp:
             result.handled = true;
