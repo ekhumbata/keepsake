@@ -33,7 +33,15 @@ Snapshot GetSnapshot();
 
 // Kicks a background retry pass over every archived recording with pending_transcription=true.
 // No-op (returns false immediately) if a batch is already running or nothing is pending.
+// Does nothing (and leaves the notes pending) while Gemini isn't ready yet.
 bool RetryPending();
+
+// For network jobs (#17), which keep the radio up only while they run: waits up to
+// `ready_timeout_ms` for Gemini to be ready (it authenticates after each fresh connection), then
+// runs a batch (or joins the one already running) and blocks until it finishes. Returns false
+// only when Gemini never became ready, so the job can try again on a later connection; the notes
+// stay pending then. Never call it from gemini_service's worker task.
+bool RetryPendingAndWait(uint32_t ready_timeout_ms);
 
 }  // namespace transcription_retry_service
 

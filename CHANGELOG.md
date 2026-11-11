@@ -8,6 +8,16 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Notes saved while offline no longer get marked "couldn't start"** (#17). When
+  Wi-Fi came back, the catch-up transcription could run before Gemini had finished
+  signing in, which marked every waiting note as failed instead of leaving it to
+  retry. It now waits for Gemini, and the catch-up holds the connection until it's
+  done. With Wi-Fi on demand switched on, a new recording asks for the network
+  straight away (the toast says "Saved. Transcribing soon") instead of waiting for
+  the next sync.
+
 ### Changed
 
 - **Works fully without a Gemini key** (#44). With no key set, a recording is a
