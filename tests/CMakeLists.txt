@@ -76,7 +76,8 @@ add_custom_command(
 )
 add_custom_target(keepsake_fixtures DEPENDS "${KEEPSAKE_FIXTURE_DIR}/epub2_ncx.epub")
 add_dependencies(unit_tests keepsake_fixtures)
-target_compile_definitions(unit_tests PRIVATE KEEPSAKE_FIXTURE_DIR="${KEEPSAKE_FIXTURE_DIR}")
+target_compile_definitions(unit_tests PRIVATE KEEPSAKE_FIXTURE_DIR="${KEEPSAKE_FIXTURE_DIR}"
+                                               KEEPSAKE_REPO_DIR="${CMAKE_CURRENT_LIST_DIR}/..")
 
 # Screen gallery (#14, docs/adr/0001-simulator-scope.md): every screen rendered to PNG, with
 # golden framebuffer hashes checked as a test. PNGs land in build/.../gallery for review.

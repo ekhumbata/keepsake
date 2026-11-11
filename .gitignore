@@ -94,3 +94,7 @@ design/
 
 # macOS Finder metadata
 .DS_Store
+
+# Filled-in provisioning files hold Wi-Fi passwords and keys (#42): never commit them.
+provision.json
+**/.keepsake/
