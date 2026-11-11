@@ -1,5 +1,8 @@
 #include "onboarding_page_coordinator.h"
 
+#include "ai_features.h"
+
+#include <algorithm>
 #include <array>
 
 #include "asset_manifest.h"
@@ -59,13 +62,17 @@ NavigationItemRole RoleForControl(OnboardingControl control)
 
 OnboardingPageCoordinator::OnboardingPageCoordinator() = default;
 
+// Index of the "Summaries with Gemini" slide in kSlides, skipped in no-key mode.
+constexpr size_t kAiSlideIndex = 4;
+
 int OnboardingPageCoordinator::slide_count() const
 {
-    return static_cast<int>(kSlides.size());
+    return static_cast<int>(kSlides.size()) - (include_ai_slide_ ? 0 : 1);
 }
 
 void OnboardingPageCoordinator::PrepareForShow()
 {
+    include_ai_slide_ = ai_features::Enabled();
     active_index_ = 0;
     focus_.Configure(navigation_model_.item_count, 0);
     FocusFirstSelectable();
@@ -210,7 +217,11 @@ epaper_ui::OnboardingPageState OnboardingPageCoordinator::BuildState() const
     state.carousel.prev_selected = IsRoleFocused(NavigationItemRole::kOnboardingPagePrev);
     state.carousel.next_selected = IsRoleFocused(NavigationItemRole::kOnboardingPageNext);
 
-    const Slide& slide = kSlides[static_cast<size_t>(active_index_)];
+    size_t slide_index = static_cast<size_t>(active_index_);
+    if (!include_ai_slide_ && slide_index >= kAiSlideIndex) {
+        ++slide_index;  // skip the Gemini slide
+    }
+    const Slide& slide = kSlides[std::min(slide_index, kSlides.size() - 1)];
     state.slide_title = slide.title;
     state.slide_body = slide.body;
     state.slide_image = project_assets::GetImage(slide.image);

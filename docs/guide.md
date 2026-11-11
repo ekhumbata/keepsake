@@ -47,7 +47,7 @@ update) · 💤 later
 | Voice notes | ✅ | Hold Record, speak, tag it; saved on the SD card as audio you can play back |
 | Todos, follow-ups, topics | ✅ | Organize notes; pending todos show on the lock screen |
 | Transcription + summaries (Gemini) | ✅ optional | Only with a Gemini key; without one, notes stay as playable audio |
-| No-key polish | 📋 [#44](https://github.com/ekhumbata/keepsake/issues/44) | No AI wording or "waiting" badges when there's no key |
+| No-key polish | 🚧 [#44](https://github.com/ekhumbata/keepsake/issues/44) | Without a key: voice notes with Play, no AI wording, no "waiting" badges (to be checked on the device) |
 | Reminders (time picker) | 🎁 [#50](https://github.com/ekhumbata/keepsake/issues/50)–[#52](https://github.com/ekhumbata/keepsake/issues/52) | Presets or a time, a label or a short voice memo, rings even from sleep |
 | Focus timers | 🎁 [#53](https://github.com/ekhumbata/keepsake/issues/53) | 5/15/25/50 minutes |
 | Voice reminders (AI) | 🎁 [#54](https://github.com/ekhumbata/keepsake/issues/54) | "Remind me tomorrow at 3 to call the dentist" (needs a key) |

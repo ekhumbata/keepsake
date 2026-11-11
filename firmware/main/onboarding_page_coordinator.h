@@ -50,6 +50,8 @@ private:
         page_navigation::BuildOnboardingPageNavigationModel();
     page_navigation::RovingFocus focus_{navigation_model_.item_count, 0};
     int active_index_ = 0;
+    // No-key mode (#44): the Gemini slide is left out when no key is set (decided on show).
+    bool include_ai_slide_ = true;
 };
 
 #endif  // ONBOARDING_PAGE_COORDINATOR_H_

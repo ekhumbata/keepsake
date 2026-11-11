@@ -119,10 +119,16 @@ This is the core interaction:
    failed. Topic and Discard skip this: Topic transcribes immediately to
    produce its name (see above), and Discard has nothing to transcribe.
 
-**If you're offline when you record**, the clip still saves to the SD
-card — it just gets marked as pending. The moment Keepsake reconnects to
-WiFi, it automatically retries every pending recording. A small badge on
-the status bar shows how many are waiting.
+**Without a Gemini key** (the default), every recording is simply a voice
+note: it saves to the SD card, its details page offers **Play** and reads
+"A voice note. Press Play to listen.", and nothing ever shows as waiting.
+Topic pages don't offer **Summarize**, and the first-time introduction skips
+the Gemini slide.
+
+**If you're offline when you record** (with a Gemini key set), the clip still
+saves to the SD card — it just gets marked as pending. The moment Keepsake
+reconnects to WiFi, it automatically retries every pending recording. A small
+badge on the status bar shows how many are waiting.
 
 ## The Home screen
 

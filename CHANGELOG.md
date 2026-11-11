@@ -8,6 +8,15 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Works fully without a Gemini key** (#44). With no key set, a recording is a
+  playable voice note: its details page offers **Play** and reads "A voice note.
+  Press Play to listen." instead of "No transcript available" or a Transcribe
+  button; the "waiting to transcribe" badge never appears; topic pages drop
+  **Summarize**; and the onboarding skips the "Summaries with Gemini" slide. With a
+  key, everything works as before.
+
 ### Added
 
 - **Reader menu with Contents** (#28). Pressing the rocker while reading opens a
