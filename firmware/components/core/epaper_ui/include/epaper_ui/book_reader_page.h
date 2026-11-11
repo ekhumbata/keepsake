@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "book_layout/book_layout.h"
 #include "epaper_ui/global_footer.h"
 #include "epaper_ui/overlay_geometry.h"
 #include "epaper_ui/status_bar.h"
@@ -19,6 +20,11 @@ struct BookReaderPageState {
     std::vector<std::string> page_lines = {};
     // In-session page counter (1-based); not persisted, resets to 1 each time a book is opened.
     int page_number = 1;
+    // EPUBs: a laid-out page (book_layout) drawn instead of page_lines, and the indicator
+    // text to show instead of "Page N" (e.g. "Chapter 3 - 4/12 - 42%").
+    bool use_layout_page = false;
+    book_layout::Page layout_page = {};
+    std::string page_label = {};
 
     bool operator==(const BookReaderPageState& other) const = default;
 };
@@ -40,6 +46,9 @@ struct BookReaderPageLayout {
 // content area, stopping once that line budget is filled or `text` runs out.
 BookReaderPageLayout PaginateBookText(int portrait_width, int portrait_height,
                                       const std::string& text);
+
+// The rectangle page text is drawn into (portrait coordinates): what EPUB layout targets.
+UiRect BookReaderContentBounds(int portrait_width, int portrait_height);
 
 void DrawBookReaderPage(uint8_t* framebuffer,
                         int raw_width,

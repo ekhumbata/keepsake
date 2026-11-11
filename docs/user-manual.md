@@ -249,28 +249,34 @@ with this topic yet" and no Summarize button.
 
 ## Books
 
-The Home screen's **Books** item opens a simple on-device reader for plain
-`.txt` files — copy them onto the SD card's `books` folder (over USB mass
-storage, from Settings > Storage) and they'll show up here.
+The Home screen's **Books** item opens the on-device reader for **EPUB** (`.epub`)
+books and plain `.txt` files. Copy them onto the SD card's `books` folder (over USB
+mass storage, from Settings > Storage) and they'll show up here.
 
-- Selecting **Books** shows the list of `.txt` files found in that folder.
-  Tilt the rocker to move between them, and select one to open a menu with:
-  - **Continue reading** — opens the book at the page you last left it on.
-  - **Start from the beginning** — opens the book at page one, overwriting
-    your saved position.
-  - **Delete** — removes the book (and your saved position for it) from the
-    SD card, after a confirmation. There's no undo.
-- In the reading view, tilting the rocker turns the page forward (down) or
-  back (up). Each book remembers the page you last left it on, so leaving
-  and reopening it picks up where you stopped.
-- Tap the Record button to leave the reading view and return to the book
-  list.
-- You can page back all the way to the start of the book at any time,
-  including right after reopening it — not just through pages turned in the
-  current session. Reopening a book you've read a long way into may take a
-  moment to open while it re-figures out where earlier pages started.
-- The reader only looks in that one folder (no subfolders), and only reads
-  `.txt` files — other formats aren't supported.
+- Selecting **Books** shows the list of books found in that folder. Tilt the rocker
+  to move between them, and select one to open a menu with:
+  - **Continue reading** — opens the book where you last left it.
+  - **Start from the beginning** — opens the book at the start, overwriting your
+    saved place.
+  - **Delete** — removes the book (and your saved place for it) from the SD card,
+    after a confirmation. There's no undo.
+- In the reading view, tilting the rocker turns the page forward (down) or back
+  (up). Each book remembers where you were, so leaving and reopening it picks up
+  where you stopped.
+- **EPUB books** show their title at the top and, at the bottom, the chapter name,
+  the page within that chapter, and how far through the whole book you are (for
+  example `Chapter Two - 3/12 - 41%`). Pages turn straight from one chapter into the
+  next. Headings, bold text, lists and scene breaks are shown; italics currently
+  look like normal text, and pictures appear as a framed caption.
+- If a book can't be opened, the reader says why in plain words instead: it's
+  locked by the store or library it came from (DRM), it's damaged (try copying it
+  again), or it isn't a book Keepsake can read.
+- Tap the Record button to leave the reading view and return to the book list.
+- For `.txt` books you can page back all the way to the start at any time, including
+  right after reopening; reopening one you've read a long way into may take a moment
+  while it re-figures out where earlier pages started.
+- The reader only looks in that one folder (no subfolders), and only reads `.epub`
+  and `.txt` files.
 
 ## Settings
 

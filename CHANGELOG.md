@@ -10,6 +10,14 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **EPUB books** (#26, #28). `.epub` files in the `books` folder now show up in
+  Books next to `.txt` files and open in the reader: real chapters, headings, bold,
+  lists and scene breaks, laid out for the screen. Tilting the rocker turns pages
+  across chapters; the bottom line shows the chapter, the page within it and how far
+  through the book you are, and your place is remembered. Locked (DRM), damaged and
+  other unreadable files show a short, friendly explanation instead. Italics,
+  pictures and a proper book font come later.
+
 - **CPU frequency scaling** (power management, #16). The CPU idles at 80 MHz and runs
   at 240 MHz only while something a person is waiting on is happening: drawing the
   screen, handling a button, playing a feedback sound. Saves battery while idle;
