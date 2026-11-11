@@ -352,6 +352,11 @@ From the top:
    network, that same button reads **Disconnect** instead. Use **Scan**
    to refresh the list.
 
+Keepsake remembers up to five networks you've connected to (for example home, a
+friend's place and a phone hotspot). It joins the one it used most recently, and if
+that one stops answering it tries the others before giving up. When a sixth is added,
+the one used longest ago is forgotten.
+
 ### Time
 
 Set your timezone from a picker, or enter the date and time by hand in the
