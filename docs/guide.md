@@ -16,7 +16,7 @@ update) · 💤 later
 | Plain-text books (`.txt`) | ✅ | Reads `.txt` files from the SD card's `books` folder and remembers your page |
 | EPUB books | 🚧 [#26](https://github.com/ekhumbata/keepsake/issues/26), [#28](https://github.com/ekhumbata/keepsake/issues/28) | Real e-books with chapters, headings, bold, lists; pages across chapters with progress (to be checked on the device). Italics, a contents menu and pictures still to come |
 | Reader with a book font | 📋 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata in three sizes, chapter + % footer, menu (contents, size, bookmark, go to %) |
-| Library with covers | 📋 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Every book in `books` (including subfolders), cover, author, progress, "Continue reading" on top |
+| Library with covers | 🚧 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Titles, progress and "reading now" first are in, subfolders too; covers still to come |
 | Friendly file messages | 🚧 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash (shown as text in the reader today; the mascot card comes with the redesign) |
 | Add books over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
 | Add books from a phone | 📋 [#32](https://github.com/ekhumbata/keepsake/issues/32) | Open "Add books", go to `keepsake.local` on the phone, upload or search |
@@ -137,7 +137,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 | Frozen or not responding | Hold PWR for 6 s, then press PWR to start it again |
 | The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer) |
 | Wi-Fi won't connect | Make sure the network is 2.4 GHz. In Settings → Network, pick it again and re-enter the password, or turn on **Access Point** and use the setup page |
-| A book doesn't show up | It must be an `.epub` or `.txt` file directly inside `books` (not a subfolder) |
+| A book doesn't show up | It must be an `.epub` or `.txt` file inside `books` (subfolders up to 4 deep are fine), and its name mustn't start with a dot |
 | Notes aren't transcribed | Expected without a Gemini key; they're saved as audio |
 
 ## For Eric (development)

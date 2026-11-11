@@ -11,8 +11,14 @@
 namespace text_reader_service {
 
 struct BookEntry {
+    // Path relative to the books folder ("Austen/Emma.epub"); what every other call takes.
     std::string filename = {};
     uint64_t size_bytes = 0;
+    // From the book's metadata (EPUB) or its file name, cached in the folder's ".library".
+    std::string title = {};
+    std::string author = {};
+    int progress_percent = -1;  // -1 = not started
+    int64_t last_opened = 0;    // seconds since the epoch; 0 = never
 };
 
 // Ensures the configured book folder exists on the SD card. Safe to call repeatedly, and
@@ -20,11 +26,16 @@ struct BookEntry {
 // missing until this (or ListBooks) is called again.
 esp_err_t Init();
 
-// Book files (".txt" and ".epub") directly under the configured folder (no subfolder browsing), sorted the
-// same way SdCard's own directory listing orders entries. Empty when the folder is
-// missing or the card isn't mounted -- not an error the caller needs to distinguish from
-// "no books yet".
+// Book files (".txt" and ".epub") in the configured folder and its subfolders (up to 4 levels;
+// hidden files and folders skipped), in shelf order: books being read first (most recently
+// opened first), then by title. Titles and authors come from a cached index (".library" in
+// the folder), refreshed for any book that is new or changed since it was cached. Empty when
+// the folder is missing or the card isn't mounted.
 std::vector<BookEntry> ListBooks();
+
+// Records that `filename` was just read, with how far through it the reader is (0..100), so
+// the shelf can put it first and show progress. Cheap to call when leaving the reader.
+void RecordOpened(const std::string& filename, int progress_percent);
 
 // Reads up to `length` bytes of `filename` (a bare filename from ListBooks, resolved
 // against the configured folder) starting at `offset` into `buffer`. Returns the number

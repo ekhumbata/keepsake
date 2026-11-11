@@ -253,8 +253,11 @@ The Home screen's **Books** item opens the on-device reader for **EPUB** (`.epub
 books and plain `.txt` files. Copy them onto the SD card's `books` folder (over USB
 mass storage, from Settings > Storage) and they'll show up here.
 
-- Selecting **Books** shows the list of books found in that folder. Tilt the rocker
-  to move between them, and select one to open a menu with:
+- Selecting **Books** shows your shelf: every book in that folder **and its
+  subfolders**, by title, with how far you've read (for example `Emma - 42%`, or
+  `Done`). The book you read most recently is at the top, then the others you've
+  started, then the rest A to Z. Tilt the rocker to move between them, and select
+  one to open a menu with:
   - **Continue reading** — opens the book where you last left it.
   - **Start from the beginning** — opens the book at the start, overwriting your
     saved place.
@@ -275,8 +278,11 @@ mass storage, from Settings > Storage) and they'll show up here.
 - For `.txt` books you can page back all the way to the start at any time, including
   right after reopening; reopening one you've read a long way into may take a moment
   while it re-figures out where earlier pages started.
-- The reader only looks in that one folder (no subfolders), and only reads `.epub`
-  and `.txt` files.
+- The reader looks in the `books` folder and up to four levels of subfolders, and
+  only reads `.epub` and `.txt` files. Files and folders whose names start with a
+  dot are ignored. Keepsake keeps a small hidden `.library` file there to remember
+  titles and progress; deleting it is harmless, it's rebuilt the next time you open
+  Books.
 
 ## Settings
 

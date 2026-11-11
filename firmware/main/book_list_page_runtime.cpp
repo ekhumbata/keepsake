@@ -1,5 +1,8 @@
 #include "book_list_page_runtime.h"
 
+#include "epaper_ui/book_page.h"
+#include "library/library.h"
+
 #include <mutex>
 #include <vector>
 
@@ -197,7 +200,9 @@ bool ShowItemActionsModal()
         }
         s_item_actions_filename = s_books[static_cast<size_t>(index)].filename;
         s_item_actions.clear();
-        modal.title_text = s_item_actions_filename;
+        const text_reader_service::BookEntry& book = s_books[static_cast<size_t>(index)];
+        modal.title_text = epaper_ui::ToDisplayText(
+            book.title.empty() ? library::TitleFromPath(book.filename) : book.title);
         modal.items.push_back({"Continue reading"});
         s_item_actions.push_back(ItemAction::kContinueReading);
         modal.items.push_back({"Start from the beginning"});

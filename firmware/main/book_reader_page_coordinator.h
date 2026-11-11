@@ -34,6 +34,8 @@ public:
     epaper_ui::BookReaderPageState BuildState() const;
     // Persists the current place (byte offset for .txt, spine/block/offset for .epub).
     void SavePosition() const;
+    // How far through the book the current page is, 0..100 (for the shelf).
+    int ProgressPercent() const;
 
     const std::string& filename() const { return filename_; }
     size_t current_page_start() const { return page_start_offset_; }

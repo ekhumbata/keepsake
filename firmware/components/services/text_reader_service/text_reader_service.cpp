@@ -6,11 +6,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
+#include <map>
+#include <memory>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "epub_engine/epub_book.h"
 #include "esp_log.h"
+#include "library/library.h"
 #include "sdkconfig.h"
 #include "storage_service.h"
 
@@ -19,6 +24,10 @@ namespace {
 
 constexpr const char* kTag = "TextReaderService";
 constexpr const char* kPositionSuffix = ".pos";
+constexpr const char* kIndexFileName = ".library";
+constexpr int kMaxFolderDepth = 4;
+constexpr size_t kMaxBooks = 2000;
+constexpr size_t kMaxIndexBytes = 512u * 1024u;
 
 std::string JoinPath(const std::string& left, const std::string& right)
 {
@@ -89,21 +98,21 @@ esp_err_t Init()
     return ESP_FAIL;
 }
 
-std::vector<BookEntry> ListBooks()
-{
-    std::vector<BookEntry> books;
-    const std::string folder = FolderPath();
+namespace {
 
+void ScanFolder(const std::string& root, const std::string& relative, int depth,
+                std::vector<library::BookRecord>* found)
+{
+    const std::string folder = relative.empty() ? root : JoinPath(root, relative);
     errno = 0;
     DIR* dir = opendir(folder.c_str());
     if (dir == nullptr) {
         if (errno != ENOENT) {
             ESP_LOGW(kTag, "opendir(%s) failed: errno=%d", folder.c_str(), errno);
         }
-        return books;
+        return;
     }
-
-    while (true) {
+    while (found->size() < kMaxBooks) {
         errno = 0;
         struct dirent* entry = readdir(dir);
         if (entry == nullptr) {
@@ -112,25 +121,156 @@ std::vector<BookEntry> ListBooks()
             }
             break;
         }
-
         const std::string name = entry->d_name;
-        if (IsHiddenName(name) || !HasBookExtension(name)) {
+        if (IsHiddenName(name)) {
             continue;
         }
-
+        const std::string child = relative.empty() ? name : JoinPath(relative, name);
         struct stat st = {};
-        if (stat(JoinPath(folder, name).c_str(), &st) != 0 || S_ISDIR(st.st_mode)) {
+        if (stat(JoinPath(root, child).c_str(), &st) != 0) {
             continue;
         }
-
-        books.push_back({.filename = name, .size_bytes = static_cast<uint64_t>(st.st_size)});
+        if (S_ISDIR(st.st_mode)) {
+            if (depth < kMaxFolderDepth) {
+                ScanFolder(root, child, depth + 1, found);
+            }
+            continue;
+        }
+        if (!HasBookExtension(name)) {
+            continue;
+        }
+        library::BookRecord record;
+        record.path = child;
+        record.size_bytes = static_cast<uint64_t>(st.st_size);
+        record.modified_time = static_cast<int64_t>(st.st_mtime);
+        found->push_back(std::move(record));
     }
     closedir(dir);
+}
 
-    std::sort(books.begin(), books.end(), [](const BookEntry& lhs, const BookEntry& rhs) {
-        return lhs.filename < rhs.filename;
-    });
+std::string IndexPath()
+{
+    return JoinPath(FolderPath(), kIndexFileName);
+}
+
+std::vector<library::BookRecord> LoadIndex()
+{
+    FILE* file = std::fopen(IndexPath().c_str(), "rb");
+    if (file == nullptr) {
+        return {};
+    }
+    std::string text;
+    char buffer[1024];
+    size_t read = 0;
+    while ((read = std::fread(buffer, 1, sizeof(buffer), file)) > 0 && text.size() < kMaxIndexBytes) {
+        text.append(buffer, read);
+    }
+    std::fclose(file);
+    return library::ParseIndex(text);
+}
+
+void SaveIndex(const std::vector<library::BookRecord>& records)
+{
+    const std::string text = library::SerializeIndex(records);
+    FILE* file = std::fopen(IndexPath().c_str(), "wb");
+    if (file == nullptr) {
+        ESP_LOGW(kTag, "Saving the library index failed");
+        return;
+    }
+    std::fwrite(text.data(), 1, text.size(), file);
+    std::fclose(file);
+}
+
+// Title/author for a book the index doesn't know yet (or that changed on disk).
+void FillMetadata(library::BookRecord* record)
+{
+    record->title = library::TitleFromPath(record->path);
+    record->author.clear();
+    if (library::Extension(record->path) != "epub") {
+        return;
+    }
+    epub::OpenError error = epub::OpenError::kNone;
+    const auto book = epub::EpubBook::Open(
+        std::make_unique<epub::FileByteSource>(BookPath(record->path)), &error);
+    if (book == nullptr) {
+        return;  // locked/damaged: keep the file-name title; the reader explains when opened
+    }
+    if (!book->metadata().title.empty()) {
+        record->title = book->metadata().title;
+    }
+    record->author = book->metadata().author;
+}
+
+std::vector<library::BookRecord> RefreshIndex()
+{
+    std::vector<library::BookRecord> found;
+    ScanFolder(FolderPath(), "", 0, &found);
+    std::map<std::string, library::BookRecord> cached;
+    for (library::BookRecord& record : LoadIndex()) {
+        cached[record.path] = std::move(record);
+    }
+    bool changed = found.size() != cached.size();
+    for (library::BookRecord& record : found) {
+        const auto it = cached.find(record.path);
+        if (it != cached.end() && it->second.size_bytes == record.size_bytes &&
+            it->second.modified_time == record.modified_time) {
+            record = it->second;  // unchanged: keep title, author, progress
+            continue;
+        }
+        if (it != cached.end()) {
+            record.last_opened = it->second.last_opened;  // replaced file: keep its place
+        }
+        FillMetadata(&record);
+        changed = true;
+    }
+    if (changed) {
+        SaveIndex(found);
+    }
+    return found;
+}
+
+}  // namespace
+
+std::vector<BookEntry> ListBooks()
+{
+    std::vector<library::BookRecord> records = RefreshIndex();
+    library::SortForShelf(&records);
+    std::vector<BookEntry> books;
+    books.reserve(records.size());
+    for (library::BookRecord& record : records) {
+        books.push_back({.filename = std::move(record.path),
+                         .size_bytes = record.size_bytes,
+                         .title = std::move(record.title),
+                         .author = std::move(record.author),
+                         .progress_percent = record.progress_percent,
+                         .last_opened = record.last_opened});
+    }
     return books;
+}
+
+void RecordOpened(const std::string& filename, int progress_percent)
+{
+    std::vector<library::BookRecord> records = LoadIndex();
+    const int64_t now = static_cast<int64_t>(std::time(nullptr));
+    for (library::BookRecord& record : records) {
+        if (record.path == filename) {
+            // A clock that was never set reads as 1970; still order by "most recent" sensibly.
+            record.last_opened = std::max<int64_t>(now, record.last_opened + 1);
+            record.progress_percent = std::clamp(progress_percent, -1, 100);
+            SaveIndex(records);
+            return;
+        }
+    }
+    // Not indexed yet (opened before the list was ever built): rebuild, then record.
+    records = RefreshIndex();
+    for (library::BookRecord& record : records) {
+        if (record.path == filename) {
+            record.last_opened = std::max<int64_t>(now, 1);
+            record.progress_percent = std::clamp(progress_percent, -1, 100);
+            SaveIndex(records);
+            return;
+        }
+    }
 }
 
 size_t ReadChunk(const std::string& filename, size_t offset, char* buffer, size_t length)

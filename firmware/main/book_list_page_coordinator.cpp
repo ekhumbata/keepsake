@@ -1,5 +1,8 @@
 #include "book_list_page_coordinator.h"
 
+#include "epaper_ui/book_page.h"
+#include "library/library.h"
+
 namespace {
 
 using page_navigation::NavigationItemRole;
@@ -59,7 +62,13 @@ epaper_ui::BookListPageState BookListPageCoordinator::BuildState(
     const int focused_index = FocusedBookIndex();
     state.books_list.items.reserve(books.size());
     for (const text_reader_service::BookEntry& book : books) {
-        state.books_list.items.push_back({.label_text = book.filename});
+        library::BookRecord record;
+        record.path = book.filename;
+        record.title = book.title;
+        record.progress_percent = book.progress_percent;
+        // Titles are UTF-8; the bitmap fonts draw ASCII (curly quotes, accents mapped).
+        state.books_list.items.push_back(
+            {.label_text = epaper_ui::ToDisplayText(library::ShelfLabel(record))});
     }
     state.books_list.focused = focused_index >= 0;
     state.books_list.active = focused_index >= 0;
