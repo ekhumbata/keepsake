@@ -1,6 +1,7 @@
 #ifndef EPAPER_UI_SELECT_MODAL_H_
 #define EPAPER_UI_SELECT_MODAL_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

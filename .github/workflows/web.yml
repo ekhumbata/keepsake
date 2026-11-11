@@ -1,0 +1,49 @@
+name: web
+
+# Lints and builds web/ (the setup portal), then checks that the copy embedded in the
+# firmware matches a fresh build, so a frontend change can't ship without its output.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "firmware/components/services/wifi_service/portal/**"
+      - ".github/workflows/web.yml"
+  pull_request:
+    paths:
+      - "web/**"
+      - "firmware/components/services/wifi_service/portal/**"
+      - ".github/workflows/web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Embedded portal matches the build
+        run: |
+          portal=../firmware/components/services/wifi_service/portal
+          status=0
+          for f in index.html index.js index.css; do
+            if ! cmp -s "dist/$f" "$portal/$f"; then
+              echo "::error file=firmware/components/services/wifi_service/portal/$f::Out of date. Run 'npm run build' in web/ and copy dist/$f into the portal folder."
+              status=1
+            fi
+          done
+          exit $status
