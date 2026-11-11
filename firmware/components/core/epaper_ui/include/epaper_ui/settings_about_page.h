@@ -22,8 +22,9 @@ struct SettingsAboutPageState {
     // e.g. "Version 0.7.0" -- built at BuildState() time from esp_app_get_description().
     std::string version_text;
     std::string_view acknowledgment_text =
-        "Chroninkle began as a fork of Followup, created by ALXV Labs. Thank you to ALXV for "
-        "the original design and implementation this project builds on.";
+        "Keepsake is built on Chroninkle by mach1na, which began as Followup by ALXV Labs. "
+        "Thank you to both for the design and code it grows from. Free software under the "
+        "GNU GPL v3.";
     ButtonState back = {};
 };
 

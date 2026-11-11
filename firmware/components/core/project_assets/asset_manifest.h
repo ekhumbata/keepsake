@@ -9,6 +9,7 @@ enum class EmbeddedLogoId : uint8_t {
     kChroninkleLogo,
     kChroninkleLogoStacked,
     kFollowupLogo,
+    kKeepsakeLogo,
 };
 
 enum class EmbeddedIconId : uint8_t {

@@ -294,24 +294,25 @@ void DrawSplashText(uint8_t* framebuffer, int x, int y, std::string_view text, d
 
 void DrawSplashScreen(uint8_t* framebuffer)
 {
-    const EmbeddedImageAsset* chroninkle_logo =
-        project_assets::GetLogo(EmbeddedLogoId::kChroninkleLogoStacked);
+    const EmbeddedImageAsset* keepsake_logo =
+        project_assets::GetLogo(EmbeddedLogoId::kKeepsakeLogo);
     const EmbeddedImageAsset* followup_logo =
         project_assets::GetLogo(EmbeddedLogoId::kFollowupLogo);
     const EmbeddedImageAsset* alxv_logo =
         project_assets::GetLogo(EmbeddedLogoId::kAlxvLabsLogo);
-    if (framebuffer == nullptr || chroninkle_logo == nullptr || followup_logo == nullptr ||
+    if (framebuffer == nullptr || keepsake_logo == nullptr || followup_logo == nullptr ||
         alxv_logo == nullptr) {
         return;
     }
 
-    constexpr std::string_view kAttributionLabel = "Based on";
+    // Keepsake is a fork of Chroninkle (mach1na), itself a fork of Followup (ALXV Labs); the
+    // splash credits both. Followup's own splash logo and the ALXV logo it was shown with
+    // stay in their original stacked layout under the label.
+    constexpr std::string_view kAttributionLabel = "Based on Chroninkle and";
     const int label_width =
         epaper_ui::MeasureText(design::TypographyRole::kLabelSmall, kAttributionLabel);
     const int label_height = epaper_ui::LineHeight(design::TypographyRole::kLabelSmall);
 
-    // Attribution block anchored to the bottom margin: the label, then Followup's own splash
-    // logo and the ALXV logo it was shown with, kept in their original stacked layout.
     const int alxv_y = kPortraitHeight - kSplashBottomMargin - static_cast<int>(alxv_logo->height);
     const int alxv_x = (kPortraitWidth - static_cast<int>(alxv_logo->width)) / 2;
     const int followup_y = alxv_y - kSplashLogoGap - static_cast<int>(followup_logo->height);
@@ -319,10 +320,10 @@ void DrawSplashScreen(uint8_t* framebuffer)
     const int label_y = followup_y - kSplashAttributionGap - label_height;
     const int label_x = (kPortraitWidth - label_width) / 2;
 
-    // The Chroninkle mark gets the rest of the screen, centered above the attribution block.
-    const int hero_y = (label_y - static_cast<int>(chroninkle_logo->height)) / 2;
-    const int hero_x = (kPortraitWidth - static_cast<int>(chroninkle_logo->width)) / 2;
-    DrawPortraitMonoAsset(framebuffer, hero_x, hero_y, chroninkle_logo);
+    // The Keepsake mark gets the rest of the screen, centered above the attribution block.
+    const int hero_y = (label_y - static_cast<int>(keepsake_logo->height)) / 2;
+    const int hero_x = (kPortraitWidth - static_cast<int>(keepsake_logo->width)) / 2;
+    DrawPortraitMonoAsset(framebuffer, hero_x, hero_y, keepsake_logo);
 
     DrawSplashText(framebuffer, label_x, label_y, kAttributionLabel, design::TypographyRole::kLabelSmall);
     DrawPortraitMonoAsset(framebuffer, followup_x, followup_y, followup_logo);

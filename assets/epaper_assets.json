@@ -19,6 +19,10 @@
     {
       "path": "assets/logos/folloup-logo.png",
       "symbol": "kFollowupLogo"
+    },
+    {
+      "path": "assets/logos/keepsake-logo.png",
+      "symbol": "kKeepsakeLogo"
     }
   ],
   "icons": [
