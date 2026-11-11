@@ -83,7 +83,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="components/project_assets",
+        default="firmware/components/core/project_assets",
         help="directory for generated C++ asset files",
     )
     return parser.parse_args()

@@ -59,7 +59,7 @@ constexpr const char* kPortalApiDisconnectUri = "/api/disconnect";
 constexpr const char* kPortalIndexJsUri = "/index.js";
 constexpr const char* kPortalIndexCssUri = "/index.css";
 
-// Captive-portal frontend, embedded from components/wifi_service/portal/ (built by the Vite app in
+// Captive-portal frontend, embedded from firmware/components/services/wifi_service/portal/ (built by the Vite app in
 // //webserver; run `npm run build` there and copy dist/* into portal/). EMBED_FILES generates the
 // _binary_<basename>_{start,end} symbols; the asm labels bind these declarations to them.
 extern const uint8_t kIndexHtmlStart[] asm("_binary_index_html_start");

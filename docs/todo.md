@@ -22,13 +22,13 @@ would now touch each page's `BuildState()`/`SetEntryFollowUpState`/
 
 ## IMU auto-sleep motion detection polls instead of using the hardware interrupt path
 
-`main/device_sleep_runtime.cpp:608-637` (`MotionPollingTask`) wakes every
+`firmware/main/device_sleep_runtime.cpp:608-637` (`MotionPollingTask`) wakes every
 200ms to do a full I2C read + float-math classification purely to detect
-stillness for auto-sleep — but `components/qmi8658/qmi8658.cc` already
+stillness for auto-sleep — but `firmware/components/drivers/qmi8658/qmi8658.cc` already
 implements complete hardware any-motion/no-motion detection via INT2
 (`ConfigMotion`, `EnableWakeOnMotion`, callbacks at lines ~877-1470), the
 same mechanism already wired for the light-sleep wake gesture.
-`components/imu_service/imu_service.cpp` never surfaces any of it — only
+`firmware/components/services/imu_service/imu_service.cpp` never surfaces any of it — only
 `ReadSample`. Continuous I2C polling on a battery-powered device where an
 event-driven equivalent already exists elsewhere in the same driver.
 
@@ -47,9 +47,9 @@ whichever files change.
 ## Replace auto light sleep with a full auto shutdown
 
 Today, after `FOLLOWUP_AUTO_SLEEP_LIGHT_SLEEP_TIMEOUT_SECONDS` of IMU-detected
-inactivity (default 1800s / 30 minutes, `main/Kconfig.projbuild:71-79`), the
+inactivity (default 1800s / 30 minutes, `firmware/main/Kconfig.projbuild:71-79`), the
 device enters light sleep: `device_sleep_service::Action::kEnterLightSleep` is
-dispatched to `EnterLightSleep()` in `main/device_sleep_runtime.cpp:490-492`,
+dispatched to `EnterLightSleep()` in `firmware/main/device_sleep_runtime.cpp:490-492`,
 which stops Wi-Fi, puts the display to sleep, and arms a GPIO wake.
 
 Craig's reasoning: waking back up from light sleep already costs about the
@@ -73,8 +73,8 @@ Open questions for whoever designs this:
   if this item replaces one with the other at the same trigger point.
 - The same `BlockerReason`s that already gate light sleep (recording active,
   recording saving, audio playback, storage write, Wi-Fi AP mode, time sync,
-  display refresh — `components/device_sleep_service/include/device_sleep_service.h:39-45`,
-  checked in `main/device_sleep_runtime.cpp`'s blocker-evaluation function)
+  display refresh — `firmware/components/services/device_sleep_service/include/device_sleep_service.h:39-45`,
+  checked in `firmware/main/device_sleep_runtime.cpp`'s blocker-evaluation function)
   presumably should gate auto-shutdown too.
 - The USB-present case: `power_service::RequestShutdown()` doesn't actually
   cut power while VBUS is present — the call returns and the board stays
@@ -105,7 +105,7 @@ this only happens for a recording saved while Gemini wasn't ready, e.g. no
 Wi-Fi at record time) gets exactly **one** automatic retry attempt the next
 time Gemini reconnects (`transcription_retry_service::RetryOne()`,
 triggered by `RetryPending()` off a Gemini ready-edge in
-`main/app_shell.cpp`'s `HandleGeminiEvent`). If that one attempt fails for
+`firmware/main/app_shell.cpp`'s `HandleGeminiEvent`). If that one attempt fails for
 *any* reason -- including a plainly transient one, like the
 `http=503 code=UNAVAILABLE "This model is currently experiencing high
 demand"` error hit during testing today -- `RetryOne()` calls
@@ -151,11 +151,11 @@ once `v2-dev` merges back into `main`.
 Craig wants a new startup sound cue to go with the Chroninkle rebrand
 (2026-09-13) — he'll make/source the audio himself later.
 
-To swap it: replace `components/system_sound_service/sounds/startup.mp3`
+To swap it: replace `firmware/components/services/system_sound_service/sounds/startup.mp3`
 with the new MP3 (same filename, no other changes needed), rebuild, flash.
 No asset-generation script/pipeline involved, unlike the boot logo — the
 MP3 is embedded directly via `EMBED_FILES` in
-`components/system_sound_service/CMakeLists.txt`. Source can be any
+`firmware/components/services/system_sound_service/CMakeLists.txt`. Source can be any
 standard MP3 (any sample rate/mono-or-stereo); the firmware decodes and
 resamples/downmixes to mono 16kHz 16-bit PCM automatically to match the
 ES8311 codec's fixed clock, though exporting at 16kHz mono directly avoids

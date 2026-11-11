@@ -7,11 +7,11 @@ Chroninkle follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATC
 `version.txt` at the repo root holds the current version. ESP-IDF's build
 system reads this file automatically (no CMake wiring needed) and bakes it
 into the firmware's app description, which is logged once at boot in
-`main/app_shell.cpp` (`Run()`) via `esp_app_get_description()->version`. This
+`firmware/main/app_shell.cpp` (`Run()`) via `esp_app_get_description()->version`. This
 is also what `esptool.py`/`idf.py partition-table`/OTA tooling reports for the
 running image.
 
-The `webserver/` setup portal is embedded into and shipped with firmware; it
+The `web/` setup portal is embedded into and shipped with firmware; it
 does not carry an independent version and moves with the firmware version.
 
 ## When to bump

@@ -110,113 +110,122 @@ events.
 ## Project Layout
 
 ```text
-CMakeLists.txt
 assets/
   epaper_assets.json
   icons/
   logos/
 fonts/
-main/
+firmware/
   CMakeLists.txt
-  main.cpp
-  app_shell.h
-  app_shell.cpp
-  button_input_runtime.h
-  button_input_runtime.cpp
-  device_sleep_runtime.h
-  device_sleep_runtime.cpp
-  footer_runtime.h
-  footer_runtime.cpp
-  input_callback_dispatcher.h
-  input_callback_dispatcher.cpp
-  input_focus_runtime.h
-  input_focus_runtime.cpp
-  input_runtime_setup.h
-  input_runtime_setup.cpp
-  lock_screen_runtime.h
-  lock_screen_runtime.cpp
-  status_bar_runtime.h
-  status_bar_runtime.cpp
-  page_action_result.h
-  overlay_runtime.h
-  overlay_runtime.cpp
-  page_input_runtime.h
-  page_input_runtime.cpp
-  shared_page_interactions.h
-  # Per-page runtime families. Each feature page has a {runtime, coordinator,
-  # interactions} trio (settings/wifi/time predate the coordinator split and
-  # keep their state in the runtime):
-  #   dashboard_page_*  onboarding_page_*  topics_browse_page_*
-  #   topic_entries_page_*  topic_summary_page_*
-  #   notes_page_*  todos_page_*  follow_up_page_*  details_page_*
-  #   settings_page_{runtime,coordinator,interactions}  wifi_page_*  time_page_*
-  settings_page_interactions.h
-  settings_page_interactions.cpp
-  wifi_page_interactions.h
-  wifi_page_interactions.cpp
-  time_page_interactions.h
-  time_page_interactions.cpp
-  page_interaction_runtime.h
-  page_interaction_runtime.cpp
-  timeline_format.h                # shared timeline date/time formatters ("Today" logic)
-  timeline_format.cpp
-  ui_refresh_runtime.h
-  ui_refresh_runtime.cpp
-  app_interaction_result.h
-  app_interaction_target.h
-components/
-  audio_hal/
-  axp2101/
-  board/
-  button_service/
-  design_tokens/
-  device_sleep_service/
-  display_service/
-  epaper_panel/
-  epaper_ui/
-  feedback_service/
-  gemini_service/
-  i2c_device/
-  imu_service/
-  page_navigation/
-  pcf85063/
-  playback_service/
-  power_service/
-  project_assets/
-  qmi8658/
-  recording_archive_service/
-  recording_service/
-  recording_session_service/
-  sd_card/
-  storage_service/
-  summary_service/
-  system_sound_service/
-  task_config/
-  timezone_service/
-  topic_service/
-  transcription_service/
-  wifi_service/
-partitions.csv
-sdkconfig
-sdkconfig.defaults
+  partitions.csv
+  sdkconfig
+  sdkconfig.defaults
+  version.txt
+  main/
+    CMakeLists.txt
+    main.cpp
+    app_shell.h
+    app_shell.cpp
+    button_input_runtime.h
+    button_input_runtime.cpp
+    device_sleep_runtime.h
+    device_sleep_runtime.cpp
+    footer_runtime.h
+    footer_runtime.cpp
+    input_callback_dispatcher.h
+    input_callback_dispatcher.cpp
+    input_focus_runtime.h
+    input_focus_runtime.cpp
+    input_runtime_setup.h
+    input_runtime_setup.cpp
+    lock_screen_runtime.h
+    lock_screen_runtime.cpp
+    status_bar_runtime.h
+    status_bar_runtime.cpp
+    page_action_result.h
+    overlay_runtime.h
+    overlay_runtime.cpp
+    page_input_runtime.h
+    page_input_runtime.cpp
+    shared_page_interactions.h
+    # Per-page runtime families. Each feature page has a {runtime, coordinator,
+    # interactions} trio (settings/wifi/time predate the coordinator split and
+    # keep their state in the runtime):
+    #   dashboard_page_*  onboarding_page_*  topics_browse_page_*
+    #   topic_entries_page_*  topic_summary_page_*
+    #   notes_page_*  todos_page_*  follow_up_page_*  details_page_*
+    #   settings_page_{runtime,coordinator,interactions}  wifi_page_*  time_page_*
+    settings_page_interactions.h
+    settings_page_interactions.cpp
+    wifi_page_interactions.h
+    wifi_page_interactions.cpp
+    time_page_interactions.h
+    time_page_interactions.cpp
+    page_interaction_runtime.h
+    page_interaction_runtime.cpp
+    timeline_format.h                # shared timeline date/time formatters ("Today" logic)
+    timeline_format.cpp
+    ui_refresh_runtime.h
+    ui_refresh_runtime.cpp
+    app_interaction_result.h
+    app_interaction_target.h
+  components/
+    core/
+      design_tokens/
+      epaper_ui/
+      page_navigation/
+      project_assets/
+    drivers/
+      audio_hal/
+      axp2101/
+      board/
+      epaper_panel/
+      i2c_device/
+      pcf85063/
+      qmi8658/
+      sd_card/
+    services/
+      app_state_service/
+      button_service/
+      device_sleep_service/
+      display_service/
+      feedback_service/
+      gemini_service/
+      imu_service/
+      playback_service/
+      power_service/
+      recording_archive_service/
+      recording_service/
+      recording_session_service/
+      storage_service/
+      summary_service/
+      system_sound_service/
+      task_config/
+      text_reader_service/
+      timezone_service/
+      topic_service/
+      transcription_retry_service/
+      transcription_service/
+      wifi_service/
 docs/
   app-architecture.md
   asset-generation.md
   auto-sleep.md
   gemini-service.md
   waveshare-epaper-hardware-spec.md
-scripts/
+tools/
   generate_epaper_assets_common.py
   generate_epaper_footer_icons.py
   generate_epaper_fonts.py
   generate_epaper_icons.py
   generate_epaper_logos.py
   generate_epaper_project_assets.py
+web/                      # setup portal source (TS/Vite)
 ```
 
 ## Component Boundaries
 
-### `components/project_assets`
+### `firmware/components/core/project_assets`
 
 This component owns embedded assets that are compiled into the firmware image.
 The source PNG/TTF files and generator scripts live outside the component; this
@@ -232,10 +241,10 @@ Current scope:
 - `project_assets::GetLogo(...)`, `GetIcon(...)`, and `GetFooterIcon(...)`
   lookup helpers by generated enum IDs
 
-Keep generated files reproducible from `assets/` and `scripts/`. Do not hand
+Keep generated files reproducible from `assets/` and `tools/`. Do not hand
 edit generated asset source files. See `docs/asset-generation.md`.
 
-### `components/design_tokens`
+### `firmware/components/core/design_tokens`
 
 This header-only component owns shared product UI constants. It is intentionally
 named `design_tokens`, not e-paper design tokens, because the values describe
@@ -253,7 +262,7 @@ Use this component as the first dependency when porting small pieces from the
 old `epaper_lib`. Keep UI tokens independent from display hardware and
 framebuffer mechanics.
 
-### `components/epaper_ui`
+### `firmware/components/core/epaper_ui`
 
 This component owns reusable e-paper UI primitives that render into the app's
 portrait framebuffer. It depends on `design_tokens` for visual constants and
@@ -267,7 +276,7 @@ Current scope:
 - the app status-bar state contract and renderer
 - a reusable lock-screen renderer plus its dedicated state contract
 
-App-owned runtime helpers in `main/` may compose service state into these UI
+App-owned runtime helpers in `firmware/main/` may compose service state into these UI
 contracts, but the drawing primitives themselves should stay reusable and
 service-agnostic.
 
@@ -280,7 +289,7 @@ The e-paper UI stack is now intentionally split across three layers:
 - `epaper_ui` owns reusable presentation primitives such as bitmap fonts,
   role-aware text rendering, the status bar renderer, the lock-screen
   renderer, and future view widgets ported from `followup`.
-- app-owned runtime helpers in `main/` compose service state into UI contracts.
+- app-owned runtime helpers in `firmware/main/` compose service state into UI contracts.
   Today that includes `status_bar_runtime`, which translates
   `power_service`, `wifi_service`, `timezone_service`, and sleep/shutdown state
   into a neutral `epaper_ui::StatusBarState`, `footer_runtime`, which projects
@@ -383,25 +392,25 @@ screen.
 
 ### `main`
 
-`main/` owns product composition for this firmware. It is not a reusable
+`firmware/main/` owns product composition for this firmware. It is not a reusable
 component. Keep it focused on startup ordering and app-level orchestration.
 
-`main/main.cpp` is intentionally tiny: it is only the ESP-IDF `app_main()` entry
+`firmware/main/main.cpp` is intentionally tiny: it is only the ESP-IDF `app_main()` entry
 point and delegates to `app_shell::Run()`.
 
-`main/app_shell.cpp` is an orchestration layer only. It may decide startup order,
+`firmware/main/app_shell.cpp` is an orchestration layer only. It may decide startup order,
 connect app-level policies, and choose whether an optional service failure is
 fatal, but it should not contain hardware driver logic, protocol logic, button
 debouncing, battery math, display drawing, networking workflows, or long-running
 feature loops. Put those behaviors in services/components and call them from the
 app shell.
 
-`main/status_bar_runtime.cpp` is an example of the intended app-runtime helper
+`firmware/main/status_bar_runtime.cpp` is an example of the intended app-runtime helper
 pattern. It is not a reusable component and does not own hardware or rendering.
 Its job is to compose product state into UI-facing data contracts that
 `display_service` can render through `epaper_ui`.
 
-The current app-runtime helpers under `main/` are:
+The current app-runtime helpers under `firmware/main/` are:
 
 - `status_bar_runtime`: compose Wi-Fi, Gemini, battery, sleep, and shutdown
   state into `epaper_ui::StatusBarState`
@@ -526,7 +535,7 @@ Current app-level button interactions are:
   instead of exiting it, and is currently a no-op at the app level.
 - A short press of the `PWR` key toggles the lock screen; a ~1s hold opens the
   shutdown confirmation modal. `PWR` is not a GPIO button: both arrive as AXP2101
-  interrupts, decoded by `main/power_key_runtime`. A sustained 6s hold bypasses
+  interrupts, decoded by `firmware/main/power_key_runtime`. A sustained 6s hold bypasses
   firmware entirely and the PMIC cuts the rails.
 - The rocker middle key has no double-click or long-press action. Lock and
   shutdown moved to `PWR`; recording is exclusive to `BOOT`.
@@ -579,36 +588,36 @@ Current focus-surface inventory is:
 
 Ownership is intentionally split as:
 
-- `components/page_navigation/roving_focus`: reusable wraparound index
+- `firmware/components/core/page_navigation/roving_focus`: reusable wraparound index
   primitive with no modal, display, or app-shell ownership baked in
-- `components/page_navigation/navigation_input_controller.*`: shared press
+- `firmware/components/core/page_navigation/navigation_input_controller.*`: shared press
   generation and hold-repeat gating for navigation buttons
-- `main/input_callback_dispatcher.*`: dedicated latest-wins input callback task
+- `firmware/main/input_callback_dispatcher.*`: dedicated latest-wins input callback task
   for app-owned button routing
-- `main/input_runtime_setup.*`: app-owned raw button/touch binding setup plus a
+- `firmware/main/input_runtime_setup.*`: app-owned raw button/touch binding setup plus a
   shared inputs-enabled gate before app routing begins
-- `main/button_input_runtime.*`: app-wide hardware-button dispatch policy that
+- `firmware/main/button_input_runtime.*`: app-wide hardware-button dispatch policy that
   converts raw button events into shared navigation press/hold behavior before
   they reach page or overlay code
-- `main/input_focus_runtime.cpp`: app-owned focus routing, touch contact state,
+- `firmware/main/input_focus_runtime.cpp`: app-owned focus routing, touch contact state,
   and app-wide precedence for overlay, footer, and page targets
-- `main/page_input_runtime.*`: active page input routing for current page-owned
+- `firmware/main/page_input_runtime.*`: active page input routing for current page-owned
   screens so `app_shell` and `input_focus_runtime` do not hard-code page
   behavior directly, and so neutral page interaction results are applied in
   one place instead of inside individual page runtimes
-- `main/settings_page_interactions.*`, `main/wifi_page_interactions.*`, and
-  `main/time_page_interactions.*`: focused interaction helpers that translate
+- `firmware/main/settings_page_interactions.*`, `firmware/main/wifi_page_interactions.*`, and
+  `firmware/main/time_page_interactions.*`: focused interaction helpers that translate
   current page focus into neutral page outcomes plus follow-on intents, while
   leaving service effects and orchestration callbacks outside the coordinator
-- `main/page_interaction_runtime.cpp`: registration point for future page
+- `firmware/main/page_interaction_runtime.cpp`: registration point for future page
   runtimes/coordinators to provide `resolve -> focus -> activate` touch hooks
-- `main/overlay_runtime.cpp`: retained overlay state, focus-sync, submit, and
+- `firmware/main/overlay_runtime.cpp`: retained overlay state, focus-sync, submit, and
   dismiss behavior for the card modal, select modal, keyboard, toast, and
   sticky-note overlays
-- `main/footer_runtime.cpp`: presentation-only projection of footer layout and
+- `firmware/main/footer_runtime.cpp`: presentation-only projection of footer layout and
   shared page focus into the e-paper footer contract, plus footer
   touch resolve/focus/activate hooks for footer-owned surfaces such as `Home`
-- `main/app_shell.cpp`: orchestration only; wires button/touch events into the
+- `firmware/main/app_shell.cpp`: orchestration only; wires button/touch events into the
   focused runtime helpers and composes higher-level product policy
 
 The current shared page-touch contract for current and future page-owned
@@ -623,7 +632,7 @@ screens is:
 This contract is implemented by every page-owned screen: `Dashboard` (home),
 `Onboarding`, `TopicsBrowse`, `TopicEntries`, `TopicSummary`, `Notes`, `Todos`, `FollowUp`, `Details`,
 `Settings`, `WiFi`, and `Time`. Dispatch for the active screen is centralized in
-`main/page_input_runtime.cpp` (`resolve/focus/activate` and button handling per
+`firmware/main/page_input_runtime.cpp` (`resolve/focus/activate` and button handling per
 `ScreenId`).
 
 Future pages should keep page-local selected indexes as render projections of
@@ -665,12 +674,12 @@ The current app-wide interaction feedback lifecycle is:
 - page, footer, overlay, and input-focus helpers may decide that an interaction
   should produce product feedback, but they should emit only neutral
   app-owned feedback cues
-- shared interaction contracts such as `main/app_interaction_result.h` should
+- shared interaction contracts such as `firmware/main/app_interaction_result.h` should
   use app-owned cue enums rather than depending on `feedback_service` or
   `system_sound_service` types directly
 - retained overlay state may queue a pending neutral feedback cue when modal or
   toast presentation changes, but it should not play sound feedback directly
-- `main/app_shell.cpp` is the single place that maps neutral app-owned feedback
+- `firmware/main/app_shell.cpp` is the single place that maps neutral app-owned feedback
   cues onto `feedback_service` events and requests actual playback
 
 This keeps interaction ownership local while preventing feedback policy from
@@ -682,22 +691,22 @@ The time configuration page is the first screen ported end-to-end through the
 full page pattern, and is the reference example for adding a page. It is reached
 from the global footer `Time` button and is composed across five layers:
 
-- **View renderer** (`components/epaper_ui/time_page.*`): a stateless
+- **View renderer** (`firmware/components/core/epaper_ui/time_page.*`): a stateless
   `DrawTimePage` plus `TimePageState`, bounds, and hit-test. Like the other page
-  renderers it lives in `epaper_ui` (not `main/`) because `display_service` — a
+  renderers it lives in `epaper_ui` (not `firmware/main/`) because `display_service` — a
   component — draws it and cannot depend on `main`. It composes the page's
   primitives: `select_input` (timezone), `time_input` (hour / minute / month /
   day / year), and `button` (AM-PM and Sync & Save). `text_input` is the shared
   field primitive those build on, and which `password_input` now wraps.
-- **Coordinator** (`main/time_page_coordinator.*`): owns the editable field
+- **Coordinator** (`firmware/main/time_page_coordinator.*`): owns the editable field
   values, the navigation model plus roving focus, loads state from
   `timezone_service`, and builds `TimePageState` and the save patch. A
   `user_edited_` guard stops background clock events from clobbering in-progress
   edits; `MarkSaved()` clears it after a save so a later sync reloads the page.
-- **Interactions** (`main/time_page_interactions.*`): map the focused control to
+- **Interactions** (`firmware/main/time_page_interactions.*`): map the focused control to
   a neutral activate intent (open timezone modal, edit a numeric field, toggle
   AM/PM, save, or footer navigation) with no side effects.
-- **Runtime** (`main/time_page_runtime.*`): the mutex-guarded orchestrator —
+- **Runtime** (`firmware/main/time_page_runtime.*`): the mutex-guarded orchestrator —
   focus movement, touch resolve/focus/activate, footer projection, the overlay
   editors, and the save flow. State is pushed to `display_service` and refreshes
   are scheduled through `ui_refresh_runtime` (`SurfaceKey::kTimePage`).
@@ -784,7 +793,7 @@ inactivity timer would otherwise keep counting through the clip.
 ## Task Mapping
 
 App-owned FreeRTOS tasks use the shared mapping in
-`components/task_config/include/chroninkle_task_config.h`. The app is optimized
+`firmware/components/services/task_config/include/chroninkle_task_config.h`. The app is optimized
 around a simple split:
 
 - CPU0 is the system/network side. ESP-IDF already runs the main task,
@@ -815,7 +824,7 @@ The mapping intentionally keeps long-running SD work below input and audio
 capture. Future tasks should be added to `task_config` first, with a short
 ownership rationale, rather than using local priority/core literals.
 
-Driver-specific wiring should stay out of `main/`; app startup should call
+Driver-specific wiring should stay out of `firmware/main/`; app startup should call
 service-level APIs instead. Add product-specific sequencing in `app_shell`, not
 inside reusable components.
 
@@ -853,7 +862,7 @@ credentials. If neither exists, or if `CONFIG_CHRONINKLE_WIFI_START_IN_AP_MODE`
 is enabled, `wifi_service` enters open AP setup mode and serves backend routes
 at the SoftAP URL, normally `http://192.168.4.1`. The backend serves both the
 JSON/form API and the setup portal frontend (embedded from
-`components/wifi_service/portal/`, generated by the Vite app in `webserver/`
+`firmware/components/services/wifi_service/portal/`, generated by the Vite app in `web/`
 — see CLAUDE.md's Setup portal section for the build/copy steps), and a
 `captive_dns` task (see Task Mapping below) 302-redirects unrecognized
 requests to the portal so OS connectivity probes land on it automatically.
@@ -876,7 +885,7 @@ Current time backend routes registered on the same HTTP server:
 Auto-sleep is split across a policy component and a product runtime helper:
 `device_sleep_service` owns sleep state, timers, timeout validation, blocker
 state, and transition events, but it does not touch display, GPIO, or ESP sleep
-hardware. `main/device_sleep_runtime.cpp` owns product-specific auto-sleep
+hardware. `firmware/main/device_sleep_runtime.cpp` owns product-specific auto-sleep
 runtime behavior: IMU inactivity polling, the event worker task, display sleep
 commands, ESP light-sleep entry, wake handling, and app-level blocker
 aggregation. `app_shell` should only provide settings, provide app-owned
@@ -886,7 +895,7 @@ deferred FIFO/shared-interrupt plan.
 
 Current auto-sleep behavior:
 
-- `main/device_sleep_runtime.cpp` polls `imu_service::ReadSample(...)` every
+- `firmware/main/device_sleep_runtime.cpp` polls `imu_service::ReadSample(...)` every
   `200 ms` and converts acceleration deltas from `g` to `mg`.
 - Motion is detected when the axis-delta sum is at least `60 mg` or the largest
   axis delta is at least `25 mg`.
@@ -921,7 +930,7 @@ SD-card formatting remains exposed through `storage_service`, but no demo
 button path currently invokes it. A future app UI should call the storage API
 through its own action/controller layer.
 
-### `components/axp2101`
+### `firmware/components/drivers/axp2101`
 
 This is the AXP2101 PMIC driver. On this board the PMIC is not optional: it feeds
 every rail, so a missing or unresponsive chip is unrecoverable by design and the
@@ -938,9 +947,9 @@ Current scope:
   a decoded `InterruptEvent` to a registered callback in task context
 
 The driver stays app-agnostic. What a power-key press *means* belongs to
-`main/power_key_runtime`, not here.
+`firmware/main/power_key_runtime`, not here.
 
-### `components/pcf85063`
+### `firmware/components/drivers/pcf85063`
 
 This is the PCF85063 RTC driver. It shares the sensor I2C bus with the PMIC and
 IMU.
@@ -951,7 +960,7 @@ Current scope:
 - back the timezone service's RTC writeback path
 - keep timezone policy and SNTP scheduling out of the driver
 
-### `components/board`
+### `firmware/components/drivers/board`
 
 This component centralizes Waveshare-specific hardware access. It is the only
 place that knows this board's pin mapping; generic drivers stay board-agnostic
@@ -996,7 +1005,7 @@ anywhere in the path. Output volume is set to `WAVESHARE_AUDIO_OUTPUT_VOLUME`
 (full scale) before output is enabled — the NS4150B into a small MX1.25 speaker
 has no headroom to give away, and the codec's own default is well below what is
 audible in the hand.
-### `components/power_service`
+### `firmware/components/services/power_service`
 
 This component is the app-facing power layer. It composes the `board` helpers
 with the AXP2101 PMIC and the PCF85063 RTC.
@@ -1027,7 +1036,7 @@ first clears and disables PCF85063 alarm/timer interrupt sources, then calls
 there and never returns; while VBUS is present the PMIC keeps the rail fed, so
 the call can return with the board still powered -- the log says as much, and
 unplugging USB completes the power-down.
-### `components/button_service`
+### `firmware/components/services/button_service`
 
 This C++ component owns app-facing button initialization and logging. It uses
 Espressif's managed `espressif/button` component for the underlying debounce and
@@ -1068,20 +1077,20 @@ Current app-shell usage on top of those low-level events is:
   action
 
 The app shell does not own modal focus routing directly. It hands button events
-to `main/input_focus_runtime.cpp`, which gives overlay focus traps first chance
+to `firmware/main/input_focus_runtime.cpp`, which gives overlay focus traps first chance
 to consume navigation movement, then defers submit/dismiss work to
-`main/overlay_runtime.cpp`. `overlay_runtime` keeps the modal above both the
+`firmware/main/overlay_runtime.cpp`. `overlay_runtime` keeps the modal above both the
 home screen and lock screen and only returns a `request_shutdown` intent after
 explicit confirmation.
 
 The auto-sleep runtime arms `ACTION` / `GPIO0` and the PMIC IRQ / `GPIO38` as
 light-sleep GPIO wake sources. The managed button component still owns normal
 awake-state debounce and event generation; light-sleep wake setup stays in
-`main/device_sleep_runtime.cpp` so pre-sleep wake-only event suppression, button
+`firmware/main/device_sleep_runtime.cpp` so pre-sleep wake-only event suppression, button
 poller suspend/resume, and immediate display recovery remain part of the auto-sleep
 policy.
 
-### `components/audio_hal`
+### `firmware/components/drivers/audio_hal`
 
 This is the ES8311 codec layer. It replaces the Sticky's PDM-input-only path:
 this board has both a microphone and a speaker (ES8311 plus an NS4150B power
@@ -1099,7 +1108,7 @@ The board keeps codec output (and therefore the PA) enabled for the codec's
 lifetime. Per-event PA toggling was rejected: cues and clip playback share the
 output, and toggling clipped whichever stream started second.
 
-### `components/system_sound_service`
+### `firmware/components/services/system_sound_service`
 
 This component owns the decoded sound-cue catalog and streams cues to the codec.
 
@@ -1113,7 +1122,7 @@ Current scope:
 The completion callback is what lets `recording_session_service` sequence the
 stop cue and the review playback without them overlapping.
 
-### `components/feedback_service`
+### `firmware/components/services/feedback_service`
 
 This C++ component owns app-facing haptic/audio feedback policy. It maps product
 events onto sound cues without exposing codec details to
@@ -1127,7 +1136,7 @@ Current scope:
 - keeps app-level feedback names separate from low-level cue names
 
 `feedback_service` is intentionally an app-shell dependency, not a runtime-helper
-dependency. App-owned helpers under `main/` such as `overlay_runtime`,
+dependency. App-owned helpers under `firmware/main/` such as `overlay_runtime`,
 `input_focus_runtime`, `footer_runtime`, and future page runtimes should not
 call `feedback_service` directly. They should emit neutral app-owned feedback
 cues and let `app_shell` map those cues onto `feedback_service` events.
@@ -1138,7 +1147,7 @@ open, startup, shutdown, and other product-level interaction outcomes. It
 should not know about LEDC timer numbers, PWM duty values, GPIO setup, or exact
 sound-cue catalog composition.
 
-### `components/sd_card`
+### `firmware/components/drivers/sd_card`
 
 This is the SDSPI/FATFS MicroSD wrapper ported from:
 
@@ -1163,7 +1172,7 @@ board layer. On Sticky, `storage_service` asks the board layer to initialize the
 shared SPI bus first and passes `external_spi_bus=true`, so the SD wrapper only
 adds its SDSPI device to the existing bus.
 
-### `components/storage_service`
+### `firmware/components/services/storage_service`
 
 This is the app-facing storage layer. It composes `board` pin definitions with
 the `sd_card` wrapper and owns app SD-card mount and format state.
@@ -1219,7 +1228,7 @@ afterward. Tearing the card back down after boot caused the panel to log a
 refresh without visibly updating the screen. Treat "SD first, then display, and
 keep SD mounted" as a required startup policy on this hardware revision.
 
-### `components/playback_service`
+### `firmware/components/services/playback_service`
 
 This component streams a clip to the codec. It is deliberately dumb: no policy,
 no task ownership, no state beyond "am I playing".
@@ -1236,7 +1245,7 @@ short-lived worker task. `PlayClip` exists for the review step after recording:
 at that point the take has deliberately not been written to SD yet, so a clip the
 user discards never touches the card.
 
-### `components/recording_service`
+### `firmware/components/services/recording_service`
 
 This is the app-facing voice-input recording layer. It composes the `audio_hal`
 codec capture side with app policy for pre-roll, recording state, clip
@@ -1262,7 +1271,7 @@ Future voice-product work should build VAD, upload/transcription, and display
 status on top of this service rather than pushing those policies down into
 `audio_hal`.
 
-### `components/epaper_panel`
+### `firmware/components/drivers/epaper_panel`
 
 This is the raw mono SSD1677 e-paper panel driver ported from:
 
@@ -1323,7 +1332,7 @@ Not yet ported from Folloup:
 pursued: the SSD1677 panel cannot drive a sub-window, so region partial refresh is not
 viable here — see the driver note above.)
 
-### `components/display_service`
+### `firmware/components/services/display_service`
 
 This is the app-facing display layer. It composes `board` pin definitions and
 power helpers with the `epaper_panel` raw driver.
@@ -1350,9 +1359,9 @@ Current UI state:
   notes, todos, follow-up, details, settings, wifi, time), and a real lock screen
 - the status bar is now rendered through `epaper_ui`
 - the global footer is rendered through `epaper_ui` and fed by
-  `main/footer_runtime.cpp`
+  `firmware/main/footer_runtime.cpp`
 - the lock screen uses its own `epaper_ui` renderer and a dedicated runtime
-  helper in `main/lock_screen_runtime.cpp`
+  helper in `firmware/main/lock_screen_runtime.cpp`
 - overlays are composited on top of the active screen in `DrawCurrentOverlays`
   (z-order keyboard → toast → select modal → card modal → sticky note); the
   `RenderSnapshot` carries each overlay's state (`card_modal`, `select_modal`,
@@ -1369,7 +1378,7 @@ Current UI state:
 Current decoupled refresh rule:
 
 - mutate runtime state first in the owning runtime helper
-- schedule keyed UI presentation work through `main/ui_refresh_runtime.cpp`
+- schedule keyed UI presentation work through `firmware/main/ui_refresh_runtime.cpp`
 - let `ui_refresh_runtime` coalesce stale intermediate updates and keep the
   latest state for each keyed surface while the panel is busy
 - carry the refresh mode through that queue as a `display_service::RefreshRequest`
@@ -1457,7 +1466,7 @@ Port validation notes still pending on hardware:
 - overlay, footer, and future page precedence logs should match the touched
   surface during on-device validation
 
-### `components/qmi8658`
+### `firmware/components/drivers/qmi8658`
 
 This is the QMI8658 6-axis IMU driver (3-axis accelerometer plus 3-axis
 gyroscope), on the shared sensor I2C bus.
@@ -1468,7 +1477,7 @@ Current scope:
 - read accelerometer samples used by `device_sleep_service` for motion wake
 - keep sleep policy and thresholds out of the driver
 
-### `components/imu_service`
+### `firmware/components/services/imu_service`
 
 This is the app-facing IMU layer. It composes `board` I2C access with the
 generic QMI8658 driver.
@@ -1564,7 +1573,7 @@ app / integration code
        -> board -> ESP-IDF drivers
        -> axp2101 -> ESP-IDF I2C/GPIO drivers
        -> pcf85063 -> ESP-IDF I2C driver
-  -> power_key_runtime (main/)
+  -> power_key_runtime (firmware/main/)
        -> board (GetPmic)
        -> axp2101
        -> device_sleep_service / device_sleep_runtime

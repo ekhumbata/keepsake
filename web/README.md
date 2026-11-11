@@ -48,7 +48,7 @@ Gemini (`gemini_service`)
 From repo root:
 
 ```bash
-cd webserver
+cd web
 npm install
 npm run dev
 ```
@@ -61,26 +61,26 @@ firmware.
 ## Build & Deploy To Firmware
 
 The firmware embeds a small, fixed set of files (`index.html`, `index.js`,
-`index.css`) via `EMBED_FILES` in `components/wifi_service/CMakeLists.txt`. To
+`index.css`) via `EMBED_FILES` in `firmware/components/services/wifi_service/CMakeLists.txt`. To
 refresh the portal after any frontend change:
 
 ```bash
-cd webserver
+cd web
 npm run build
-cp dist/index.html dist/index.js dist/index.css ../components/wifi_service/portal/
+cp dist/index.html dist/index.js dist/index.css ../firmware/components/services/wifi_service/portal/
 ```
 
 Then rebuild the firmware. `wifi_service` serves them at `/`, `/index.js`, and
 `/index.css`.
 
-`webserver/` is the source of truth. The copies under
-`components/wifi_service/portal/` are the tracked, embedded build output — refresh
+`web/` is the source of truth. The copies under
+`firmware/components/services/wifi_service/portal/` are the tracked, embedded build output — refresh
 them with the command above rather than hand-editing.
 
 ## Project Structure
 
 ```text
-webserver/
+web/
   index.html              # portal markup (WiFi / Gemini / Time cards)
   src/assets/             # inline SVGs (?raw)
   src/components/         # autonomous Web Components
@@ -89,7 +89,7 @@ webserver/
   src/main.ts             # bootstrap and orchestration
   src/portal.css          # global page/layout styles
   dist/                   # build output (generated, gitignored)
-components/wifi_service/portal/   # embedded build output served by the firmware
+firmware/components/services/wifi_service/portal/   # embedded build output served by the firmware
 ```
 
 ## Portal Source Layout

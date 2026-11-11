@@ -11,7 +11,7 @@ Auto sleep is split between policy and hardware runtime code:
 
 - `device_sleep_service` owns the sleep state machine, inactivity timers,
   timeout validation, blocker state, and transition events.
-- `main/device_sleep_runtime.cpp` owns product-specific hardware behavior:
+- `firmware/main/device_sleep_runtime.cpp` owns product-specific hardware behavior:
   IMU polling, display sleep commands, ESP light-sleep entry, `ACTION` wake
   setup and blocker aggregation.
 - `app_shell` remains an orchestrator. It provides settings, forwards user
@@ -52,7 +52,7 @@ mean paying its cost (Wi-Fi teardown/reassociation, plus a forced SD-card
 remount on wake — see Light Sleep below) on every quick lock/unlock cycle,
 not just on a lock that's actually left alone long enough to matter.
 
-Because of this, while the lock screen is active, `main/
+Because of this, while the lock screen is active, `firmware/main/
 device_sleep_runtime.cpp`'s motion classifier drops
 motion-sourced wake notifications instead of forwarding them to
 `device_sleep_service::NotifyMotionDetected()`. This matters for two
@@ -77,7 +77,7 @@ RequestUnlockOnWake()` before the `NotifyUserActivity()` that wakes the
 device, which sets a one-shot flag consumed by whichever wake path actually
 runs — `WakeDisplayRespectingLock()` for a display-sleep wake, or
 `RecoverDisplayRespectingLock()` for a light-sleep wake — both in
-`main/device_sleep_runtime.cpp`. If the flag is set (and the lock screen is
+`firmware/main/device_sleep_runtime.cpp`. If the flag is set (and the lock screen is
 still active), that path calls `lock_screen_runtime::HideWaking()`
 instead of the plain `WakeDisplay()`/`RecoverAfterLightSleep()`, which in
 turn calls the new `display_service::WakeDisplayToScreen()` to set the
@@ -139,7 +139,7 @@ at a glance that the device is powered down but still holding state, which is
 more useful than a blank screen that looks indistinguishable from "off" or
 "broken." It also costs no extra refresh cycle against the panel's ghosting
 budget (see `kMaxPartialRefreshesBeforeFlush` in
-`components/epaper_panel/ssd1677_driver.cpp`).
+`firmware/components/drivers/epaper_panel/ssd1677_driver.cpp`).
 
 Motion or user interaction wakes the display and restores the app surface
 with a full refresh.

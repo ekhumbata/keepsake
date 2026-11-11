@@ -9,6 +9,11 @@
 >   comment on the issue saying what's done and what's left.
 > - **Never commit personal data or secrets** (the friend's name, birthday, Wi-Fi, API keys). The repo is public.
 > - Ignore the `v2-dev` / `docs/specs/v2/` process below; it's Chroninkle's, not Keepsake's.
+> - **Repo layout (#7):** the ESP-IDF project lives in `firmware/` (run `idf.py` there, or `idf.py -C firmware …`
+>   from the root). Components are split into `firmware/components/core/` (portable, no ESP-IDF: `epaper_ui`,
+>   `design_tokens`, `project_assets`, `page_navigation`), `drivers/` (hardware) and `services/` (`*_service`,
+>   `task_config`). `webserver/` is now `web/` and `scripts/` is now `tools/`. Upstream-era docs and history
+>   (`CHANGELOG.md`, `docs/todo-archive.md`, `docs/specs/v2/`) still use the old paths.
 > - The rest of this file is Chroninkle's original guide. It's still accurate for the inherited code until the
 >   "Agent docs" issue rewrites it.
 
@@ -51,18 +56,20 @@ lives in `docs/waveshare-epaper-hardware-spec.md`.
 
 This is an ESP-IDF project; there is no unit test suite. **Do not automatically
 run builds** — only build when the user explicitly asks, and reuse the
-existing `build/` directory rather than creating a new one (see `AGENTS.md`).
+existing `firmware/build/` directory rather than creating a new one (see `AGENTS.md`).
+All `idf.py` commands below run from `firmware/` (or pass `-C firmware`).
 
 An ESP-IDF environment must be sourced first (`idf.py` on `PATH`, or set
 `IDF_PATH` to a v5.x ESP-IDF checkout). Helper scripts under
 `.agents/skills/esp32-firmware-engineer/scripts/` wrap `idf.py` with
-environment auto-detection, port auto-detection, and target sync:
+environment auto-detection, port auto-detection, and target sync. Point them at
+the project with `PROJECT_DIR=firmware` (run from the repo root):
 
 ```bash
-./.agents/skills/esp32-firmware-engineer/scripts/build.sh              # idf.py build
-./.agents/skills/esp32-firmware-engineer/scripts/build.sh --strict-warnings  # fail if build.log has any "warning:"
-./.agents/skills/esp32-firmware-engineer/scripts/flash.sh              # build + flash (auto-detects serial port; PORT=... to override)
-./.agents/skills/esp32-firmware-engineer/scripts/monitor.sh            # idf.py monitor
+PROJECT_DIR=firmware ./.agents/skills/esp32-firmware-engineer/scripts/build.sh              # idf.py build
+PROJECT_DIR=firmware ./.agents/skills/esp32-firmware-engineer/scripts/build.sh --strict-warnings  # fail if build.log has any "warning:"
+PROJECT_DIR=firmware ./.agents/skills/esp32-firmware-engineer/scripts/flash.sh              # build + flash (auto-detects serial port; PORT=... to override)
+PROJECT_DIR=firmware ./.agents/skills/esp32-firmware-engineer/scripts/monitor.sh            # idf.py monitor
 ```
 
 That build wrapper also runs a generic ESP-ADF/ESP-SR compatibility preflight
@@ -76,6 +83,7 @@ with no `sdkconfig` yet, also pass `ESP_TARGET=esp32s3` (or the wrapper's
 Equivalent raw commands (target is `esp32s3`):
 
 ```bash
+cd firmware
 idf.py build
 idf.py -p <PORT> -b 460800 flash
 idf.py monitor
@@ -83,16 +91,16 @@ idf.py menuconfig   # project options live under "Chroninkle Settings"
 ```
 
 Asset regeneration (icons/logos/fonts are generated C++ compiled into
-`components/project_assets`; **never hand-edit the generated files**):
+`firmware/components/core/project_assets`; **never hand-edit the generated files**):
 
 ```bash
-python3 scripts/generate_epaper_project_assets.py   # manifest-driven, regenerates everything from assets/epaper_assets.json
+python3 tools/generate_epaper_project_assets.py   # manifest-driven, regenerates everything from assets/epaper_assets.json
 ```
 
-See `scripts/README.md` for the lower-level per-asset-type generator scripts
+See `tools/README.md` for the lower-level per-asset-type generator scripts
 and `docs/asset-generation.md` for the pipeline.
 
-### Setup portal (`webserver/`)
+### Setup portal (`web/`)
 
 A separate TypeScript + Vite web app, embedded into firmware and served by
 `wifi_service`'s HTTP server while the device is in AP setup mode (Wi-Fi
@@ -101,16 +109,16 @@ build graph — after any frontend change it must be built and its output
 manually copied into the component:
 
 ```bash
-cd webserver
+cd web
 npm install
 npm run dev          # vite dev server at http://localhost:5173 (no backend; point at a real device's AP for live API calls)
 npm run build         # tsc -b && vite build -> dist/
 npm run lint
-cp dist/index.html dist/index.js dist/index.css ../components/wifi_service/portal/
+cp dist/index.html dist/index.js dist/index.css ../firmware/components/services/wifi_service/portal/
 ```
 
-`webserver/` is the source of truth; `components/wifi_service/portal/` is
-tracked, generated build output — don't hand-edit it. See `webserver/README.md`
+`web/` is the source of truth; `firmware/components/services/wifi_service/portal/` is
+tracked, generated build output — don't hand-edit it. See `web/README.md`
 for the source layout (`src/components/` web components, `src/portal/`
 feature controllers/API helpers).
 
@@ -118,15 +126,18 @@ feature controllers/API helpers).
 
 ### Layout
 
-- `main/` — product composition only (not a reusable component). `main.cpp` is
+- `firmware/main/` — product composition only (not a reusable component). `main.cpp` is
   a one-line `app_shell::Run()` call. `app_shell.cpp` is an **orchestration
   layer only**: startup ordering, event wiring, policy composition — no
   hardware/protocol/display/power logic (see `AGENTS.md`). Everything else
-  under `main/` is an "app-runtime helper" that composes service state into
+  under `firmware/main/` is an "app-runtime helper" that composes service state into
   neutral UI/interaction contracts; each feature page has a
   `{runtime, coordinator, interactions}` trio (older pages — settings/wifi/time
   — predate the coordinator split).
-- `components/` — generic hardware drivers (`pcf85063`, `qmi8658`, `sd_card`,
+- `firmware/components/{core,drivers,services}/` — `core/` holds the portable,
+  ESP-IDF-free UI pieces (`epaper_ui`, `design_tokens`, `project_assets`,
+  `page_navigation`); `drivers/` holds hardware drivers; `services/` holds the
+  `*_service` components and `task_config`. Generic hardware drivers (`pcf85063`, `qmi8658`, `sd_card`,
   `epaper_panel`) are board-agnostic and must not depend on `board`. `board`
   (`waveshare_board`) centralizes Waveshare-specific pin/bus assignments, PMIC
   rail bring-up, and the shared audio codec instance. App-facing `*_service`
@@ -136,7 +147,7 @@ feature controllers/API helpers).
 - `epaper_ui` — reusable e-paper presentation primitives (status bar, footer,
   modals, toast, keyboard, timeline list, sticky note, ~55 widgets) *and* all
   full page renderers. It depends on `design_tokens` + `project_assets` only,
-  never on app services — page renderers live here (not in `main/`) because
+  never on app services — page renderers live here (not in `firmware/main/`) because
   `display_service`, a component, draws them and cannot depend on `main`.
 - `design_tokens` — header-only shared spacing/grayscale/typography/sizing
   constants.
@@ -165,11 +176,11 @@ Full detail: "Dependency Direction" in `docs/app-architecture.md`.
 - Overlays composite on top, z-order keyboard → toast → select modal → card
   modal → sticky note. Every page-owned screen implements a shared touch
   contract: `resolve_touch_target` / `focus_touch_target` /
-  `activate_touch_target`, dispatched centrally in `main/page_input_runtime.cpp`
+  `activate_touch_target`, dispatched centrally in `firmware/main/page_input_runtime.cpp`
   — this contract is vestigial UI-focus plumbing inherited from the Sticky
   port (**this board has no touch controller**, so nothing dispatches real
   touch events; all input is buttons only).
-- All repaints route through `main/ui_refresh_runtime.cpp`, a keyed
+- All repaints route through `firmware/main/ui_refresh_runtime.cpp`, a keyed
   latest-wins worker (one `SurfaceKey` per page + `kOverlay`/`kLockScreen`/
   `kStatusBar`/`kFooter`). **The overlay rule**: while `overlay_runtime::
   IsInputCaptured()` is true, underlay (page/status/footer) refreshes are
@@ -239,7 +250,7 @@ the AXP2101 holds rails across `esp_light_sleep_start()` on its own.
 ### Task/core mapping
 
 App FreeRTOS tasks use the shared table in
-`components/task_config/include/chroninkle_task_config.h`. CPU0 = system/network
+`firmware/components/services/task_config/include/chroninkle_task_config.h`. CPU0 = system/network
 (Wi-Fi, timezone sync — alongside ESP-IDF's own main task/esp_timer/Wi-Fi
 driver); CPU1 = product hardware/UI (audio capture, storage, sound feedback,
 sleep-driven display transitions, PMIC IRQ servicing). Add new tasks to
@@ -250,7 +261,7 @@ priority/core literals. Full priority table: "Task Mapping" in
 ### Auto-sleep
 
 `device_sleep_service` (component) owns policy/state/timers only — no display,
-GPIO, or ESP sleep hardware. `main/device_sleep_runtime.cpp` owns the actual
+GPIO, or ESP sleep hardware. `firmware/main/device_sleep_runtime.cpp` owns the actual
 IMU-polling (QMI8658, via `imu_service`), display-sleep, and light-sleep
 mechanics. See `docs/auto-sleep.md`.
 
@@ -285,8 +296,8 @@ Runtime settings persist under service-owned NVS namespaces: `wifi`
 `CONFIG_CHRONINKLE_AUTO_SLEEP_*_TIMEOUT_SECONDS`. Saved NVS Wi-Fi credentials
 always take precedence over built-in sdkconfig credentials.
 
-**Local test builds vs. release builds**: the project-root `sdkconfig` (gitignored, tied to
-the default `build/` directory) is a personal dev config -- it's fine to hand-edit real
+**Local test builds vs. release builds**: the project's `firmware/sdkconfig` (gitignored, tied to
+the default `firmware/build/` directory) is a personal dev config -- it's fine to hand-edit real
 Wi-Fi/Gemini values directly into its `CONFIG_CHRONINKLE_WIFI_STA_SSID`/`_PASSWORD`/
 `GEMINI_API_KEY` lines (or set them via `idf.py menuconfig`) so a test flash doesn't need
 the on-device setup portal every time. **Never carry those into a release build.** Build
@@ -294,6 +305,7 @@ release artifacts into a separate directory with their own config path so they o
 trace back to the tracked `sdkconfig.defaults` (empty credential fields), e.g.:
 
 ```bash
+cd firmware
 rm -f sdkconfig.release   # force a fresh regenerate from sdkconfig.defaults, not a stale one
 idf.py -B build-release -D SDKCONFIG=sdkconfig.release set-target esp32s3
 idf.py -B build-release -D SDKCONFIG=sdkconfig.release build
@@ -304,18 +316,18 @@ personal credentials afterward, and no risk of a release accidentally shipping t
 
 ## Working conventions
 
-- Keep `main/app_shell.cpp` an orchestration layer — before adding logic
+- Keep `firmware/main/app_shell.cpp` an orchestration layer — before adding logic
   there, ask whether it belongs in a service/component or a focused runtime
   helper instead (`AGENTS.md`).
-- Generic drivers under `components/` (`pcf85063`, `qmi8658`, `sd_card`,
+- Generic drivers under `firmware/components/drivers/` (`pcf85063`, `qmi8658`, `sd_card`,
   `epaper_panel`) must stay board-agnostic: take an already-initialized
   bus/device handle and pins/config from the caller, never read `board`
   directly. `axp2101` and `audio_hal` stay app-agnostic in the same sense —
-  what a power-key press or a sound cue *means* belongs in `main/` or
+  what a power-key press or a sound cue *means* belongs in `firmware/main/` or
   `feedback_service`, not the driver.
-- Don't hand-edit generated files: `components/project_assets/generated_*`,
-  `components/epaper_ui/generated_epaper_fonts.*`, and
-  `components/wifi_service/portal/*` (regenerate via the scripts/build steps
+- Don't hand-edit generated files: `firmware/components/core/project_assets/generated_*`,
+  `firmware/components/core/epaper_ui/generated_epaper_fonts.*`, and
+  `firmware/components/services/wifi_service/portal/*` (regenerate via the tools/build steps
   above instead).
 - `GPIO0` (`ACTION`/BOOT button) is the boot/download strap pin and must read
   high at reset — it's only ever pulled low by a button press, never held

@@ -3,7 +3,7 @@
 This document describes the current Gemini integration used by the Chroninkle
 firmware.
 
-`components/gemini_service/` currently owns:
+`firmware/components/services/gemini_service/` currently owns:
 
 - Gemini API key storage precedence
 - Gemini authentication state
@@ -33,12 +33,12 @@ Current runtime split:
 - `wifi_service`
   - owns the backend HTTP server and hosts Gemini routes through the existing
     portal route registrar
-- `main/app_shell.cpp`
+- `firmware/main/app_shell.cpp`
   - initializes the service, forwards Wi-Fi network state into Gemini, logs
     Gemini events, and triggers the Gemini-connected sound cue
-- `main/status_bar_runtime.cpp`
+- `firmware/main/status_bar_runtime.cpp`
   - reflects Gemini-ready state into `epaper_ui::StatusBarState`
-- `components/epaper_ui/`
+- `firmware/components/core/epaper_ui/`
   - renders the Gemini-ready star icon in the status bar
 - `feedback_service` / `system_sound_service`
   - play a dedicated Gemini-connected cue when readiness transitions from false
@@ -131,7 +131,7 @@ The current auth path is intentionally minimal:
 - request type: HTTP `GET`
 - endpoint: `v1beta/<model>`
 - default model: `models/gemini-3.5-flash-lite` (`kDefaultModelName` in
-  `components/gemini_service/gemini_service.cpp`)
+  `firmware/components/services/gemini_service/gemini_service.cpp`)
 - auth header: `x-goog-api-key: <api_key>`
 
 The current implementation uses ESP-IDF's `esp_http_client` with the CRT bundle
