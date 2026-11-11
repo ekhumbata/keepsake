@@ -66,6 +66,10 @@ lives in `docs/waveshare-epaper-hardware-spec.md`.
 cmake -S tests -B build/tests -G Ninja && cmake --build build/tests && ctest --test-dir build/tests --output-on-failure
 ```
 
+The same build renders the **screen gallery** (`tests/gallery/`): every screen as a PNG, with
+golden hashes checked by ctest. A UI change updates `tests/gallery/golden.txt` (see
+`tests/README.md`).
+
 CI (`.github/workflows/`) runs `firmware.yml` (ESP-IDF v5.5 build, fails on any warning,
 uploads the images), `tests.yml` (unit tests under ASan/UBSan + a 60 s fuzz per target) and
 `web.yml` (lint, build, and a check that the embedded portal matches the build) on every PR.
