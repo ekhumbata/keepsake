@@ -42,6 +42,23 @@ artifact. To reproduce one locally, pass the file to the fuzzer: `build/fuzz/<ta
 | `unit/test_*.cpp` | test cases; any new file is picked up automatically |
 | `fuzz/fuzz_*.cpp` | one libFuzzer target per file (`LLVMFuzzerTestOneInput`) |
 
+## Screen gallery
+
+`screen_gallery` (`gallery/screen_gallery.cpp`) renders every `epaper_ui` screen and overlay
+from sample states into the panel's own 800×480 framebuffer and writes portrait PNGs.
+`gallery/golden.txt` holds a CRC-32 per screen; the `screen_gallery` ctest fails when a screen
+changes. CI uploads the PNGs as the `screen-gallery-<sha>` artifact on every run, so a design
+change can be reviewed from the Actions page, even on a phone. Why it's headless and
+host-built: `docs/adr/0001-simulator-scope.md`.
+
+```bash
+build/tests/screen_gallery --out build/tests/gallery                         # just render
+build/tests/screen_gallery --out build/tests/gallery --golden tests/gallery/golden.txt --update
+```
+
+After an **intended** UI change, look at the PNGs, rerun with `--update`, and commit
+`golden.txt` with the change. A new screen gets a sample state in `Screens()` in the same PR.
+
 ## Writing tests
 
 - Test behavior the device relies on (invariants, edge cases, bugs that happened), not

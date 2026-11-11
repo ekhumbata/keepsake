@@ -78,8 +78,19 @@ add_custom_target(keepsake_fixtures DEPENDS "${KEEPSAKE_FIXTURE_DIR}/epub2_ncx.e
 add_dependencies(unit_tests keepsake_fixtures)
 target_compile_definitions(unit_tests PRIVATE KEEPSAKE_FIXTURE_DIR="${KEEPSAKE_FIXTURE_DIR}")
 
+# Screen gallery (#14, docs/adr/0001-simulator-scope.md): every screen rendered to PNG, with
+# golden framebuffer hashes checked as a test. PNGs land in build/.../gallery for review.
+add_executable(screen_gallery "${CMAKE_CURRENT_LIST_DIR}/gallery/screen_gallery.cpp")
+target_link_libraries(screen_gallery PRIVATE keepsake_core)
+target_compile_options(screen_gallery PRIVATE ${KEEPSAKE_WARNINGS} ${KEEPSAKE_SANITIZER_FLAGS})
+set(KEEPSAKE_GALLERY_DIR "${CMAKE_CURRENT_BINARY_DIR}/gallery")
+file(MAKE_DIRECTORY "${KEEPSAKE_GALLERY_DIR}")
+
 enable_testing()
 add_test(NAME unit_tests COMMAND unit_tests)
+add_test(NAME screen_gallery
+         COMMAND screen_gallery --out "${KEEPSAKE_GALLERY_DIR}"
+                 --golden "${CMAKE_CURRENT_LIST_DIR}/gallery/golden.txt")
 
 if(KEEPSAKE_FUZZ)
     if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
