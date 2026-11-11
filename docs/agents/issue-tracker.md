@@ -2,7 +2,7 @@
 
 ## Chroninkle-specific rules
 
-- **Always pass `--repo mach1na/chroninkle`** to `gh` commands. The fork otherwise defaults to the untouched upstream.
+- **Always pass `--repo ekhumbata/keepsake`** to `gh` commands. The fork otherwise defaults to the untouched upstream.
 - **Branching:** follow `CLAUDE.md`. Each ticket gets its own branch, created before any edits. V2 work branches off `v2-dev` and merges back into it. Behaviour changes bump `version.txt` and add a `CHANGELOG.md` entry under `## [Unreleased]`.
 - **No automated tests:** this is ESP-IDF firmware with no test suite, so `/tdd` red-green does not apply. Verification is a clean build (only when the user asks for one) followed by the user flashing and checking on the device.
 - **Specs:** long-form V2 specs live in `docs/specs/v2/` (template: `_template.md`). Issues reference them rather than duplicating them.

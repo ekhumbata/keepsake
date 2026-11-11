@@ -1,3 +1,6 @@
+> **Keepsake:** read `CLAUDE.md` (its Keepsake banner) and `docs/plan.md` first. Issues and PRs go to
+> `ekhumbata/keepsake`, never `mach1na/chroninkle`.
+
 # Agent Notes
 
 Read `docs/app-architecture.md` before changing the firmware architecture,
