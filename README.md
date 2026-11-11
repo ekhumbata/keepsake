@@ -26,7 +26,8 @@ features on top.
 - **USB drive mode** (Settings → Storage) to copy files onto the SD card from a computer.
 - **Wi-Fi setup** through the device's own `Keepsake-XXXXXX` hotspot.
 
-The full walkthrough of every screen and control is in the [user manual](docs/user-manual.md).
+The [guide](docs/guide.md) has the feature list (with status), controls and how-tos; the full walkthrough of every
+screen is in the [user manual](docs/user-manual.md).
 
 ## Coming next
 
