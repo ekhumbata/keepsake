@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy this file OUTSIDE the repo, fill it in, and put it on the SD card as /.keepsake/provision.json. Keepsake imports it on the next start, then wipes and deletes it. Every setting is optional; delete the lines you don't need. Never commit the filled-in copy.",
+  "version": 1,
+  "wifi": [
+    { "ssid": "Friends-Home-WiFi", "password": "home network password" },
+    { "ssid": "Phone Hotspot", "password": "hotspot password" }
+  ],
+  "timezone": "Europe/London",
+  "weather_location": "London",
+  "friend_name": "Sam",
+  "birthday": "07-14",
+  "welcome_message": "Happy birthday! I made you a little reading companion.",
+  "gemini_key": ""
+}
