@@ -1551,13 +1551,16 @@ the auto-sleep timeouts, this one has a runtime NVS override (`rec_archive_cfg`
 above) that the Settings page's "Archive todos after" picker can change without
 a reflash.
 
-The partition table currently contains:
+The partition table (16 MB flash, final for the gift, #39) contains:
 
-- `nvs`
+- `nvs` (24 KB)
 - `otadata`
 - `phy_init`
-- `ota_0`
-- `ota_1`
+- `ota_0`, `ota_1` (7.875 MB each)
+- `coredump` (128 KB, the last 128 KB of flash): an ELF core dump written on a panic
+  (`CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH`), copied to the SD card on the next boot (#41)
+
+Changing the table needs a USB flash; OTA can't move partitions.
 
 Rollback is enabled with `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y`. Because
 rollback is enabled, the application must keep the OTA validation hook in
