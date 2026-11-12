@@ -39,5 +39,7 @@ inline constexpr UBaseType_t kPrioritySensorPoll = 2;
 // Wi-Fi on demand (#17): runs queued network jobs (time sync, uploads) one at a time and
 // decides when the radio is on. Background work, so below the UI and Wi-Fi driver tasks.
 inline constexpr UBaseType_t kPriorityNetJobs = 2;
+// Board test console (#15): only answers commands from a computer over USB; never in the way.
+inline constexpr UBaseType_t kPriorityTestConsole = 1;
 
 }  // namespace chroninkle_task_config

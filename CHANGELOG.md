@@ -10,6 +10,15 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Board tests** (#15). A test console in the firmware (on by default, USB serial,
+  `kst ...` commands) and `tools/board/run_board_tests.py` on the computer: plug the board
+  in and run it for a self-test of every chip (PMIC, RTC, IMU, sensor, SD card, display,
+  memory, Wi-Fi), real screenshots of the panel, an SD card round trip and a UI tour with
+  simulated button presses; optionally a by-hand button check, a forced crash and a broken
+  provisioning file. See `docs/board-tests.md`.
+
+### Added
+
 - **Crash reports on the SD card** (#41). After a crash (panic, watchdog or brownout)
   the next start writes `/.keepsake/crash/crash-NNN.txt` with the reset reason, the
   crashed task and backtrace, and the last log lines from before the crash, plus the core

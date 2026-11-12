@@ -1,6 +1,9 @@
 #ifndef DISPLAY_SERVICE_H_
 #define DISPLAY_SERVICE_H_
 
+#include <cstdint>
+#include <vector>
+
 #include "epaper_ui/lock_screen.h"
 #include "epaper_ui/book_list_page.h"
 #include "epaper_ui/book_reader_page.h"
@@ -102,6 +105,10 @@ bool IsInitialized();
 int PortraitWidth();
 int PortraitHeight();
 ScreenId GetCurrentScreen();
+const char* ScreenName(ScreenId screen);
+// Board tests (#15): a copy of what's on the panel, as the raw 1-bit framebuffer (rows of the
+// panel's native landscape layout, most significant bit first, a set bit is white).
+bool CopyFramebuffer(std::vector<uint8_t>* out, int* raw_width, int* raw_height);
 esp_err_t SetStatusBarState(const epaper_ui::StatusBarState& state);
 esp_err_t SetGlobalFooterState(const epaper_ui::GlobalFooterState& state);
 esp_err_t SetSettingsPageState(const epaper_ui::SettingsPageState& state);

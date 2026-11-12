@@ -1634,6 +1634,53 @@ ScreenId GetCurrentScreen()
     return s_current_screen.load(std::memory_order_relaxed);
 }
 
+const char* ScreenName(ScreenId screen)
+{
+    switch (screen) {
+        case ScreenId::kHome: return "home";
+        case ScreenId::kSettings: return "settings";
+        case ScreenId::kWifi: return "wifi";
+        case ScreenId::kTime: return "time";
+        case ScreenId::kSettingsStorage: return "settings_storage";
+        case ScreenId::kSettingsTodos: return "settings_todos";
+        case ScreenId::kSettingsTopics: return "settings_topics";
+        case ScreenId::kSettingsAbout: return "settings_about";
+        case ScreenId::kTopicsBrowse: return "topics_browse";
+        case ScreenId::kTopicEntries: return "topic_entries";
+        case ScreenId::kTopicSummary: return "topic_summary";
+        case ScreenId::kNotes: return "notes";
+        case ScreenId::kTodos: return "todos";
+        case ScreenId::kFollowUp: return "follow_up";
+        case ScreenId::kDetails: return "details";
+        case ScreenId::kOnboarding: return "onboarding";
+        case ScreenId::kLockScreen: return "lock_screen";
+        case ScreenId::kBookList: return "book_list";
+        case ScreenId::kBookReader: return "book_reader";
+    }
+    return "unknown";
+}
+
+bool CopyFramebuffer(std::vector<uint8_t>* out, int* raw_width, int* raw_height)
+{
+    if (!s_initialized || out == nullptr) {
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(s_panel_mutex);
+    const uint8_t* framebuffer = Panel().framebuffer();
+    if (framebuffer == nullptr) {
+        return false;
+    }
+    const size_t bytes = static_cast<size_t>(WAVESHARE_EPD_WIDTH / 8) * WAVESHARE_EPD_HEIGHT;
+    out->assign(framebuffer, framebuffer + bytes);
+    if (raw_width != nullptr) {
+        *raw_width = WAVESHARE_EPD_WIDTH;
+    }
+    if (raw_height != nullptr) {
+        *raw_height = WAVESHARE_EPD_HEIGHT;
+    }
+    return true;
+}
+
 esp_err_t SetStatusBarState(const epaper_ui::StatusBarState& state)
 {
     if (!s_initialized) {
