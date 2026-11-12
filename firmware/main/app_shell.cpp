@@ -10,6 +10,7 @@
 #include "ai_features.h"
 #include "app_state_service.h"
 #include "epaper_ui/book_page.h"
+#include "battery_runtime.h"
 #include "book_list_page_runtime.h"
 #include "book_reader_page_runtime.h"
 #include "button_input_runtime.h"
@@ -2447,6 +2448,8 @@ void Run()
         special_days_runtime::ShowCardIfDue();
     }
     ShowProvisioningOutcome();
+    // Charging card and low-battery nudges (#84).
+    battery_runtime::Start();
     // Lets tools/board/ on a computer check a plugged-in board (#15, docs/board-tests.md).
     test_console_runtime::Start();
 }

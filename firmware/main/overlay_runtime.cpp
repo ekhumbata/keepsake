@@ -626,6 +626,17 @@ esp_err_t ShowShutdownModal()
     return ShowCardModal(CardModalPurpose::kShutdownConfirm, "shutdown_confirm");
 }
 
+esp_err_t DismissNoteCardTitled(const std::string& title)
+{
+    {
+        std::lock_guard<std::mutex> lock(s_state_mutex);
+        if (s_card_modal_purpose != CardModalPurpose::kNote || s_note_title != title) {
+            return ESP_ERR_INVALID_STATE;
+        }
+    }
+    return DismissCardModal();
+}
+
 esp_err_t DismissShutdownModal()
 {
     return DismissCardModal();

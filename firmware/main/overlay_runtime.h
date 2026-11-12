@@ -38,6 +38,9 @@ bool IsInputCaptured();
 
 esp_err_t ShowShutdownModal();
 esp_err_t DismissShutdownModal();
+// Closes the note card if it's still the one called `title` (e.g. the charging card once the
+// charger is unplugged, #84); leaves any other card alone.
+esp_err_t DismissNoteCardTitled(const std::string& title);
 esp_err_t ShowStorageModalNoSdCard();
 esp_err_t ShowStorageModalConfirmFormat();
 esp_err_t ShowStorageModalFormatting();

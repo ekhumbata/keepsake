@@ -31,6 +31,7 @@
 #include "epaper_ui/mascots.h"
 #include "greeting/special_days.h"
 #include "epaper_ui/notes_page.h"
+#include "battery_ux/battery_ux.h"
 #include "epaper_ui/onboarding_page.h"
 #include "epaper_ui/select_modal.h"
 #include "epaper_ui/settings_about_page.h"
@@ -456,6 +457,26 @@ std::map<std::string, Renderer> Screens()
                 state.body_text = occasion.message;
                 state.action_labels = {"Close"};
                 state.image = OccasionMascot(occasion.mascot);
+                DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+            });
+        }
+    }
+    // Battery (#84): the charging card and the low-battery card, with their Mochis.
+    {
+        const std::pair<const char*, std::pair<battery_ux::Message, EmbeddedImageId>> cards[] = {
+            {"battery_charging", {battery_ux::ChargingMessage(42), EmbeddedImageId::kMascotCharging}},
+            {"battery_low", {battery_ux::NudgeMessage(10), EmbeddedImageId::kMascotSleepy}},
+        };
+        for (const auto& [name, card] : cards) {
+            const battery_ux::Message message = card.first;
+            const EmbeddedImageId image = card.second;
+            screens[name] = over_home([message, image](uint8_t* fb) {
+                CardModalState state = {};
+                state.visible = true;
+                state.title_text = message.title;
+                state.body_text = message.body;
+                state.action_labels = {"Close"};
+                state.image = project_assets::GetImage(image);
                 DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
             });
         }

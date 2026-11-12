@@ -480,8 +480,21 @@ As a last resort, **holding PWR continuously for 6 seconds cuts power
 immediately**, regardless of what the screen is doing — useful if the
 device is ever unresponsive.
 
-**Charging**: plug in via USB-C. The status bar shows your battery
-percentage and a charging indicator while power is connected.
+**Charging**: plug in via USB-C. A **Charging** card with Mochi having a
+snack says how far along it is. It closes by itself after a few seconds, or
+when you unplug, and **Close** puts it away sooner. Keepsake works as usual
+while it charges. The status bar shows your battery percentage and a charging
+mark while power is connected. The percentage is smoothed so it doesn't
+jitter: on battery it only goes down, and while charging it only goes up.
+
+**Low battery**: Keepsake reminds you gently, once each time:
+
+- at **20%**, a short note at the bottom of the screen ("Time to charge
+  soon");
+- at **10%** and **5%**, a card with a sleepy Mochi.
+
+Charging re-arms them. Updates wait for you to plug in when the battery is
+below 30%.
 
 ## Tips and things that surprise people
 
