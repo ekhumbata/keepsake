@@ -77,6 +77,8 @@
 namespace app_shell {
 namespace {
 
+// Whether the "Let's reconnect" card was offered this boot (#43).
+std::atomic<bool> s_reconnect_offered{false};
 void ShowWelcomeNoteIfDue();
 
 constexpr const char* kTag = "AppShell";
@@ -1548,6 +1550,22 @@ void HandleWifiEvent(const wifi_service::Event& event, void*)
                                     event.ui_state.access_point_mode);
     recording_session_service::SetNetworkConnected(event.ui_state.connected);
 
+    // The saved password stopped working (#43): offer to set Wi-Fi up again, once per boot.
+    // Being out of range ("RECONNECT_EXHAUSTED") doesn't ask: the network is just not there.
+    if (event.detail == "PASSWORD_REJECTED" && s_startup_complete.load(std::memory_order_relaxed) &&
+        !s_reconnect_offered.exchange(true, std::memory_order_relaxed)) {
+        const std::vector<std::string> saved = wifi_service::SavedNetworks();
+        const std::string network = !event.ui_state.ssid.empty() ? event.ui_state.ssid
+                                    : !saved.empty()              ? saved.front()
+                                                                  : std::string();
+        const esp_err_t err =
+            overlay_runtime::ShowReconnectCard(epaper_ui::ToDisplayText(network));
+        FlushOverlayFeedback();
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGW(kTag, "Reconnect card failed: %s", esp_err_to_name(err));
+        }
+    }
+
     const bool wifi_connected = event.ui_state.connected;
     const bool was_wifi_connected =
         s_wifi_connected.exchange(wifi_connected, std::memory_order_relaxed);
@@ -1625,6 +1643,14 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
     }
     if (overlay_result.request_delete_book) {
         (void)book_list_page_runtime::DeleteConfirmedBook();
+    }
+    if (overlay_result.request_wifi_setup) {
+        // "Let's reconnect" -> Set up (#43): the setup hotspot, and the page that explains it.
+        wifi_service::SetAccessPointEnabled(true);
+        const esp_err_t err = ShowWifiScreen(display_service::RefreshMode::kPartial);
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGW(kTag, "Wi-Fi setup screen failed: %s", esp_err_to_name(err));
+        }
     }
     if (overlay_result.request_format_sd_card) {
         const esp_err_t err = storage_service::RequestFormatSdCard();

@@ -10,6 +10,13 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **"Let's reconnect"** (#43). When the saved Wi-Fi turns the password away (it was
+  probably changed) and every saved network has been tried, Keepsake shows a card once
+  per start-up; **Set up** turns on its setup hotspot and opens the Wi-Fi page. Being out
+  of range doesn't trigger it.
+
+### Added
+
 - **Personal touches** (#85). With a name in the provisioning file, Home alternates its
   usual prompts with a greeting ("Good evening, Sam"); on the birthday it reads "Happy
   birthday, Sam!" all day (Feb 29 birthdays on Feb 28 in other years). The welcome
