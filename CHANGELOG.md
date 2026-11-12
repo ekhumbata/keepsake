@@ -10,6 +10,19 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Special days with the mascots** (#85, #20). Besides the birthday: the anniversary
+  and the first date ("Happy 5th anniversary!", "7 years since your first date" when the
+  year is given), days of your own from the provisioning file (`special_days`: date,
+  title, message), and Christmas, New Year's Day, Valentine's Day and Halloween (choose
+  with `holidays`). On the day, Home's title says so, and the first time Home shows that
+  day a card with a pixel mascot wishes them well.
+- **Bookworm and Mochi**, placeholder 1-bit pixel-art mascots (#20), drawn by
+  `tools/draw_mascots.py` into `assets/mascots/`: their everyday look and festive
+  versions (party hat, Santa hat, fireworks, hearts, the two together, a flower, a
+  pumpkin, sparkles).
+
+### Added
+
 - **"Let's reconnect"** (#43). When the saved Wi-Fi turns the password away (it was
   probably changed) and every saved network has been tried, Keepsake shows a card once
   per start-up; **Set up** turns on its setup hotspot and opens the Wi-Fi page. Being out

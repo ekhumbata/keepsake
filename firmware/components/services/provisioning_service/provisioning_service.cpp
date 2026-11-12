@@ -10,6 +10,7 @@
 #include "app_state_service.h"
 #include "esp_log.h"
 #include "gemini_service.h"
+#include "greeting/special_days.h"
 #include "nvs.h"
 #include "provisioning/provision.h"
 #include "storage_service.h"
@@ -162,6 +163,25 @@ bool Apply(const provisioning::Provision& provision)
     personal.birthday = provision.birthday;
     personal.welcome_message = provision.welcome_message;
     personal.weather_location = provision.weather_location;
+    personal.anniversary = provision.anniversary;
+    personal.first_date = provision.first_date;
+    if (provision.holidays_given) {
+        int bits = 0;
+        for (const std::string& name : provision.holidays) {
+            if (name == "christmas") bits |= greeting::kHolidayChristmas;
+            else if (name == "new_year") bits |= greeting::kHolidayNewYear;
+            else if (name == "valentines") bits |= greeting::kHolidayValentines;
+            else if (name == "halloween") bits |= greeting::kHolidayHalloween;
+        }
+        personal.holidays = bits;
+    }
+    if (!provision.special_days.empty()) {
+        std::vector<greeting::CustomDay> days;
+        for (const auto& day : provision.special_days) {
+            days.push_back({day.date, day.title, day.message});
+        }
+        personal.special_days = greeting::SerializeCustomDays(days);
+    }
     if (!app_state_service::SavePersonal(personal)) {
         ok = false;
     } else if (!provision.welcome_message.empty()) {

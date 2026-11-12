@@ -52,8 +52,10 @@ esp_err_t ShowStorageModalUsbError();
 esp_err_t DismissStorageModal();
 esp_err_t ShowTopicsModalConfirmDelete();
 esp_err_t ShowBookListModalConfirmDelete();
-// A message card with one Close button (the welcome note, #85).
-esp_err_t ShowNoteCard(const std::string& title, const std::string& body);
+// A message card with one Close button (the welcome note and special days, #85), with an
+// optional picture (a mascot) above the title.
+esp_err_t ShowNoteCard(const std::string& title, const std::string& body,
+                       const EmbeddedImageAsset* image = nullptr);
 // "Let's reconnect" (#43): the saved Wi-Fi password was rejected; "Set up" sets
 // InteractionResult::request_wifi_setup.
 esp_err_t ShowReconnectCard(const std::string& network);

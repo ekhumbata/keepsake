@@ -17,6 +17,7 @@ constexpr design::TypographyRole kTitleRole = design::TypographyRole::kLabelMedi
 constexpr design::TypographyRole kBodyRole = design::TypographyRole::kBody;
 constexpr design::TypographyRole kButtonRole = design::TypographyRole::kLabelSmall;
 constexpr int kMaxActions = 2;
+constexpr int kImageTitleGap = design::spacing::k12;
 
 int ClampedActionCount(const CardModalState& state)
 {
@@ -103,8 +104,10 @@ int CardHeight(int portrait_width, const CardModalState& state)
     const int action_height = action_count > 0 ? design::button::kHeight : 0;
     const int action_gap = action_count > 0 ? design::modal::kContentActionGap : 0;
 
-    return design::modal::kTopPadding + title_height + design::modal::kTitleContentGap +
-           body_height + action_gap + action_height + design::modal::kBottomPadding;
+    const int image_height = state.image != nullptr ? state.image->height + kImageTitleGap : 0;
+    return design::modal::kTopPadding + image_height + title_height +
+           design::modal::kTitleContentGap + body_height + action_gap + action_height +
+           design::modal::kBottomPadding;
 }
 
 ButtonStyle BuildButtonStyle(int width)
@@ -288,7 +291,13 @@ void DrawCardModal(uint8_t* framebuffer,
     const int inner_x = card.x + design::modal::kHorizontalPadding;
     const int inner_width =
         std::max(0, card.width - (2 * design::modal::kHorizontalPadding));
-    const int title_y = card.y + design::modal::kTopPadding;
+    int title_y = card.y + design::modal::kTopPadding;
+    if (state.image != nullptr) {
+        DrawPortraitMonoAsset(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                              card.x + (card.width - state.image->width) / 2, title_y, state.image,
+                              design::color::kBlack);
+        title_y += state.image->height + kImageTitleGap;
+    }
     DrawTypographyText(framebuffer,
                        raw_width,
                        raw_height,

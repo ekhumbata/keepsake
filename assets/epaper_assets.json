@@ -284,6 +284,46 @@
     {
       "path": "assets/images/slide6.png",
       "symbol": "kSlide6"
+    },
+    {
+      "path": "assets/mascots/mochi_happy.png",
+      "symbol": "kMascotMochiHappy"
+    },
+    {
+      "path": "assets/mascots/bookworm_reading.png",
+      "symbol": "kMascotBookwormReading"
+    },
+    {
+      "path": "assets/mascots/day_birthday.png",
+      "symbol": "kMascotDayBirthday"
+    },
+    {
+      "path": "assets/mascots/day_christmas.png",
+      "symbol": "kMascotDayChristmas"
+    },
+    {
+      "path": "assets/mascots/day_new_year.png",
+      "symbol": "kMascotDayNewYear"
+    },
+    {
+      "path": "assets/mascots/day_valentines.png",
+      "symbol": "kMascotDayValentines"
+    },
+    {
+      "path": "assets/mascots/day_anniversary.png",
+      "symbol": "kMascotDayAnniversary"
+    },
+    {
+      "path": "assets/mascots/day_first_date.png",
+      "symbol": "kMascotDayFirstDate"
+    },
+    {
+      "path": "assets/mascots/day_halloween.png",
+      "symbol": "kMascotDayHalloween"
+    },
+    {
+      "path": "assets/mascots/day_celebrate.png",
+      "symbol": "kMascotDayCelebrate"
     }
   ]
 }

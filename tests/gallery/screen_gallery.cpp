@@ -28,6 +28,8 @@
 #include "epaper_ui/follow_up_page.h"
 #include "epaper_ui/keyboard.h"
 #include "epaper_ui/lock_screen.h"
+#include "epaper_ui/mascots.h"
+#include "greeting/special_days.h"
 #include "epaper_ui/notes_page.h"
 #include "epaper_ui/onboarding_page.h"
 #include "epaper_ui/select_modal.h"
@@ -416,6 +418,37 @@ std::map<std::string, Renderer> Screens()
         state.action_labels = {"Cancel", "Shut down"};
         DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
     });
+    // Special days (#85): the card that greets the day, with its mascot (#20).
+    {
+        greeting::People people;
+        people.name = "Sam";
+        people.birthday = "07-14";
+        people.anniversary = "2021-09-03";
+        people.first_date = "2019-05-20";
+        people.custom_days = {{"03-17", "Happy Gotcha Day, Biscuit!", "Treats for the dog today."}};
+        const std::pair<const char*, greeting::Date> days[] = {
+            {"day_birthday", {2026, 7, 14}},   {"day_christmas", {2026, 12, 25}},
+            {"day_new_year", {2027, 1, 1}},    {"day_valentines", {2027, 2, 14}},
+            {"day_anniversary", {2026, 9, 3}}, {"day_first_date", {2026, 5, 20}},
+            {"day_halloween", {2026, 10, 31}}, {"day_custom", {2027, 3, 17}},
+        };
+        for (const auto& [name, date] : days) {
+            const auto occasions = greeting::OccasionsOn(people, date);
+            if (occasions.empty()) {
+                continue;
+            }
+            const greeting::Occasion occasion = occasions.front();
+            screens[name] = over_home([occasion](uint8_t* fb) {
+                CardModalState state = {};
+                state.visible = true;
+                state.title_text = occasion.title;
+                state.body_text = occasion.message;
+                state.action_labels = {"Close"};
+                state.image = OccasionMascot(occasion.mascot);
+                DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+            });
+        }
+    }
     screens["overlay_keyboard"] = over_home([](uint8_t* fb) {
         KeyboardState state = {};
         state.visible = true;

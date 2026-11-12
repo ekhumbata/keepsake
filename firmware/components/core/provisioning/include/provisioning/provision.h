@@ -29,6 +29,19 @@ struct Provision {
     std::string weather_location;    // a place name for the weather (#37)
     std::string friend_name;         // for the greeting (#85)
     std::string birthday;            // "MM-DD" (the year, if given, is dropped)
+    std::string anniversary;         // "MM-DD" or "YYYY-MM-DD" (with the year: "5th anniversary")
+    std::string first_date;          // "MM-DD" or "YYYY-MM-DD"
+    // Holidays to celebrate, from "holidays": ["christmas", "new_year", "valentines",
+    // "halloween"]. All of them when the file doesn't say.
+    bool holidays_given = false;
+    std::vector<std::string> holidays;
+    struct SpecialDay {
+        std::string date;     // "MM-DD" or "YYYY-MM-DD"
+        std::string title;    // the Home title and card heading for the day
+        std::string message;  // the card's line
+        bool operator==(const SpecialDay& other) const = default;
+    };
+    std::vector<SpecialDay> special_days;  // at most 12
     std::string welcome_message;     // shown once on the welcome card (#86)
     std::string gemini_key;          // optional (#49)
 

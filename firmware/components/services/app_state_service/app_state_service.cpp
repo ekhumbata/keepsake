@@ -16,7 +16,12 @@ constexpr const char* kBirthdayKey = "birthday";
 constexpr const char* kWelcomeKey = "welcome";
 constexpr const char* kWeatherLocationKey = "weather_loc";
 constexpr const char* kNoteShownKey = "note_shown";
-constexpr size_t kMaxPersonalBytes = 512;
+constexpr const char* kAnniversaryKey = "anniversary";
+constexpr const char* kFirstDateKey = "first_date";
+constexpr const char* kHolidaysKey = "holidays";
+constexpr const char* kSpecialDaysKey = "special_days";
+constexpr const char* kDayCardKey = "day_card";
+constexpr size_t kMaxPersonalBytes = 3000;
 
 std::string ReadString(nvs_handle_t handle, const char* key)
 {
@@ -98,6 +103,13 @@ PersonalSettings Personal()
     settings.birthday = ReadString(handle, kBirthdayKey);
     settings.welcome_message = ReadString(handle, kWelcomeKey);
     settings.weather_location = ReadString(handle, kWeatherLocationKey);
+    settings.anniversary = ReadString(handle, kAnniversaryKey);
+    settings.first_date = ReadString(handle, kFirstDateKey);
+    settings.special_days = ReadString(handle, kSpecialDaysKey);
+    uint8_t holidays = 0;
+    if (nvs_get_u8(handle, kHolidaysKey, &holidays) == ESP_OK) {
+        settings.holidays = holidays;
+    }
     nvs_close(handle);
     return settings;
 }
@@ -119,6 +131,12 @@ bool SavePersonal(const PersonalSettings& settings)
     save(kBirthdayKey, settings.birthday);
     save(kWelcomeKey, settings.welcome_message);
     save(kWeatherLocationKey, settings.weather_location);
+    save(kAnniversaryKey, settings.anniversary);
+    save(kFirstDateKey, settings.first_date);
+    save(kSpecialDaysKey, settings.special_days);
+    if (err == ESP_OK && settings.holidays >= 0) {
+        err = nvs_set_u8(handle, kHolidaysKey, static_cast<uint8_t>(settings.holidays));
+    }
     if (err == ESP_OK) {
         err = nvs_commit(handle);
     }
@@ -148,6 +166,29 @@ void MarkWelcomeNoteShown(bool shown)
         return;
     }
     if (nvs_set_u8(handle, kNoteShownKey, shown ? 1 : 0) == ESP_OK) {
+        (void)nvs_commit(handle);
+    }
+    nvs_close(handle);
+}
+
+std::string LastDayCard()
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READONLY, &handle) != ESP_OK) {
+        return {};
+    }
+    std::string value = ReadString(handle, kDayCardKey);
+    nvs_close(handle);
+    return value;
+}
+
+void SetLastDayCard(const std::string& value)
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READWRITE, &handle) != ESP_OK) {
+        return;
+    }
+    if (nvs_set_str(handle, kDayCardKey, value.c_str()) == ESP_OK) {
         (void)nvs_commit(handle);
     }
     nvs_close(handle);

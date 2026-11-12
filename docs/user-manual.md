@@ -141,6 +141,10 @@ Home is Keepsake's dashboard. Near the top you'll see:
   day.
 - If a welcome note was included at setup, it appears once as a card the first time
   you reach Home. Press **Close** to put it away.
+- On special days Home says so all day, and the first time you reach Home that day a
+  card with one of Keepsake's two mascots (Bookworm, who reads, and Mochi, a little
+  cloud) wishes you well: your birthday, your anniversary, the day of your first date,
+  any days added at setup, and Christmas, New Year's Day, Valentine's Day and Halloween.
 
 Below that is the main menu, in this order:
 

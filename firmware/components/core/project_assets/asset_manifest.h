@@ -83,6 +83,16 @@ enum class EmbeddedImageId : uint8_t {
     kSlide4,
     kSlide5,
     kSlide6,
+    kMascotMochiHappy,
+    kMascotBookwormReading,
+    kMascotDayBirthday,
+    kMascotDayChristmas,
+    kMascotDayNewYear,
+    kMascotDayValentines,
+    kMascotDayAnniversary,
+    kMascotDayFirstDate,
+    kMascotDayHalloween,
+    kMascotDayCelebrate,
 };
 
 #endif  // PROJECT_ASSET_MANIFEST_H_

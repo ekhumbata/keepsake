@@ -23,13 +23,21 @@ struct PersonalSettings {
     std::string birthday;          // "MM-DD"
     std::string welcome_message;
     std::string weather_location;
+    std::string anniversary;   // "MM-DD" or "YYYY-MM-DD"
+    std::string first_date;    // "MM-DD" or "YYYY-MM-DD"
+    int holidays = -1;         // greeting::Holiday bits; -1 = not set (all of them)
+    std::string special_days;  // greeting::SerializeCustomDays text
 };
 PersonalSettings Personal();
-// Saves the non-empty fields of `settings` (an empty field leaves the saved one alone).
+// Saves the non-empty fields of `settings` (an empty field leaves the saved one alone;
+// holidays >= 0 is saved).
 bool SavePersonal(const PersonalSettings& settings);
 // The welcome note (#85/#86) is shown once; a new welcome message (provisioning) shows again.
 bool WelcomeNoteShown();
 void MarkWelcomeNoteShown(bool shown);
+// The special-day card (#85) is shown once per day: the last "YYYY-MM-DD key" shown.
+std::string LastDayCard();
+void SetLastDayCard(const std::string& value);
 
 }  // namespace app_state_service
 

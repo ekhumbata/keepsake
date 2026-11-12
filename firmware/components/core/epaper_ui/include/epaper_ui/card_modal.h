@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "asset_types.h"
 #include "epaper_ui/overlay_geometry.h"
 
 namespace epaper_ui {
@@ -22,6 +23,8 @@ struct CardModalState {
     // buttons (e.g. a progress card). More than two are ignored.
     std::vector<std::string> action_labels = {};
     int selected_action_index = 0;
+    // An optional picture (a mascot, #20) centred above the title.
+    const EmbeddedImageAsset* image = nullptr;
 };
 
 // Number of action buttons actually laid out (action_labels size clamped to 2).

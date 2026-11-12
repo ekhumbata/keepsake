@@ -174,6 +174,26 @@ const EmbeddedImageAsset* GetImage(EmbeddedImageId id)
             return &epaper_images::kSlide5;
         case EmbeddedImageId::kSlide6:
             return &epaper_images::kSlide6;
+        case EmbeddedImageId::kMascotMochiHappy:
+            return &epaper_images::kMascotMochiHappy;
+        case EmbeddedImageId::kMascotBookwormReading:
+            return &epaper_images::kMascotBookwormReading;
+        case EmbeddedImageId::kMascotDayBirthday:
+            return &epaper_images::kMascotDayBirthday;
+        case EmbeddedImageId::kMascotDayChristmas:
+            return &epaper_images::kMascotDayChristmas;
+        case EmbeddedImageId::kMascotDayNewYear:
+            return &epaper_images::kMascotDayNewYear;
+        case EmbeddedImageId::kMascotDayValentines:
+            return &epaper_images::kMascotDayValentines;
+        case EmbeddedImageId::kMascotDayAnniversary:
+            return &epaper_images::kMascotDayAnniversary;
+        case EmbeddedImageId::kMascotDayFirstDate:
+            return &epaper_images::kMascotDayFirstDate;
+        case EmbeddedImageId::kMascotDayHalloween:
+            return &epaper_images::kMascotDayHalloween;
+        case EmbeddedImageId::kMascotDayCelebrate:
+            return &epaper_images::kMascotDayCelebrate;
         default:
             return nullptr;
     }

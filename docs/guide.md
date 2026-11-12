@@ -35,9 +35,9 @@ update) · 💤 later
 | Ambient lock screen | 📋 [#38](https://github.com/ekhumbata/keepsake/issues/38) | Big clock, date + month, weather, indoor temperature/humidity, night mode |
 | Indoor climate | 📋 [#36](https://github.com/ekhumbata/keepsake/issues/36) | The board's SHTC3 temperature/humidity sensor |
 | Weather | 📋 [#37](https://github.com/ekhumbata/keepsake/issues/37) | Open-Meteo (no account), hourly, "updated X h ago" when offline |
-| Cute visual identity | 🚧 [#19](https://github.com/ekhumbata/keepsake/issues/19)–[#25](https://github.com/ekhumbata/keepsake/issues/25) | Rounded font (Nunito) and book font (Literata) are in; Bookworm and Mochi mascots, chunky icons, warm copy to come |
+| Cute visual identity | 🚧 [#19](https://github.com/ekhumbata/keepsake/issues/19)–[#25](https://github.com/ekhumbata/keepsake/issues/25) | Rounded font (Nunito) and book font (Literata) are in; placeholder pixel Bookworm and Mochi mascots are in (`tools/draw_mascots.py`, final art to come); chunky icons, warm copy to come |
 | Choose your own fonts | 🎁 [#104](https://github.com/ekhumbata/keepsake/issues/104) | Settings → Fonts: pick the interface and book fonts separately, from fonts copied onto the SD card (Quicksand included) |
-| Personal touches | 🚧 [#85](https://github.com/ekhumbata/keepsake/issues/85) | Home greets by name and celebrates the birthday; the welcome message shows once as a card. Values come from the provisioning file, never the repo. A birthday jingle and mascot art are still to come |
+| Personal touches | 🚧 [#85](https://github.com/ekhumbata/keepsake/issues/85) | Home greets by name; on special days (birthday, anniversary, first date, your own days, Christmas, New Year, Valentine's, Halloween) it says so and shows a card with a mascot once that day; the welcome message shows once. Values come from the provisioning file, never the repo. A birthday jingle is still to come |
 | Keepsake branding | 🚧 [#9](https://github.com/ekhumbata/keepsake/issues/9) | Boot screen, About page, `Keepsake-XXXXXX` hotspot |
 
 ### Reminders, timers and notes
@@ -96,8 +96,10 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 
 ### Pre-load the setup (provisioning file)
 1. Copy [`provision.example.json`](../provision.example.json) **somewhere outside the repo** and fill it in: Wi-Fi
-   networks (first one is used for now), `timezone` (e.g. `Europe/London`), and optionally the friend's name, birthday
-   (`MM-DD`), a welcome message, a weather location and a Gemini key. Delete the lines you don't need.
+   networks, `timezone` (e.g. `Europe/London`), and optionally the friend's name, birthday (`MM-DD`), anniversary and
+   first date (`MM-DD` or `YYYY-MM-DD`; with the year it counts them), which `holidays` to celebrate, your own
+   `special_days` (date, title, message), a welcome message, a weather location and a Gemini key. Delete the lines
+   you don't need.
 2. Put it on the SD card as `.keepsake/provision.json` (the `.keepsake` folder is hidden on some computers).
 3. Start Keepsake. It imports the file before Wi-Fi starts, shows **All set up!**, then **overwrites and deletes the
    file** so no passwords stay on the card.

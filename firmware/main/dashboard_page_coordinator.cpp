@@ -8,6 +8,7 @@
 #include "esp_random.h"
 #include "esp_timer.h"
 #include "greeting/greeting.h"
+#include "special_days_runtime.h"
 #include "sdkconfig.h"
 
 namespace {
@@ -153,9 +154,13 @@ epaper_ui::DashboardPageState DashboardPageCoordinator::BuildState() const
         const int year = local.tm_year + 1900;
         leap_year = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
     }
+    // A special day (#85) takes over the title for the whole day.
+    const std::vector<greeting::Occasion> occasions = special_days_runtime::Today(personal_);
     state.welcome_message.title_text = epaper_ui::ToDisplayText(
-        greeting::HomeTitle(personal_.friend_name, personal_.birthday, today, leap_year, rotation,
-                            prompt));
+        !occasions.empty()
+            ? occasions.front().title
+            : greeting::HomeTitle(personal_.friend_name, personal_.birthday, today, leap_year,
+                                  rotation, prompt));
 
     // Empty archive: invite the first capture. Otherwise show the task tracker.
     if (archive_.recording_count == 0) {

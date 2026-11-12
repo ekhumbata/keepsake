@@ -8,6 +8,14 @@ book_reader_epub ac49f7c0
 book_reader_epub_large 6eeca66e
 book_reader_epub_small ad7adb05
 book_reader_txt 81208774
+day_anniversary c54e49e8
+day_birthday 836ee65f
+day_christmas 568cf727
+day_custom cf7a44f5
+day_first_date 99f23997
+day_halloween 6ca95b33
+day_new_year e10516fd
+day_valentines 64471d82
 details 2fceeb80
 follow_up 598654cd
 home 6651ce8f

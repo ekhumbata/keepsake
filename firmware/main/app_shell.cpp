@@ -54,6 +54,7 @@
 #include "follow_up_page_runtime.h"
 #include "notes_page_runtime.h"
 #include "onboarding_page_runtime.h"
+#include "special_days_runtime.h"
 #include "status_bar_runtime.h"
 #include "test_console_runtime.h"
 #include "todos_page_runtime.h"
@@ -253,8 +254,13 @@ esp_err_t ShowHomeScreen(display_service::RefreshMode refresh_mode)
     if (!s_archive_reconcile_started.exchange(true)) {
         recording_archive_service::RefreshAsync();
     }
-    return display_service::SetCurrentScreen(display_service::ScreenId::kHome, refresh_mode,
-                                             "show_home_screen");
+    const esp_err_t err = display_service::SetCurrentScreen(display_service::ScreenId::kHome,
+                                                            refresh_mode, "show_home_screen");
+    // A special day that began while the device was on (#85): its card, once, on Home.
+    if (err == ESP_OK && s_startup_complete.load(std::memory_order_relaxed)) {
+        special_days_runtime::ShowCardIfDue();
+    }
+    return err;
 }
 
 esp_err_t ShowSettingsScreen(display_service::RefreshMode refresh_mode)
@@ -720,6 +726,7 @@ void HandleOnboardingDismissIfRequested()
         ESP_LOGW(kTag, "Onboarding dismiss -> home failed: %s", esp_err_to_name(err));
     }
     ShowWelcomeNoteIfDue();
+    special_days_runtime::ShowCardIfDue();
 }
 
 esp_err_t ShowDetailsScreen(const std::string& recording_id, DetailsPageSource source,
@@ -2407,6 +2414,7 @@ void Run()
     s_startup_complete.store(true, std::memory_order_relaxed);
     if (!show_onboarding) {
         ShowWelcomeNoteIfDue();  // after onboarding instead, when it's showing
+        special_days_runtime::ShowCardIfDue();
     }
     ShowProvisioningOutcome();
     // Lets tools/board/ on a computer check a plugged-in board (#15, docs/board-tests.md).

@@ -74,6 +74,30 @@ TEST_CASE("the example file in the repo is valid")
     CHECK(provision.timezone == "Europe/London");
     CHECK(provision.birthday == "07-14");
     CHECK(provision.gemini_key.empty());
+    CHECK(provision.anniversary == "2021-09-03");
+    CHECK(provision.holidays.size() == 4);
+    REQUIRE(provision.special_days.size() == 1);
+    CHECK(provision.special_days[0].title == "Happy Gotcha Day, Biscuit!");
+}
+
+TEST_CASE("special days, anniversaries and holidays are checked")
+{
+    Provision p;
+    auto result = ParseProvision(R"({"anniversary": "09-03", "first_date": "2019-05-20",
+        "holidays": [], "special_days": [{"date": "2023-06-01", "title": "Moving-in day"}]})", &p);
+    REQUIRE(result.ok);
+    CHECK(p.holidays_given);
+    CHECK(p.holidays.empty());  // [] means no holidays
+    CHECK(p.special_days[0].message.empty());
+
+    result = ParseProvision(R"({"anniversary": "Sept 3", "holidays": ["easter"],
+        "special_days": [{"date": "13-01", "title": "x"}, {"date": "01-01"}]})", &p);
+    CHECK_FALSE(result.ok);
+    CHECK(Mentions(result, "anniversary"));
+    CHECK(Mentions(result, "holidays"));
+    CHECK(Mentions(result, "special_days[0].date"));
+    CHECK(Mentions(result, "special_days[1].title"));
+    CHECK(Mentions(ParseProvision(R"({"holidays": "christmas"})", &p), "must be a list"));
 }
 
 TEST_CASE("a full file imports, trimmed and normalised")
