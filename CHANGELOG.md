@@ -10,6 +10,37 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Weather on Home** (#37), with no API key. From Open-Meteo, for the provisioning file's
+  `weather_location` (a town name, looked up once and cached, or "lat, lon").
+  - `core/weather` (host-tested, fuzzed): URLs, the geocoding and forecast answers,
+    weather codes in words, °C/°F, the NVS cache, and when a report is shown, aged
+    ("updated 2 h ago") or hidden (after 6 h).
+  - `weather_service` checks every 10 minutes and fetches hourly as a background network
+    job. A failed fetch retries on the next connection.
+  - Home shows "8C, light rain" under the greeting. The degree sign waits for the font
+    work (#104). Kconfig `KEEPSAKE_WEATHER_ENABLED` and `_FAHRENHEIT`.
+- **Settings → Saved Wi-Fi** (#43). A new heading lists the networks Keepsake
+  remembers, most recent first, with "(connected)" on the current one. Picking one asks
+  "Forget this Wi-Fi?", and **Forget** removes it (`wifi_service::ForgetNetwork`), with a
+  toast either way. With none saved, a toast points to Network.
+- **Charging card and low-battery nudges** (#84).
+  - Plugging in the charger shows a **Charging** card with Mochi (new `charging` sprite)
+    and the percentage. It closes by itself after ~16 s or when unplugged.
+  - At 20% a passing note says to charge soon. At 10% and 5% a card with a sleepy Mochi
+    (new `sleepy` sprite) asks to plug in. Each shows once per discharge, and charging
+    re-arms them.
+  - The status bar's percentage is smoothed (`core/battery_ux`, host-tested): it only goes
+    down on battery and only up while charging.
+  - `firmware/main/battery_runtime.cpp` watches power_service's cached readings on a small
+    low-priority task.
+
+### Fixed
+
+- The update download's battery check (#40) took every board for "on USB power", because
+  `power_input_valid` is always true; it now uses `usb_detected`.
+
+### Added
+
 - **A new first-run introduction** (#86). The inherited voice-notebook carousel, with its
   Followup artwork, is replaced by seven slides for Keepsake:
   1. "Hi, <name>!" with Bookworm and Mochi together (a new `hello` sprite);

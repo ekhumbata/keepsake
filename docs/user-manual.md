@@ -156,6 +156,10 @@ Home is Keepsake's dashboard. Near the top you'll see:
 - Today's date and a rotating welcome message. When Keepsake was set up with your
   name, it also greets you ("Good evening, Sam"), and on your birthday it says so all
   day.
+- The weather under the greeting ("8C, light rain"), if Keepsake was set up with a
+  place. It's fetched about once an hour over Wi-Fi. When Keepsake hasn't been able to
+  check for a while, it says so ("updated 2 h ago"), and after about 6 hours without
+  news it hides the weather rather than show something stale.
 - If a welcome note was included at setup, it appears once as a card, with Bookworm
   and Mochi saying hello, the first time you reach Home. Press **Close** to put it
   away.
@@ -346,10 +350,12 @@ mass storage, from Settings > Storage) and they'll show up here.
 
 ## Settings
 
-Settings is a hub, like a phone's settings app: six headings, each
+Settings is a hub, like a phone's settings app: seven headings, each
 opening its own page, plus one action below them:
 
 - **Network** — WiFi and Access Point.
+- **Saved Wi-Fi** — the networks Keepsake remembers; forget one you no
+  longer use.
 - **Time** — timezone and clock.
 - **Storage** — SD card status and management.
 - **Todos** — todo archiving.
@@ -382,6 +388,11 @@ Keepsake remembers up to five networks you've connected to (for example home, a
 friend's place and a phone hotspot). It joins the one it used most recently, and if
 that one stops answering it tries the others before giving up. When a sixth is added,
 the one used longest ago is forgotten.
+
+To see them, open **Settings → Saved Wi-Fi**: the list starts with the most
+recent, and the one you're on says "(connected)". Pick one and choose
+**Forget** to remove it. Keepsake won't join it again until you set it up
+again here. **Close** leaves the list as it is.
 
 If your Wi-Fi password changes, Keepsake notices that the network turned it away and
 shows **Let's reconnect** (once per start-up). Choose **Set up** and it opens its own
@@ -498,8 +509,21 @@ As a last resort, **holding PWR continuously for 6 seconds cuts power
 immediately**, regardless of what the screen is doing — useful if the
 device is ever unresponsive.
 
-**Charging**: plug in via USB-C. The status bar shows your battery
-percentage and a charging indicator while power is connected.
+**Charging**: plug in via USB-C. A **Charging** card with Mochi having a
+snack says how far along it is. It closes by itself after a few seconds, or
+when you unplug, and **Close** puts it away sooner. Keepsake works as usual
+while it charges. The status bar shows your battery percentage and a charging
+mark while power is connected. The percentage is smoothed so it doesn't
+jitter: on battery it only goes down, and while charging it only goes up.
+
+**Low battery**: Keepsake reminds you gently, once each time:
+
+- at **20%**, a short note at the bottom of the screen ("Time to charge
+  soon");
+- at **10%** and **5%**, a card with a sleepy Mochi.
+
+Charging re-arms them. Updates wait for you to plug in when the battery is
+below 30%.
 
 ## Tips and things that surprise people
 

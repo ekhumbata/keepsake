@@ -9,6 +9,7 @@
 #include "esp_timer.h"
 #include "greeting/greeting.h"
 #include "special_days_runtime.h"
+#include "weather_service.h"
 #include "sdkconfig.h"
 
 namespace {
@@ -138,6 +139,8 @@ epaper_ui::DashboardPageState DashboardPageCoordinator::BuildState() const
     state.navigation_focus_index = focus_.index();
 
     FillCurrentDate(&state.welcome_message.current_date);
+    // The weather under the greeting (#37), while the last report is recent enough to trust.
+    state.welcome_message.subtitle_text = epaper_ui::ToDisplayText(weather_service::SummaryNow());
     // Random per-boot phase, advanced one step per configured interval so it rotates over time.
     // With the friend's name set (#85), every other step greets them instead, and their
     // birthday takes over the whole day.

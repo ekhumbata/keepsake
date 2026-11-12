@@ -10,6 +10,7 @@
 #include "ai_features.h"
 #include "app_state_service.h"
 #include "epaper_ui/book_page.h"
+#include "battery_runtime.h"
 #include "book_list_page_runtime.h"
 #include "book_reader_page_runtime.h"
 #include "button_input_runtime.h"
@@ -55,7 +56,9 @@
 #include "follow_up_page_runtime.h"
 #include "notes_page_runtime.h"
 #include "onboarding_page_runtime.h"
+#include "saved_networks_runtime.h"
 #include "special_days_runtime.h"
+#include "weather_service.h"
 #include "status_bar_runtime.h"
 #include "test_console_runtime.h"
 #include "todos_page_runtime.h"
@@ -1637,6 +1640,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
                 overlay_result.select_modal_selected_index) &&
             !settings_topics_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
+            !saved_networks_runtime::HandleSelection(overlay_result.select_modal_selected_index) &&
             !book_list_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
             !book_reader_page_runtime::HandleMenuSelection(
@@ -1652,6 +1656,9 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
     }
     if (overlay_result.request_delete_topic) {
         (void)settings_topics_page_runtime::DeleteConfirmedTopic();
+    }
+    if (overlay_result.request_forget_network) {
+        saved_networks_runtime::ForgetConfirmed();
     }
     if (overlay_result.request_delete_book) {
         (void)book_list_page_runtime::DeleteConfirmedBook();
@@ -1758,6 +1765,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         HandleDetailsBackIfRequested();
         HandleOnboardingDismissIfRequested();
         ShowOnboardingFromSettingsIfRequested();
+        (void)saved_networks_runtime::ShowListIfRequested();
         ShowSettingsSubPageIfRequested();
         ShowTopicEntriesScreenIfRequested();
         HandleTopicEntriesBackIfRequested();
@@ -2198,6 +2206,16 @@ void InitWifiService()
         }
     });
     ota_service::Start();
+    // Weather (#37): hourly, for the place the provisioning file named; Home shows it.
+    (void)weather_service::Init();
+    weather_service::SetLocationProvider(
+        [] { return app_state_service::Personal().weather_location; });
+    weather_service::SetListener([] {
+        if (ScreenActiveForRefresh(display_service::ScreenId::kHome)) {
+            (void)dashboard_page_runtime::UpdateDisplayStateAndRequestRefresh();
+        }
+    });
+    weather_service::Start();
     // A provisioning file on the SD card (#42) sets the network (and more) before Wi-Fi starts,
     // so the first connection already uses it. Its toast waits for the first screen.
     s_provisioning_outcome = provisioning_service::ImportFromSdCard();
@@ -2464,6 +2482,8 @@ void Run()
         special_days_runtime::ShowCardIfDue();
     }
     ShowProvisioningOutcome();
+    // Charging card and low-battery nudges (#84).
+    battery_runtime::Start();
     // Lets tools/board/ on a computer check a plugged-in board (#15, docs/board-tests.md).
     test_console_runtime::Start();
 }
