@@ -15,6 +15,8 @@ namespace epaper_ui {
 struct WelcomeMessageState {
     CurrentDateState current_date = {};
     std::string title_text = {};
+    // One quieter line under the title, e.g. the weather (#37): "8C, light rain". Empty: none.
+    std::string subtitle_text = {};
 
     bool operator==(const WelcomeMessageState& other) const = default;
 };
@@ -28,6 +30,8 @@ struct WelcomeMessageStyle {
     int icon_gap = design::welcome_message::kIconGap;
     int icon_y_offset = design::welcome_message::kIconYOffset;
     uint8_t icon_color = design::color::kBlack;
+    design::TypographyRole subtitle_role = design::TypographyRole::kLabelSmallBold;
+    int subtitle_gap = design::spacing::k8;
     bool show_icon = true;
 };
 

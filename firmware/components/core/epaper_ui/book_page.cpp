@@ -38,6 +38,7 @@ const char* AsciiFor(uint32_t codepoint)
     switch (codepoint) {
         case 0x00A0: case 0x2002: case 0x2003: case 0x2009: return " ";
         case 0x00AD: case 0x200B: case 0x200C: case 0x200D: case 0xFEFF: return "";
+        case 0x00B0: return "";  // no degree glyph in the ASCII fonts yet (#104): "12°C" -> "12C"
         case 0x2018: case 0x2019: case 0x201A: case 0x2032: return "'";
         case 0x201C: case 0x201D: case 0x201E: case 0x2033: case 0x00AB: case 0x00BB: return "\"";
         case 0x2010: case 0x2011: case 0x2012: case 0x2013: return "-";

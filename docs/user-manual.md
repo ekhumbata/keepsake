@@ -156,6 +156,10 @@ Home is Keepsake's dashboard. Near the top you'll see:
 - Today's date and a rotating welcome message. When Keepsake was set up with your
   name, it also greets you ("Good evening, Sam"), and on your birthday it says so all
   day.
+- The weather under the greeting ("8C, light rain"), if Keepsake was set up with a
+  place. It's fetched about once an hour over Wi-Fi. When Keepsake hasn't been able to
+  check for a while, it says so ("updated 2 h ago"), and after about 6 hours without
+  news it hides the weather rather than show something stale.
 - If a welcome note was included at setup, it appears once as a card, with Bookworm
   and Mochi saying hello, the first time you reach Home. Press **Close** to put it
   away.

@@ -67,8 +67,13 @@ UiRect WelcomeMessageBounds(int origin_x,
     }
 
     const int gap = (has_date && !lines.empty()) ? ClampPositive(style.section_gap) : 0;
+    int subtitle_height = 0;
+    if (!state.subtitle_text.empty()) {
+        subtitle_height = ClampPositive(style.subtitle_gap) + LineHeight(style.subtitle_role);
+        title_width = std::max(title_width, MeasureText(style.subtitle_role, state.subtitle_text));
+    }
     return {origin_x, origin_y, std::max(date_bounds.width, title_width),
-            date_bounds.height + gap + title_height};
+            date_bounds.height + gap + title_height + subtitle_height};
 }
 
 void DrawWelcomeMessage(uint8_t* framebuffer,
@@ -103,6 +108,11 @@ void DrawWelcomeMessage(uint8_t* framebuffer,
                            origin_x, cursor_y, line, style.title_role, style.title_color);
         last_line_width = MeasureText(style.title_role, line);
         cursor_y += line_height;
+    }
+    if (!state.subtitle_text.empty()) {
+        DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                           origin_x, cursor_y + ClampPositive(style.subtitle_gap),
+                           state.subtitle_text, style.subtitle_role, style.title_color);
     }
 
     if (icon == nullptr || lines.empty()) {

@@ -21,6 +21,7 @@ day_valentines 64471d82
 details 2fceeb80
 follow_up 598654cd
 home 6651ce8f
+home_weather 64ed2b0a
 lock_screen 72ee2da4
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
