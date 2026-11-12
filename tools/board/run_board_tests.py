@@ -166,6 +166,67 @@ def check_crash_report(run: Run):
             f"{reports[-1]}{' + core dump' if has_dump else ' (no core dump)'}", [str(path)])
 
 
+# Phases of firmware_update::Phase, as `kst ota` reports them.
+OTA_UP_TO_DATE, OTA_FAILED, OTA_READY = 2, 5, 4
+
+
+def wait_for_ota(run: Run, phases: set, timeout: float) -> dict:
+    deadline = time.monotonic() + timeout
+    reply = run.board.command("ota")
+    while reply["phase"] not in phases and time.monotonic() < deadline:
+        time.sleep(3)
+        reply = run.board.command("ota")
+    return reply
+
+
+def ota_update(run: Run, name: str, rollback: bool):
+    """Installs the newest release from GitHub (#40); with `rollback`, forces its health check
+    to fail first, so the board must come back on the version it had."""
+    before = run.board.command("ota")
+    if rollback:
+        run.board.command("ota", "fail-next", "yes")
+    run.board.command("ota", "check")
+    reply = wait_for_ota(run, {OTA_UP_TO_DATE, OTA_FAILED, OTA_READY}, 600.0)
+    if reply["phase"] != OTA_READY:
+        run.add(name, "warn" if reply["phase"] == OTA_UP_TO_DATE else "fail",
+                f"nothing installed: {reply['status']} (needs a release newer than {before['version']})")
+        return
+    run.board.command("ota", "restart")
+    run.board.reconnect(60.0)
+    run.board.wait_ready(60.0)
+    time.sleep(5)
+    # The health check needs Home, the display and ~20 s of running (or times out, ~90 s).
+    deadline = time.monotonic() + (150.0 if rollback else 60.0)
+    after = run.board.command("ota")
+    while after.get("verifying") and time.monotonic() < deadline:
+        time.sleep(5)
+        try:
+            after = run.board.command("ota")
+        except (BoardError, OSError):  # the rollback restarts the board
+            run.board.reconnect(60.0)
+            run.board.wait_ready(60.0)
+            after = run.board.command("ota")
+    if rollback:
+        ok = after["version"] == before["version"] and after["bad_version"] != ""
+        run.add(name, "pass" if ok else "fail",
+                f"back on {after['version']} ({after['running']}, {after['state']}); "
+                f"marked {after['bad_version'] or '?'} as not to install")
+        # It was only a rehearsal: let the real install that follows have that version.
+        run.board.command("ota", "clear-bad")
+    else:
+        ok = after["version"] != before["version"] and after["state"] == "valid"
+        run.add(name, "pass" if ok else "fail",
+                f"{before['version']} -> {after['version']} on {after['running']} ({after['state']})")
+
+
+def check_ota_rollback(run: Run):
+    ota_update(run, "ota/rollback", rollback=True)
+
+
+def check_ota_install(run: Run):
+    ota_update(run, "ota/install", rollback=False)
+
+
 def check_provisioning_refusal(run: Run):
     """A broken provisioning file must import nothing and explain itself."""
     bad = b'{ "wifi": [ { "ssid": "BoardTest", "password": "short" } ] }'
@@ -214,6 +275,9 @@ def main(argv: list) -> int:
     parser.add_argument("--interactive", action="store_true", help="also ask you to press each real button")
     parser.add_argument("--destructive", action="store_true",
                         help="also crash the board on purpose and try a broken provisioning file (reboots it)")
+    parser.add_argument("--ota", action="store_true",
+                        help="also rehearse an update from GitHub Releases: a forced rollback, then a real "
+                             "install (needs Wi-Fi and a release newer than the board's firmware)")
     parser.add_argument("--out", type=Path, help="where to write the report (default build/board-tests/<time>)")
     options = parser.parse_args(argv)
 
@@ -232,6 +296,8 @@ def main(argv: list) -> int:
         checks.append(check_buttons_by_hand)
     if options.destructive:
         checks += [check_crash_report, check_provisioning_refusal]
+    if options.ota:
+        checks += [check_ota_rollback, check_ota_install]
     try:
         for check in checks:
             print(f"\n{check.__name__.removeprefix('check_').replace('_', ' ')}:")

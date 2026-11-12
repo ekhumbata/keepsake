@@ -15,6 +15,7 @@
 #include "notes_page_runtime.h"
 #include "onboarding_page_interactions.h"
 #include "onboarding_page_runtime.h"
+#include "ota_service.h"
 #include "overlay_runtime.h"
 #include "todos_page_interactions.h"
 #include "todos_page_runtime.h"
@@ -453,6 +454,13 @@ ButtonResult ApplySettingsAboutActivateResult(
     };
     callbacks.show_settings = [&result]() {
         result.footer_item = footer_runtime::FooterFocusItem::kSettings;
+    };
+    callbacks.update = []() {
+        // A downloaded update starts now (this restarts); otherwise look for one. The page
+        // follows along through ota_service's status listener.
+        if (!ota_service::RestartIntoUpdate()) {
+            ota_service::CheckNow();
+        }
     };
     settings_about_page_interactions::ApplyPrimaryActivateResult(activation, callbacks);
     if (result.footer_item != footer_runtime::FooterFocusItem::kNone) {

@@ -181,7 +181,9 @@ NavigationModel BuildSettingsAboutPageNavigationModel()
     model.scope = NavigationScope::kSettingsAbout;
 
     AddItem(model, NavigationItemSection::kSettingsAboutPageControls,
-            NavigationItemRole::kSettingsAboutBackButton, 0);
+            NavigationItemRole::kSettingsAboutUpdateButton, 0);
+    AddItem(model, NavigationItemSection::kSettingsAboutPageControls,
+            NavigationItemRole::kSettingsAboutBackButton, 1);
     AddFooterItems(model, /*is_home_screen=*/false);
     return model;
 }

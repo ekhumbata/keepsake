@@ -72,7 +72,54 @@ class FakeBoard:
         pass
 
 
+class FakeOtaBoard:
+    """Runs 1.0.0; the newest release is 1.1.0. Updates restart instantly."""
+
+    def __init__(self):
+        self.version = "1.0.0"
+        self.slot = "ota_0"
+        self.phase = 0
+        self.bad = ""
+        self.fail_next = False
+
+    def command(self, *words, timeout=10.0):
+        sub = words[1] if len(words) > 1 else ""
+        if sub == "check":
+            self.phase = runner.OTA_UP_TO_DATE if self.bad == "1.1.0" or self.version == "1.1.0" else runner.OTA_READY
+        elif sub == "fail-next":
+            self.fail_next = True
+        elif sub == "clear-bad":
+            self.bad = ""
+        elif sub == "restart":
+            if self.fail_next:  # the health check fails and the bootloader goes back
+                self.fail_next = False
+                self.bad = "1.1.0"
+            else:
+                self.version, self.slot = "1.1.0", "ota_1"
+            self.phase = 0
+        return kb.Reply({"cmd": "ota", "ok": True, "version": self.version, "running": self.slot,
+                         "state": "valid", "verifying": False, "bad_version": self.bad,
+                         "phase": self.phase, "status": "..."})
+
+    def reconnect(self, timeout=30.0):
+        pass
+
+    def wait_ready(self, timeout=40.0):
+        return True
+
+
 class RunnerTest(unittest.TestCase):
+    def test_ota_rehearsal_rolls_back_then_installs(self):
+        with tempfile.TemporaryDirectory() as folder:
+            run = runner.Run(FakeOtaBoard(), Path(folder), types.SimpleNamespace())
+            with mock.patch.object(runner.time, "sleep", lambda _seconds: None):
+                runner.check_ota_rollback(run)
+                runner.check_ota_install(run)
+            statuses = {r.name: r.status for r in run.results}
+            self.assertEqual(statuses["ota/rollback"], "pass")
+            self.assertEqual(statuses["ota/install"], "pass")
+            self.assertEqual(run.board.version, "1.1.0")
+
     def test_standard_checks_against_a_fake_board(self):
         with tempfile.TemporaryDirectory() as folder:
             out = Path(folder)

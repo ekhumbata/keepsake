@@ -1,0 +1,34 @@
+menu "Keepsake updates"
+
+    config KEEPSAKE_OTA_ENABLED
+        bool "Check for updates on GitHub Releases"
+        default y
+        help
+            Once a day (and from Settings -> About), fetch the latest release's manifest and,
+            if it is newer, download the image into the other app slot. See #40 and the
+            release how-to in docs/guide.md.
+
+    config KEEPSAKE_OTA_MANIFEST_URL
+        string "Release manifest URL"
+        depends on KEEPSAKE_OTA_ENABLED
+        default "https://github.com/ekhumbata/keepsake/releases/latest/download/latest.json"
+        help
+            The small JSON file each release publishes (tools/release/make_manifest.py). The
+            "latest" link always points at the newest non-prerelease release.
+
+    config KEEPSAKE_OTA_CHECK_INTERVAL_HOURS
+        int "Background check interval (hours)"
+        depends on KEEPSAKE_OTA_ENABLED
+        range 1 168
+        default 24
+
+    config KEEPSAKE_OTA_HEALTH_TIMEOUT_SECONDS
+        int "Health check timeout after an update (seconds)"
+        range 30 600
+        default 90
+        help
+            A new firmware has this long to reach Home with a working display (and the SD
+            card, if it was mounted before the update) and keep running for 20 s. If it
+            doesn't, the device goes back to the previous firmware.
+
+endmenu

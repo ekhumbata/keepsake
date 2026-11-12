@@ -11,6 +11,12 @@ ActivateResult HandlePrimaryActivate(const SettingsAboutPageCoordinator& coordin
 {
     ActivateResult result = {};
 
+    if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsAboutUpdateButton)) {
+        result.handled = true;
+        result.play_activate_cue = true;
+        result.intent = ActivateIntent::kUpdate;
+        return result;
+    }
     if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsAboutBackButton)) {
         // Returns to the Settings hub -- this page is only ever reached from there, so there's
         // no other source to track.
@@ -40,6 +46,11 @@ void ApplyPrimaryActivateResult(const ActivateResult& result, const ActivateCall
         case ActivateIntent::kShowSettings:
             if (callbacks.show_settings) {
                 callbacks.show_settings();
+            }
+            break;
+        case ActivateIntent::kUpdate:
+            if (callbacks.update) {
+                callbacks.update();
             }
             break;
         case ActivateIntent::kNone:

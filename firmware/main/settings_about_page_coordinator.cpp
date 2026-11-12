@@ -3,6 +3,7 @@
 #include <cstdio>
 
 #include "esp_app_desc.h"
+#include "ota_service.h"
 
 SettingsAboutPageCoordinator::SettingsAboutPageCoordinator() = default;
 
@@ -38,6 +39,14 @@ epaper_ui::SettingsAboutPageState SettingsAboutPageCoordinator::BuildState() con
     std::snprintf(version_buffer, sizeof(version_buffer), "Version %s",
                  esp_app_get_description()->version);
     state.version_text = version_buffer;
+
+    const firmware_update::Status update = ota_service::GetStatus();
+    state.update_status_text = firmware_update::Describe(update);
+    state.update = {
+        .label_text = firmware_update::ButtonLabel(update),
+        .selected =
+            IsRoleFocused(page_navigation::NavigationItemRole::kSettingsAboutUpdateButton),
+    };
 
     state.back = {
         .label_text = "Back",
