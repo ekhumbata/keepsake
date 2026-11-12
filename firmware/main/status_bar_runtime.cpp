@@ -1,5 +1,7 @@
 #include "status_bar_runtime.h"
 
+#include "battery_runtime.h"
+
 #include "ai_features.h"
 
 #include <mutex>
@@ -84,8 +86,11 @@ epaper_ui::StatusBarState BuildState()
 
     power_service::Status power_status = {};
     if (power_service::ReadStatus(&power_status) == ESP_OK && power_status.battery.available) {
-        state.battery.percent =
-            static_cast<int>(power_status.battery.state_of_charge_percent);
+        // Smoothed (#84), so the number doesn't jitter; the raw reading until the first sample.
+        const int smoothed = battery_runtime::DisplayPercent();
+        state.battery.percent = smoothed >= 0
+                                    ? smoothed
+                                    : static_cast<int>(power_status.battery.state_of_charge_percent);
         state.battery.charging =
             power_status.charge_state == power_service::ChargeState::kCharging;
     }

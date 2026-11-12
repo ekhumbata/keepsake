@@ -364,6 +364,32 @@ def compose() -> dict[str, Grid]:
     g.stamp(bat(), 29, 6)
     sprites["day_halloween"] = g
 
+    # Charging (#84): Mochi having a snack of electricity, a bolt above.
+    g, _ = mochi()
+    g.stamp(from_rows([
+        "....##",
+        "...##.",
+        "..##..",
+        ".#####",
+        "...##.",
+        "..##..",
+        ".##...",
+        ".#....",
+    ]), 18, 0)
+    dots(g, [(5, 8), (34, 6), (36, 12)])
+    sprites["charging"] = g
+
+    # Sleepy (#84, low battery): Mochi with closed eyes, a "z z" drifting up.
+    g, _ = mochi()
+    for x, y in ((15, 25), (16, 25), (15, 26), (16, 26), (25, 25), (26, 25), (25, 26), (26, 26)):
+        g.set(x, y, 0)
+    dots(g, [(14, 26), (15, 26), (16, 26), (17, 26), (24, 26), (25, 26), (26, 26), (27, 26)])
+    z_big = from_rows(["#####", "...#.", "..#..", ".#...", "#####"])
+    z_small = from_rows(["###", "..#", ".#.", "#..", "###"])
+    g.stamp(z_big, 33, 2)
+    g.stamp(z_small, 27, 0)
+    sprites["sleepy"] = g
+
     # Any other special day: Mochi with sparkles all around.
     g, _ = mochi()
     for x, y in ((2, 4), (16, 1), (33, 2), (36, 13), (1, 15)):

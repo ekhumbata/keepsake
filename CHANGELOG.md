@@ -10,6 +10,24 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Charging card and low-battery nudges** (#84).
+  - Plugging in the charger shows a **Charging** card with Mochi (new `charging` sprite)
+    and the percentage. It closes by itself after ~16 s or when unplugged.
+  - At 20% a passing note says to charge soon. At 10% and 5% a card with a sleepy Mochi
+    (new `sleepy` sprite) asks to plug in. Each shows once per discharge, and charging
+    re-arms them.
+  - The status bar's percentage is smoothed (`core/battery_ux`, host-tested): it only goes
+    down on battery and only up while charging.
+  - `firmware/main/battery_runtime.cpp` watches power_service's cached readings on a small
+    low-priority task.
+
+### Fixed
+
+- The update download's battery check (#40) took every board for "on USB power", because
+  `power_input_valid` is always true; it now uses `usb_detected`.
+
+### Added
+
 - **A new first-run introduction** (#86). The inherited voice-notebook carousel, with its
   Followup artwork, is replaced by seven slides for Keepsake:
   1. "Hi, <name>!" with Bookworm and Mochi together (a new `hello` sprite);
