@@ -5,43 +5,13 @@
 #include <algorithm>
 #include <array>
 
-#include "asset_manifest.h"
-#include "project_assets.h"
+#include "app_state_service.h"
+#include "wifi_service.h"
 
 namespace {
 
 using page_navigation::NavigationItemRole;
 using epaper_ui::OnboardingControl;
-
-struct Slide {
-    const char* title;
-    const char* body;
-    EmbeddedImageId image;
-};
-
-constexpr std::array<Slide, 6> kSlides = {{
-    {"Welcome to Keepsake",
-     "Your pocket voice notebook. Capture thoughts out loud and let Keepsake keep them organized.",
-     EmbeddedImageId::kSlide1},
-    {"Capture in a tap",
-     "Hold Record to capture a note, idea, or task -- saved straight to the SD card. A quick "
-     "press is Back -- it exits whatever you're inside.",
-     EmbeddedImageId::kSlide2},
-    {"Navigate with the rocker",
-     "Tilt the rocker up or down to move your selection; press it in to select.",
-     EmbeddedImageId::kSlide3},
-    {"Sleep & power",
-     "The device sleeps when inactive. Hold PWR for about a second to open a shut-down "
-     "confirmation.",
-     EmbeddedImageId::kSlide4},
-    {"Summaries with Gemini",
-     "Connect Gemini and let Keepsake transcribe your recordings and summarize your day for you.",
-     EmbeddedImageId::kSlide5},
-    {"Notes, Todos & Follow-ups",
-     "Recordings are grouped by day. Browse them as Notes, mark tasks as Todos, and pin anything as "
-     "a follow-up.",
-     EmbeddedImageId::kSlide6},
-}};
 
 NavigationItemRole RoleForControl(OnboardingControl control)
 {
@@ -62,17 +32,21 @@ NavigationItemRole RoleForControl(OnboardingControl control)
 
 OnboardingPageCoordinator::OnboardingPageCoordinator() = default;
 
-// Index of the "Summaries with Gemini" slide in kSlides, skipped in no-key mode.
-constexpr size_t kAiSlideIndex = 4;
-
 int OnboardingPageCoordinator::slide_count() const
 {
-    return static_cast<int>(kSlides.size()) - (include_ai_slide_ ? 0 : 1);
+    return static_cast<int>(slides_.size());
 }
 
 void OnboardingPageCoordinator::PrepareForShow()
 {
-    include_ai_slide_ = ai_features::Enabled();
+    // What the slides say depends on the setup (#86): the friend's name, a Gemini key (#44),
+    // and whether the provisioning file already brought a Wi-Fi network.
+    const std::string friend_name = app_state_service::Personal().friend_name;
+    epaper_ui::OnboardingContext context = {};
+    context.friend_name = friend_name;
+    context.ai_enabled = ai_features::Enabled();
+    context.wifi_ready = !wifi_service::SavedNetworks().empty();
+    slides_ = epaper_ui::OnboardingSlides(context);
     active_index_ = 0;
     focus_.Configure(navigation_model_.item_count, 0);
     FocusFirstSelectable();
@@ -217,13 +191,14 @@ epaper_ui::OnboardingPageState OnboardingPageCoordinator::BuildState() const
     state.carousel.prev_selected = IsRoleFocused(NavigationItemRole::kOnboardingPagePrev);
     state.carousel.next_selected = IsRoleFocused(NavigationItemRole::kOnboardingPageNext);
 
-    size_t slide_index = static_cast<size_t>(active_index_);
-    if (!include_ai_slide_ && slide_index >= kAiSlideIndex) {
-        ++slide_index;  // skip the Gemini slide
+    if (slides_.empty()) {
+        return state;
     }
-    const Slide& slide = kSlides[std::min(slide_index, kSlides.size() - 1)];
+    const size_t slide_index =
+        std::min(static_cast<size_t>(std::max(active_index_, 0)), slides_.size() - 1);
+    const epaper_ui::OnboardingSlide& slide = slides_[slide_index];
     state.slide_title = slide.title;
     state.slide_body = slide.body;
-    state.slide_image = project_assets::GetImage(slide.image);
+    state.slide_image = slide.image;
     return state;
 }

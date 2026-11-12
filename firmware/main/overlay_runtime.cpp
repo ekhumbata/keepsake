@@ -36,6 +36,7 @@ enum class CardModalPurpose : uint8_t {
     kBookListConfirmDelete,
     kNote,  // a message for the friend (#85): title/body from s_note_title/s_note_body
     kReconnect,  // the saved Wi-Fi password stopped working (#43); body from s_note_body
+    kGetOnline,  // first run without Wi-Fi (#86): offer the phone setup
 };
 
 std::mutex s_state_mutex;
@@ -148,6 +149,13 @@ epaper_ui::CardModalState BuildCardModalState(CardModalPurpose purpose)
         case CardModalPurpose::kReconnect:
             state.title_text = "Let's reconnect";
             state.body_text = s_note_body;
+            state.action_labels = {"Later", "Set up"};
+            break;
+        case CardModalPurpose::kGetOnline:
+            state.title_text = "Let's get online";
+            state.body_text =
+                "Wi-Fi keeps the clock right and brings little updates. Set it up from your "
+                "phone now? Keepsake will open its own Wi-Fi (Keepsake-...) for you to join.";
             state.action_labels = {"Later", "Set up"};
             break;
         case CardModalPurpose::kNone:
@@ -710,6 +718,11 @@ esp_err_t ShowReconnectCard(const std::string& network)
     return ShowCardModal(CardModalPurpose::kReconnect, "reconnect");
 }
 
+esp_err_t ShowGetOnlineCard()
+{
+    return ShowCardModal(CardModalPurpose::kGetOnline, "get_online");
+}
+
 esp_err_t DismissStorageModal()
 {
     return DismissCardModal();
@@ -1088,6 +1101,14 @@ app_interaction::InputResult HandleButtonEvent(const button_service::ButtonEvent
                                 if (index == 1) {
                                     result.request_wifi_setup = true;
                                 } else {
+                                    play_click = true;
+                                }
+                                break;
+                            case CardModalPurpose::kGetOnline:
+                                if (index == 1) {
+                                    result.request_wifi_setup = true;
+                                } else {
+                                    result.request_due_cards = true;
                                     play_click = true;
                                 }
                                 break;

@@ -1,7 +1,10 @@
 #ifndef ONBOARDING_PAGE_COORDINATOR_H_
 #define ONBOARDING_PAGE_COORDINATOR_H_
 
+#include <vector>
+
 #include "epaper_ui/onboarding_page.h"
+#include "epaper_ui/onboarding_slides.h"
 #include "page_navigation/navigation_model.h"
 #include "page_navigation/roving_focus.h"
 
@@ -50,8 +53,8 @@ private:
         page_navigation::BuildOnboardingPageNavigationModel();
     page_navigation::RovingFocus focus_{navigation_model_.item_count, 0};
     int active_index_ = 0;
-    // No-key mode (#44): the Gemini slide is left out when no key is set (decided on show).
-    bool include_ai_slide_ = true;
+    // Built on show from the device's setup (#86, epaper_ui::OnboardingSlides).
+    std::vector<epaper_ui::OnboardingSlide> slides_;
 };
 
 #endif  // ONBOARDING_PAGE_COORDINATOR_H_

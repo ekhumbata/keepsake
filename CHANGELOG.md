@@ -10,6 +10,21 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **A new first-run introduction** (#86). The inherited voice-notebook carousel, with its
+  Followup artwork, is replaced by seven slides for Keepsake:
+  1. "Hi, <name>!" with Bookworm and Mochi together (a new `hello` sprite);
+  2. Meet Bookworm (your books);
+  3. Meet Mochi (company, notes, special days);
+  4. the rocker;
+  5. Back and voice notes, with the AI line only when a Gemini key is set;
+  6. resting and power;
+  7. Wi-Fi: "All set" when the provisioning file brought a network, otherwise "One last
+     thing".
+
+  Without Wi-Fi, closing it offers a **Let's get online** card. **Set up** opens the
+  phone setup hotspot; **Later** goes on. The welcome note follows on Home, now with
+  Bookworm and Mochi on it.
+
 - **Updates over the air** (#40). Once a day (and from Settings → About → **Check for
   updates**) Keepsake looks at the latest GitHub release, downloads a newer firmware into
   the other app slot over HTTPS, and checks its size, SHA-256 and app header before it can
