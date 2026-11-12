@@ -34,7 +34,7 @@ idf_component_register(SRCS "onboarding_page_runtime.cpp" "onboarding_page_inter
                             "book_reader_page_runtime.cpp"
                             "book_reader_page_coordinator.cpp"
                        INCLUDE_DIRS "."
-                       REQUIRES app_state_service app_update crash_report_service provisioning_service axp2101 board book_formats book_reader button_service library net_jobs net_jobs_service cpu_boost display_service
+                       REQUIRES app_state_service app_update crash_report_service greeting provisioning_service axp2101 board book_formats book_reader button_service library net_jobs net_jobs_service cpu_boost display_service
                                 feedback_service
                                 device_sleep_service epaper_ui esp_driver_gpio
                                 esp_hw_support esp_partition gemini_service imu_service power_service

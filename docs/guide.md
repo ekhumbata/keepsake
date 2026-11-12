@@ -37,7 +37,7 @@ update) · 💤 later
 | Weather | 📋 [#37](https://github.com/ekhumbata/keepsake/issues/37) | Open-Meteo (no account), hourly, "updated X h ago" when offline |
 | Cute visual identity | 🚧 [#19](https://github.com/ekhumbata/keepsake/issues/19)–[#25](https://github.com/ekhumbata/keepsake/issues/25) | Rounded font (Nunito) and book font (Literata) are in; Bookworm and Mochi mascots, chunky icons, warm copy to come |
 | Choose your own fonts | 🎁 [#104](https://github.com/ekhumbata/keepsake/issues/104) | Settings → Fonts: pick the interface and book fonts separately, from fonts copied onto the SD card (Quicksand included) |
-| Personal touches | 📋 [#85](https://github.com/ekhumbata/keepsake/issues/85) | Greeting by name, birthday screen, a welcome card (kept off the repo) |
+| Personal touches | 🚧 [#85](https://github.com/ekhumbata/keepsake/issues/85) | Home greets by name and celebrates the birthday; the welcome message shows once as a card. Values come from the provisioning file, never the repo. A birthday jingle and mascot art are still to come |
 | Keepsake branding | 🚧 [#9](https://github.com/ekhumbata/keepsake/issues/9) | Boot screen, About page, `Keepsake-XXXXXX` hotspot |
 
 ### Reminders, timers and notes

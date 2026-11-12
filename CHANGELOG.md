@@ -10,6 +10,15 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Personal touches** (#85). With a name in the provisioning file, Home alternates its
+  usual prompts with a greeting ("Good evening, Sam"); on the birthday it reads "Happy
+  birthday, Sam!" all day (Feb 29 birthdays on Feb 28 in other years). The welcome
+  message from the provisioning file shows once as a card on the first Home (after
+  onboarding, if that's showing); a new provisioning file with a new message shows it
+  again.
+
+### Added
+
 - **Crash reports on the SD card** (#41). After a crash (panic, watchdog or brownout)
   the next start writes `/.keepsake/crash/crash-NNN.txt` with the reset reason, the
   crashed task and backtrace, and the last log lines from before the crash, plus the core

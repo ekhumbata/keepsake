@@ -3,9 +3,11 @@
 #include <ctime>
 #include <string>
 
+#include "epaper_ui/book_page.h"
 #include "esp_log.h"
 #include "esp_random.h"
 #include "esp_timer.h"
+#include "greeting/greeting.h"
 #include "sdkconfig.h"
 
 namespace {
@@ -90,6 +92,7 @@ void DashboardPageCoordinator::PrepareForShow()
                  static_cast<unsigned>(welcome_seed_),
                  static_cast<unsigned>(WelcomePeriodsSinceEpoch()));
     }
+    personal_ = app_state_service::Personal();
     focus_.Configure(navigation_model_.item_count, 0);
 }
 
@@ -135,8 +138,24 @@ epaper_ui::DashboardPageState DashboardPageCoordinator::BuildState() const
 
     FillCurrentDate(&state.welcome_message.current_date);
     // Random per-boot phase, advanced one step per configured interval so it rotates over time.
-    state.welcome_message.title_text =
-        epaper_ui::WelcomeMessageTitle(welcome_seed_ + WelcomePeriodsSinceEpoch());
+    // With the friend's name set (#85), every other step greets them instead, and their
+    // birthday takes over the whole day.
+    const uint32_t rotation = welcome_seed_ + WelcomePeriodsSinceEpoch();
+    const bool named = !personal_.friend_name.empty();
+    const std::string prompt = epaper_ui::WelcomeMessageTitle(named ? rotation / 2 : rotation);
+    greeting::Today today;
+    bool leap_year = false;
+    const time_t now = time(nullptr);
+    if (static_cast<int64_t>(now) >= kMinValidEpoch) {
+        std::tm local = {};
+        localtime_r(&now, &local);
+        today = {true, local.tm_mon + 1, local.tm_mday, local.tm_hour};
+        const int year = local.tm_year + 1900;
+        leap_year = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+    }
+    state.welcome_message.title_text = epaper_ui::ToDisplayText(
+        greeting::HomeTitle(personal_.friend_name, personal_.birthday, today, leap_year, rotation,
+                            prompt));
 
     // Empty archive: invite the first capture. Otherwise show the task tracker.
     if (archive_.recording_count == 0) {

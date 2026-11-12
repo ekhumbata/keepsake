@@ -9,6 +9,7 @@
 
 #include "ai_features.h"
 #include "app_state_service.h"
+#include "epaper_ui/book_page.h"
 #include "book_list_page_runtime.h"
 #include "book_reader_page_runtime.h"
 #include "button_input_runtime.h"
@@ -75,6 +76,8 @@
 
 namespace app_shell {
 namespace {
+
+void ShowWelcomeNoteIfDue();
 
 constexpr const char* kTag = "AppShell";
 constexpr bool kEnablePowerButtonShutdown = true;
@@ -713,6 +716,7 @@ void HandleOnboardingDismissIfRequested()
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         ESP_LOGW(kTag, "Onboarding dismiss -> home failed: %s", esp_err_to_name(err));
     }
+    ShowWelcomeNoteIfDue();
 }
 
 esp_err_t ShowDetailsScreen(const std::string& recording_id, DetailsPageSource source,
@@ -2056,6 +2060,28 @@ void InitGeminiService()
     }
 }
 
+// The welcome note (#85/#86): the provisioning file's welcome message, shown once on Home.
+void ShowWelcomeNoteIfDue()
+{
+    if (app_state_service::WelcomeNoteShown()) {
+        return;
+    }
+    const app_state_service::PersonalSettings personal = app_state_service::Personal();
+    if (personal.welcome_message.empty()) {
+        return;
+    }
+    const std::string title = personal.friend_name.empty()
+                                  ? std::string("A note for you")
+                                  : "For " + epaper_ui::ToDisplayText(personal.friend_name);
+    const esp_err_t err =
+        overlay_runtime::ShowNoteCard(title, epaper_ui::ToDisplayText(personal.welcome_message));
+    if (err == ESP_OK) {
+        app_state_service::MarkWelcomeNoteShown(true);
+    } else if (err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Welcome note failed: %s", esp_err_to_name(err));
+    }
+}
+
 // Result of importing the provisioning file at boot (#42), shown once the first screen is up.
 provisioning_service::Outcome s_provisioning_outcome = {};
 
@@ -2352,6 +2378,9 @@ void Run()
                  esp_err_to_name(initial_err));
     }
     s_startup_complete.store(true, std::memory_order_relaxed);
+    if (!show_onboarding) {
+        ShowWelcomeNoteIfDue();  // after onboarding instead, when it's showing
+    }
     ShowProvisioningOutcome();
 }
 

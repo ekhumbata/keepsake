@@ -34,11 +34,14 @@ enum class CardModalPurpose : uint8_t {
     kStorageFormatError,
     kTopicsConfirmDelete,
     kBookListConfirmDelete,
+    kNote,  // a message for the friend (#85): title/body from s_note_title/s_note_body
 };
 
 std::mutex s_state_mutex;
 bool s_initialized = false;
 epaper_ui::CardModalState s_card_modal_state = {};
+std::string s_note_title;
+std::string s_note_body;
 CardModalPurpose s_card_modal_purpose = CardModalPurpose::kNone;
 epaper_ui::SelectModalState s_select_modal_state = {};
 epaper_ui::KeyboardState s_keyboard_state = {};
@@ -133,6 +136,11 @@ epaper_ui::CardModalState BuildCardModalState(CardModalPurpose purpose)
             state.body_text = "This book and your saved reading position will be removed. "
                               "There's no undo.";
             state.action_labels = {"Cancel", "Delete"};
+            break;
+        case CardModalPurpose::kNote:
+            state.title_text = s_note_title;
+            state.body_text = s_note_body;
+            state.action_labels = {"Close"};
             break;
         case CardModalPurpose::kNone:
         default:
@@ -670,6 +678,16 @@ esp_err_t ShowBookListModalConfirmDelete()
     return ShowCardModal(CardModalPurpose::kBookListConfirmDelete, "book_list_confirm_delete");
 }
 
+esp_err_t ShowNoteCard(const std::string& title, const std::string& body)
+{
+    {
+        std::lock_guard<std::mutex> lock(s_state_mutex);
+        s_note_title = title;
+        s_note_body = body;
+    }
+    return ShowCardModal(CardModalPurpose::kNote, "note");
+}
+
 esp_err_t DismissStorageModal()
 {
     return DismissCardModal();
@@ -1044,6 +1062,7 @@ app_interaction::InputResult HandleButtonEvent(const button_service::ButtonEvent
                                     play_click = true;
                                 }
                                 break;
+                            case CardModalPurpose::kNote:
                             case CardModalPurpose::kStorageNoSdCard:
                             case CardModalPurpose::kStorageFormatSuccess:
                             case CardModalPurpose::kStorageFormatError:
