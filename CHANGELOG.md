@@ -10,6 +10,16 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Weather on Home** (#37), with no API key. From Open-Meteo, for the provisioning file's
+  `weather_location` (a town name, looked up once and cached, or "lat, lon").
+  - `core/weather` (host-tested, fuzzed): URLs, the geocoding and forecast answers,
+    weather codes in words, °C/°F, the NVS cache, and when a report is shown, aged
+    ("updated 2 h ago") or hidden (after 6 h).
+  - `weather_service` checks every 10 minutes and fetches hourly as a background network
+    job. A failed fetch retries on the next connection.
+  - Home shows "8C, light rain" under the greeting. The degree sign waits for the font
+    work (#104). Kconfig `KEEPSAKE_WEATHER_ENABLED` and `_FAHRENHEIT`.
+
 - **A new first-run introduction** (#86). The inherited voice-notebook carousel, with its
   Followup artwork, is replaced by seven slides for Keepsake:
   1. "Hi, <name>!" with Bookworm and Mochi together (a new `hello` sprite);

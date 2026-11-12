@@ -33,6 +33,7 @@
 #include "greeting/special_days.h"
 #include "epaper_ui/notes_page.h"
 #include "epaper_ui/onboarding_page.h"
+#include "weather/weather.h"
 #include "epaper_ui/onboarding_slides.h"
 #include "epaper_ui/select_modal.h"
 #include "epaper_ui/settings_about_page.h"
@@ -193,6 +194,20 @@ std::map<std::string, Renderer> Screens()
         state.navigation_focus_index = 0;
         state.welcome_message.title_text = "Good morning";
         state.welcome_message.current_date = {"Wednesday", "November 11"};
+        DrawDashboardPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
+    // Weather under the greeting (#37), as weather::Summary words it, through the display filter.
+    screens["home_weather"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        DashboardPageState state = {};
+        state.navigation_focus_index = 0;
+        state.welcome_message.title_text = "Good morning";
+        state.welcome_message.current_date = {"Wednesday", "November 11"};
+        weather::Report report;
+        report.temperature_c = 7.6;
+        report.code = 61;
+        report.fetched_at = 1800000000 - 2 * 3600;
+        state.welcome_message.subtitle_text =
+            ToDisplayText(weather::Summary(report, 1800000000, false));
         DrawDashboardPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
     screens["lock_screen"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {

@@ -1,0 +1,15 @@
+menu "Keepsake weather"
+
+    config KEEPSAKE_WEATHER_ENABLED
+        bool "Fetch the weather from Open-Meteo"
+        default y
+        help
+            Once an hour, as a background network job, for the place set by the provisioning
+            file ("weather_location"). Open-Meteo needs no key. Nothing is fetched without a
+            place. See #37.
+
+    config KEEPSAKE_WEATHER_FAHRENHEIT
+        bool "Show temperatures in Fahrenheit"
+        default n
+
+endmenu

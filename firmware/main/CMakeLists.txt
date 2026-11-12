@@ -37,7 +37,7 @@ idf_component_register(SRCS "onboarding_page_runtime.cpp" "onboarding_page_inter
                             "special_days_runtime.cpp"
                        INCLUDE_DIRS "."
                        REQUIRES app_state_service app_update board_test climate_service crash_report_service
-                                esp_app_format esp_driver_usb_serial_jtag esp_psram greeting provisioning_service axp2101 board book_formats book_reader button_service library net_jobs net_jobs_service ota_service cpu_boost display_service
+                                esp_app_format esp_driver_usb_serial_jtag esp_psram greeting provisioning_service axp2101 board book_formats book_reader button_service library net_jobs net_jobs_service ota_service weather_service cpu_boost display_service
                                 feedback_service
                                 device_sleep_service epaper_ui esp_driver_gpio
                                 esp_hw_support esp_partition gemini_service imu_service power_service

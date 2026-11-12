@@ -32,6 +32,7 @@ update) · 💤 later
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
+| Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
 | Ambient lock screen | 📋 [#38](https://github.com/ekhumbata/keepsake/issues/38) | Big clock, date + month, weather, indoor temperature/humidity, night mode |
 | Indoor climate | 📋 [#36](https://github.com/ekhumbata/keepsake/issues/36) | The board's SHTC3 temperature/humidity sensor |
 | Weather | 📋 [#37](https://github.com/ekhumbata/keepsake/issues/37) | Open-Meteo (no account), hourly, "updated X h ago" when offline |

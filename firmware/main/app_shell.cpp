@@ -56,6 +56,7 @@
 #include "notes_page_runtime.h"
 #include "onboarding_page_runtime.h"
 #include "special_days_runtime.h"
+#include "weather_service.h"
 #include "status_bar_runtime.h"
 #include "test_console_runtime.h"
 #include "todos_page_runtime.h"
@@ -2198,6 +2199,16 @@ void InitWifiService()
         }
     });
     ota_service::Start();
+    // Weather (#37): hourly, for the place the provisioning file named; Home shows it.
+    (void)weather_service::Init();
+    weather_service::SetLocationProvider(
+        [] { return app_state_service::Personal().weather_location; });
+    weather_service::SetListener([] {
+        if (ScreenActiveForRefresh(display_service::ScreenId::kHome)) {
+            (void)dashboard_page_runtime::UpdateDisplayStateAndRequestRefresh();
+        }
+    });
+    weather_service::Start();
     // A provisioning file on the SD card (#42) sets the network (and more) before Wi-Fi starts,
     // so the first connection already uses it. Its toast waits for the first screen.
     s_provisioning_outcome = provisioning_service::ImportFromSdCard();
