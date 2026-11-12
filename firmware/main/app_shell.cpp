@@ -26,6 +26,7 @@
 #include "footer_runtime.h"
 #include "chroninkle_task_config.h"
 #include "cpu_boost.h"
+#include "crash_report_service.h"
 #include "net_jobs_service.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -2275,6 +2276,8 @@ const char* ResetReasonName(esp_reset_reason_t reason)
 
 void Run()
 {
+    // Before anything logs: keep the log from before a crash and start capturing (#41).
+    crash_report_service::StartLogCapture();
     ESP_LOGI(kTag, "Chroninkle firmware version %s", esp_app_get_description()->version);
     // Logged first thing on every boot: without it, a reset that happens between two
     // normal-looking boot logs is indistinguishable from a deliberate restart, which is
@@ -2302,6 +2305,10 @@ void Run()
     // delayed by SD detect/mount latency.
     InitDisplayService();
     InitStorageService();
+    // A crash before this boot leaves a report on the SD card for Eric (#41).
+    if (const int reports = crash_report_service::CollectAfterReset(); reports > 0) {
+        ESP_LOGW(kTag, "%d crash report(s) in /.keepsake/crash", reports);
+    }
     InitTextReaderService();
     InitUiRefreshRuntime();
     InitLockScreenRuntime();
