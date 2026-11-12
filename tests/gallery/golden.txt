@@ -23,6 +23,8 @@ follow_up 598654cd
 home 2ded523c
 home_weather 983ea28b
 lock_screen 72ee2da4
+lock_screen_ambient 1413bbef
+lock_screen_night daaae14d
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
 notes_empty eac3007f
