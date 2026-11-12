@@ -10,7 +10,19 @@ via `git log`, not backfilled here.
 
 ### Added
 
-- **Photos groundwork** (#136; not on the device yet).
+- **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.
+  - The rocker flips through the photos (oldest first, wrapping round) with a full
+    refresh each. A press hides or shows the caption ("First date, May 20, 2019" and
+    "3 / 12"). A quick Record press goes back to Home.
+  - It opens at the last photo seen.
+  - `photo_service` lists `/photos` (up to 500, two folder levels) and caches each
+    prepared photo in `/.keepsake/photo-cache`. It prepares the neighbours of the photo
+    on screen in the background, on a low-priority task.
+  - Big JPEGs are decoded at 1/2 to 1/8 scale with the ROM's TJpgDec, so 12 MP phone
+    photos fit in memory. Everything else goes through `core/photo`.
+  - Empty and can't-open states with Mochi say what to do (HEIC → save as JPEG; too big
+    → a smaller copy).
+- **Photos groundwork** (#136).
   - `core/photo` (host-tested, fuzzed): EXIF orientation and date, the eight orientations,
     fitting to the 480x760 photo area, auto-levels, preparing a photo for the 1-bit panel,
     format sniffing (HEIC/WebP get a plain answer), and captions and oldest-first order

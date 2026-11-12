@@ -7,6 +7,7 @@
 // Without --update, a missing or changed hash fails (exit 1) and names the screen; the PNGs
 // in DIR show what it looks like now. With --update, the golden file is rewritten. All sample
 // text is original.
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <cstdio>
@@ -34,6 +35,8 @@
 #include "epaper_ui/notes_page.h"
 #include "battery_ux/battery_ux.h"
 #include "epaper_ui/onboarding_page.h"
+#include "epaper_ui/photo_page.h"
+#include "photo/photo.h"
 #include "weather/weather.h"
 #include "epaper_ui/onboarding_slides.h"
 #include "epaper_ui/select_modal.h"
@@ -211,6 +214,63 @@ std::map<std::string, Renderer> Screens()
             ToDisplayText(weather::Summary(report, 1800000000, false));
         DrawDashboardPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
+    // Photos (#136): a generated "photo" (no personal pictures in the repo), portrait and
+    // landscape, plus the empty and can't-open states.
+    {
+        const auto make_photo = [](int width, int height) {
+            photo::Gray image;
+            image.width = width;
+            image.height = height;
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
+                    // A sky gradient, a dark hill, and a round "face" in the middle.
+                    int v = 120 + 100 * y / height;
+                    if (y > height * 2 / 3 + (x * 7 % 23)) v = 60;
+                    const int dx = x - width / 2;
+                    const int dy = y - height / 2;
+                    if (dx * dx + dy * dy < (width / 6) * (width / 6)) v = 200 - (dy > 0 ? 40 : 0);
+                    if ((dx + width / 16) * (dx + width / 16) + (dy + height / 30) * (dy + height / 30) < 64 ||
+                        (dx - width / 16) * (dx - width / 16) + (dy + height / 30) * (dy + height / 30) < 64) {
+                        v = 20;
+                    }
+                    image.pixels.push_back(static_cast<uint8_t>(std::clamp(v, 0, 255)));
+                }
+            }
+            return std::make_shared<const cover_image::Thumbnail>(photo::Prepare(image, 1));
+        };
+        const auto portrait = make_photo(600, 800);
+        const auto landscape = make_photo(800, 600);
+        screens["photo_portrait"] = page([portrait](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            PhotoPageState state = {};
+            state.photo = portrait;
+            state.caption_text = photo::CaptionFor("2019-05-20 First date.jpg", "").Text();
+            state.position_text = "3 / 12";
+            DrawPhotoPage(fb, rw, rh, pw, ph, state);
+        });
+        screens["photo_landscape"] = page([landscape](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            PhotoPageState state = {};
+            state.photo = landscape;
+            state.caption_text = photo::CaptionFor("2021-07-04 Beach day.jpg", "").Text();
+            state.position_text = "4 / 12";
+            DrawPhotoPage(fb, rw, rh, pw, ph, state);
+        });
+        screens["photos_empty"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            PhotoPageState state = {};
+            state.message_title = "No photos yet";
+            state.message_body = "Drop some into the photos folder on the SD card (Settings > "
+                                 "Storage > Enable OTG).";
+            state.message_image = project_assets::GetImage(EmbeddedImageId::kMascotMochiHappy);
+            DrawPhotoPage(fb, rw, rh, pw, ph, state);
+        });
+        screens["photo_cant_open"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            PhotoPageState state = {};
+            state.message_title = "Mochi can't open this one";
+            state.message_body = "It's a HEIC photo. Save it as JPEG and drop it in again.";
+            state.message_image = project_assets::GetImage(EmbeddedImageId::kMascotSleepy);
+            state.position_text = "5 / 12";
+            DrawPhotoPage(fb, rw, rh, pw, ph, state);
+        });
+    }
     screens["lock_screen"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         LockScreenState state = {};
         state.weekday_text = "Wednesday";

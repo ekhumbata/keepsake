@@ -31,7 +31,7 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
-| Photos | 📋 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card and added later by dropping them into `photos` over USB. A Photos row on Home opens them full screen; the rocker flips through, with a caption from the file name |
+| Photos | 🚧 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card (see "Preload photos") and added later by dropping them into `photos` over USB. A Photos row on Home opens them full screen: the rocker flips through, oldest first; a press hides or shows the caption from the file name (to be checked on the device) |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
 | Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
 | Ambient lock screen | 📋 [#38](https://github.com/ekhumbata/keepsake/issues/38) | Big clock, date + month, weather, indoor temperature/humidity, night mode |

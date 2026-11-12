@@ -42,6 +42,8 @@ inline constexpr UBaseType_t kPriorityNetJobs = 2;
 // Battery UX (#84): watches the cached battery readings for plug-in and low-battery nudges.
 // Background, low priority: it only reads a cache and posts the odd card or toast.
 inline constexpr UBaseType_t kPriorityBatteryUx = 1;
+// Photos (#136): prepares the photos next to the one on screen, in the background.
+inline constexpr UBaseType_t kPriorityPhotoPrepare = 1;
 // Board test console (#15): only answers commands from a computer over USB; never in the way.
 inline constexpr UBaseType_t kPriorityTestConsole = 1;
 
