@@ -17,6 +17,7 @@
 #include "onboarding_page_runtime.h"
 #include "ota_service.h"
 #include "overlay_runtime.h"
+#include "saved_networks_runtime.h"
 #include "todos_page_interactions.h"
 #include "todos_page_runtime.h"
 #include "settings_page_interactions.h"
@@ -756,6 +757,8 @@ ButtonResult ApplySettingsActivateResult(const settings_page_interactions::Activ
     callbacks.show_time = [&result]() {
         result.footer_item = footer_runtime::FooterFocusItem::kTime;
     };
+    // Deferred like Storage below: app_shell opens the list after input dispatch (#43).
+    callbacks.show_saved_wifi = []() { saved_networks_runtime::RequestShowList(); };
     callbacks.show_storage = []() {
         // Deferred so the screen change happens after input dispatch; app_shell polls for it,
         // same pattern as Manual's onboarding_page_runtime::RequestManualLaunch().

@@ -62,11 +62,11 @@ update) · 💤 later
 | Auto-sleep | ✅ | Screen rests after ~3 min, deep sleep after ~30 min |
 | Power management | 🚧 [#16](https://github.com/ekhumbata/keepsake/issues/16) | Slower CPU while idle (frequency scaling is in; to be measured on the device) |
 | Wi-Fi only when needed | 🚧 [#17](https://github.com/ekhumbata/keepsake/issues/17) | Radio off by default; jobs batched; a new recording brings it up to transcribe straight away. Built, behind a menuconfig switch until it's checked on the board |
-| Charging screen + low-battery nudges | 📋 [#84](https://github.com/ekhumbata/keepsake/issues/84) | Mochi while charging; gentle warnings at 20/10/5% |
+| Charging screen + low-battery nudges | 🚧 [#84](https://github.com/ekhumbata/keepsake/issues/84) | A Charging card with Mochi on plug-in (closes by itself); a gentle note at 20% and a sleepy-Mochi card at 10% and 5%; a smoothed battery percentage (to be checked on the device) |
 | Battery saver + profiles | 🎁 [#58](https://github.com/ekhumbata/keepsake/issues/58) | Always fresh / Balanced / Max battery |
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |
 | Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device) |
-| Several saved networks | 🚧 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5, most recent first, moving on when one stops answering (to be checked on the device); a "Let's reconnect" card offers the setup hotspot when the password is rejected; a saved-networks list in Settings is still to come |
+| Several saved networks | 🚧 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5, most recent first, moving on when one stops answering (to be checked on the device); a "Let's reconnect" card offers the setup hotspot when the password is rejected; Settings → Saved Wi-Fi lists them and forgets one |
 | Over-the-air updates | 🚧 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Checks the latest GitHub release once a day (or Settings → About → Check for updates) and downloads a newer one in the background. It starts the next time the device sleeps. If it fails its health check it rolls back and isn't offered again. A "Keepsake updated" card says what's new (to be checked on the device) |
 | Crash reports | 🚧 [#39](https://github.com/ekhumbata/keepsake/issues/39), [#41](https://github.com/ekhumbata/keepsake/issues/41) | A crash leaves a report and core dump on the SD card for Eric (to be checked on the device) |
 | Works offline | 📋 [#45](https://github.com/ekhumbata/keepsake/issues/45) | Everything but downloads, weather and AI works without Wi-Fi |
@@ -145,7 +145,8 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 - 📋 Battery profiles come after the gift ([#58](https://github.com/ekhumbata/keepsake/issues/58)).
 
 ### Charge and power off
-- Charge with USB-C; the status bar shows the battery and a charging mark.
+- Charge with USB-C: a Charging card with Mochi appears, and the status bar shows the battery and a charging mark.
+- Keepsake nudges at 20%, 10% and 5% battery, once each.
 - Hold PWR ~1 s → **Shut down**. On USB power it stays on until unplugged.
 
 ### Fix common problems

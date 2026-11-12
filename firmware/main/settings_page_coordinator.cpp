@@ -7,6 +7,7 @@ using page_navigation::NavigationItemRole;
 // Order must match epaper_ui::SettingsMenuItem / kSettingsMenuLabels.
 constexpr NavigationItemRole kMenuRoles[epaper_ui::kSettingsMenuItemCount] = {
     NavigationItemRole::kSettingsMenuNetwork,
+    NavigationItemRole::kSettingsMenuSavedWifi,
     NavigationItemRole::kSettingsMenuTime,
     NavigationItemRole::kSettingsMenuStorage,
     NavigationItemRole::kSettingsMenuTodos,

@@ -32,6 +32,7 @@
 #include "epaper_ui/mascots.h"
 #include "greeting/special_days.h"
 #include "epaper_ui/notes_page.h"
+#include "battery_ux/battery_ux.h"
 #include "epaper_ui/onboarding_page.h"
 #include "weather/weather.h"
 #include "epaper_ui/onboarding_slides.h"
@@ -463,6 +464,27 @@ std::map<std::string, Renderer> Screens()
         }
         DrawSelectModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
     });
+    // Settings -> Saved Wi-Fi (#43): the list, then the confirmation.
+    screens["saved_wifi"] = over_home([](uint8_t* fb) {
+        SelectModalState state = {};
+        state.visible = true;
+        state.title_text = "Saved Wi-Fi";
+        for (const char* label : {"Home Network (connected)", "Office", "Grandma's", "Close"}) {
+            SelectModalItemState item = {};
+            item.label_text = label;
+            state.items.push_back(item);
+        }
+        DrawSelectModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+    });
+    screens["saved_wifi_forget"] = over_home([](uint8_t* fb) {
+        CardModalState state = {};
+        state.visible = true;
+        state.title_text = "Forget this Wi-Fi?";
+        state.body_text =
+            "Keepsake won't join Office again until it's set up again from Settings > Network.";
+        state.action_labels = {"Cancel", "Forget"};
+        DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+    });
     screens["overlay_card_modal"] = over_home([](uint8_t* fb) {
         CardModalState state = {};
         state.visible = true;
@@ -498,6 +520,26 @@ std::map<std::string, Renderer> Screens()
                 state.body_text = occasion.message;
                 state.action_labels = {"Close"};
                 state.image = OccasionMascot(occasion.mascot);
+                DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+            });
+        }
+    }
+    // Battery (#84): the charging card and the low-battery card, with their Mochis.
+    {
+        const std::pair<const char*, std::pair<battery_ux::Message, EmbeddedImageId>> cards[] = {
+            {"battery_charging", {battery_ux::ChargingMessage(42), EmbeddedImageId::kMascotCharging}},
+            {"battery_low", {battery_ux::NudgeMessage(10), EmbeddedImageId::kMascotSleepy}},
+        };
+        for (const auto& [name, card] : cards) {
+            const battery_ux::Message message = card.first;
+            const EmbeddedImageId image = card.second;
+            screens[name] = over_home([message, image](uint8_t* fb) {
+                CardModalState state = {};
+                state.visible = true;
+                state.title_text = message.title;
+                state.body_text = message.body;
+                state.action_labels = {"Close"};
+                state.image = project_assets::GetImage(image);
                 DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
             });
         }
