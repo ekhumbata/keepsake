@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy this file OUTSIDE the repo, fill it in, and put it on the SD card as /.keepsake/provision.json. Keepsake imports it on the next start, then wipes and deletes it. Every setting is optional; delete the lines you don't need. Never commit the filled-in copy.",
+  "_comment": "Copy this file OUTSIDE the repo, fill it in, and put it on the SD card as /.keepsake/provision.json. Keepsake imports it on the next start, then wipes and deletes it. Every setting is optional; delete the lines you don't need. Dates are \"MM-DD\" or \"YYYY-MM-DD\" (with the year, anniversaries count: \"Happy 5th anniversary!\"). Never commit the filled-in copy.",
   "version": 1,
   "wifi": [
     { "ssid": "Friends-Home-WiFi", "password": "home network password" },
@@ -9,6 +9,12 @@
   "weather_location": "London",
   "friend_name": "Sam",
   "birthday": "07-14",
+  "anniversary": "2021-09-03",
+  "first_date": "2019-05-20",
+  "holidays": ["christmas", "new_year", "valentines", "halloween"],
+  "special_days": [
+    { "date": "03-17", "title": "Happy Gotcha Day, Biscuit!", "message": "Treats for the dog today." }
+  ],
   "welcome_message": "Happy birthday! I made you a little reading companion.",
   "gemini_key": ""
 }

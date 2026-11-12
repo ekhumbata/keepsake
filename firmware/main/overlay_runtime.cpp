@@ -43,6 +43,7 @@ bool s_initialized = false;
 epaper_ui::CardModalState s_card_modal_state = {};
 std::string s_note_title;
 std::string s_note_body;
+const EmbeddedImageAsset* s_note_image = nullptr;
 CardModalPurpose s_card_modal_purpose = CardModalPurpose::kNone;
 epaper_ui::SelectModalState s_select_modal_state = {};
 epaper_ui::KeyboardState s_keyboard_state = {};
@@ -141,6 +142,7 @@ epaper_ui::CardModalState BuildCardModalState(CardModalPurpose purpose)
         case CardModalPurpose::kNote:
             state.title_text = s_note_title;
             state.body_text = s_note_body;
+            state.image = s_note_image;
             state.action_labels = {"Close"};
             break;
         case CardModalPurpose::kReconnect:
@@ -684,12 +686,14 @@ esp_err_t ShowBookListModalConfirmDelete()
     return ShowCardModal(CardModalPurpose::kBookListConfirmDelete, "book_list_confirm_delete");
 }
 
-esp_err_t ShowNoteCard(const std::string& title, const std::string& body)
+esp_err_t ShowNoteCard(const std::string& title, const std::string& body,
+                       const EmbeddedImageAsset* image)
 {
     {
         std::lock_guard<std::mutex> lock(s_state_mutex);
         s_note_title = title;
         s_note_body = body;
+        s_note_image = image;
     }
     return ShowCardModal(CardModalPurpose::kNote, "note");
 }
