@@ -10,6 +10,15 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Photos groundwork** (#136; not on the device yet).
+  - `core/photo` (host-tested, fuzzed): EXIF orientation and date, the eight orientations,
+    fitting to the 480x760 photo area, auto-levels, preparing a photo for the 1-bit panel,
+    format sniffing (HEIC/WebP get a plain answer), and captions and oldest-first order
+    from file names.
+  - `cover_image` exposes `DecodeGray` and `Resample` for it.
+  - `tools/photos/prepare_photos.py` (+ tests) readies Eric's photos for the SD card and
+    refuses to write inside the repo.
+
 - **Weather on Home** (#37), with no API key. From Open-Meteo, for the provisioning file's
   `weather_location` (a town name, looked up once and cached, or "lat, lon").
   - `core/weather` (host-tested, fuzzed): URLs, the geocoding and forecast answers,

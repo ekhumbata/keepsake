@@ -40,6 +40,10 @@ jobs:
         run: python3 -m unittest discover -s tools/board/tests -v
       - name: Release tools (the update manifest, #40)
         run: python3 -m unittest discover -s tools/release/tests -v
+      - name: Photo prepare tool (#136)
+        run: |
+          python3 -m pip install --quiet "pillow>=10"
+          python3 -m unittest discover -s tools/photos/tests -v
 
       - name: Upload screen gallery
         if: always()

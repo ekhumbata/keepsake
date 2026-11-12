@@ -16,6 +16,19 @@ constexpr int kMaxEnlarge = 2;
 
 // Box-filter resample of an 8-bit gray image: each output pixel averages the source pixels
 // it covers (or takes the nearest one when enlarging).
+void PutU16(std::string* out, int value)
+{
+    out->push_back(static_cast<char>(value & 0xFF));
+    out->push_back(static_cast<char>((value >> 8) & 0xFF));
+}
+
+int GetU16(std::string_view data, size_t at)
+{
+    return static_cast<unsigned char>(data[at]) | (static_cast<unsigned char>(data[at + 1]) << 8);
+}
+
+}  // namespace
+
 std::vector<uint8_t> Resample(const uint8_t* src, int width, int height, int out_width,
                               int out_height)
 {
@@ -44,18 +57,39 @@ std::vector<uint8_t> Resample(const uint8_t* src, int width, int height, int out
     return out;
 }
 
-void PutU16(std::string* out, int value)
+Result DecodeGray(std::string_view encoded, std::vector<uint8_t>* gray, int* width, int* height,
+                  const Limits& limits)
 {
-    out->push_back(static_cast<char>(value & 0xFF));
-    out->push_back(static_cast<char>((value >> 8) & 0xFF));
+    gray->clear();
+    *width = 0;
+    *height = 0;
+    if (encoded.empty()) {
+        return Result::kEmpty;
+    }
+    if (encoded.size() > limits.max_input_bytes || encoded.size() > static_cast<size_t>(INT32_MAX)) {
+        return Result::kTooBig;
+    }
+    const auto* bytes = reinterpret_cast<const stbi_uc*>(encoded.data());
+    const int length = static_cast<int>(encoded.size());
+    int w = 0;
+    int h = 0;
+    int channels = 0;
+    if (!stbi_info_from_memory(bytes, length, &w, &h, &channels) || w <= 0 || h <= 0) {
+        return Result::kUndecodable;
+    }
+    if (static_cast<uint64_t>(w) * static_cast<uint64_t>(h) > limits.max_source_pixels) {
+        return Result::kTooBig;
+    }
+    stbi_uc* pixels = stbi_load_from_memory(bytes, length, &w, &h, &channels, 1);
+    if (pixels == nullptr) {
+        return Result::kUndecodable;
+    }
+    gray->assign(pixels, pixels + static_cast<size_t>(w) * static_cast<size_t>(h));
+    stbi_image_free(pixels);
+    *width = w;
+    *height = h;
+    return Result::kOk;
 }
-
-int GetU16(std::string_view data, size_t at)
-{
-    return static_cast<unsigned char>(data[at]) | (static_cast<unsigned char>(data[at + 1]) << 8);
-}
-
-}  // namespace
 
 Thumbnail Dither(const std::vector<uint8_t>& gray, int width, int height)
 {

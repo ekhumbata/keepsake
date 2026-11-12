@@ -46,6 +46,15 @@ enum class Result {
 Result MakeThumbnail(std::string_view encoded, int box_width, int box_height, Thumbnail* out,
                      const Limits& limits = {});
 
+// Decodes `encoded` (JPEG, PNG or GIF) to 8-bit grayscale, one byte per pixel, rows top to
+// bottom. Same limits as MakeThumbnail. Photos (#136) build on this.
+Result DecodeGray(std::string_view encoded, std::vector<uint8_t>* gray, int* width, int* height,
+                  const Limits& limits = {});
+
+// Area-average resampling of an 8-bit grayscale image to out_width x out_height (both > 0).
+std::vector<uint8_t> Resample(const uint8_t* src, int width, int height, int out_width,
+                              int out_height);
+
 // Dithers an 8-bit grayscale image (0 black .. 255 white) to 1 bit (Atkinson: high contrast
 // with clean whites, which suits small covers on e-paper).
 Thumbnail Dither(const std::vector<uint8_t>& gray, int width, int height);
