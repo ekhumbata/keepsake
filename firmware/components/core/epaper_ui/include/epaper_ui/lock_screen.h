@@ -6,7 +6,26 @@
 
 #include "epaper_ui/status_bar.h"
 
+struct EmbeddedImageAsset;
+
 namespace epaper_ui {
+
+// The ambient variant (#38): what a resting Keepsake shows instead of the todo list. By day a
+// big clock, the date, the weather, the indoor climate and this month; at night a sleeping
+// Mochi and tomorrow's first todo, without the clock (night is "no updates").
+struct LockScreenAmbient {
+    bool enabled = false;
+    bool night = false;
+    std::string clock_text = {};    // "9:41"
+    std::string weather_text = {};  // "8C, light rain"; empty: no line
+    std::string range_text = {};    // "High 9C, low 3C"
+    std::string indoor_text = {};   // "Inside 21C, 45%"
+    int year = 0;                   // the calendar; month 0 = none
+    int month = 0;
+    int today = 0;
+    std::string night_note = {};    // "Tomorrow: water the fern"
+    const EmbeddedImageAsset* mascot = nullptr;
+};
 
 struct LockScreenState {
     std::string weekday_text = {};
@@ -22,6 +41,7 @@ struct LockScreenState {
     // icon for a power icon at the same size/position, so the frozen screen reads
     // as "powered down" rather than "locked."
     bool for_shutdown = false;
+    LockScreenAmbient ambient = {};
 };
 
 void DrawLockScreen(uint8_t* framebuffer,

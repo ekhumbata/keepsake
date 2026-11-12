@@ -20,6 +20,8 @@ details 2fceeb80
 follow_up 598654cd
 home 6651ce8f
 lock_screen 72ee2da4
+lock_screen_ambient 1413bbef
+lock_screen_night e58c8b49
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
 notes_empty eac3007f

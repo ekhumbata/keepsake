@@ -204,6 +204,32 @@ std::map<std::string, Renderer> Screens()
         state.pending_todo_count = 3;
         DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
     });
+    // The ambient lock screen (#38): day, and night.
+    screens["lock_screen_ambient"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        LockScreenState state = {};
+        state.weekday_text = "Wednesday";
+        state.date_text = "November 11";
+        state.ambient.enabled = true;
+        state.ambient.clock_text = "9:41";
+        state.ambient.weather_text = "8C, light rain";
+        state.ambient.range_text = "High 9C, low 3C";
+        state.ambient.indoor_text = "Inside 21C, 45%";
+        state.ambient.year = 2026;
+        state.ambient.month = 11;
+        state.ambient.today = 11;
+        state.ambient.mascot = project_assets::GetImage(EmbeddedImageId::kMascotMochiHappy);
+        DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
+    });
+    screens["lock_screen_night"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        LockScreenState state = {};
+        state.weekday_text = "Wednesday";
+        state.date_text = "November 11";
+        state.ambient.enabled = true;
+        state.ambient.night = true;
+        state.ambient.night_note = "Tomorrow: water the fern";
+        state.ambient.mascot = project_assets::GetImage(EmbeddedImageId::kMascotDayCelebrate);
+        DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
+    });
     screens["lock_screen_shutdown"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         LockScreenState state = {};
         state.weekday_text = "Wednesday";
