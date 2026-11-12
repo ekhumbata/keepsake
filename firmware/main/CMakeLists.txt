@@ -35,6 +35,7 @@ idf_component_register(SRCS "onboarding_page_runtime.cpp" "onboarding_page_inter
                             "book_reader_page_coordinator.cpp"
                             "test_console_runtime.cpp"
                             "special_days_runtime.cpp"
+                            "saved_networks_runtime.cpp"
                             "battery_runtime.cpp"
                        INCLUDE_DIRS "."
                        REQUIRES app_state_service app_update board_test climate_service crash_report_service

@@ -10,6 +10,10 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Settings → Saved Wi-Fi** (#43). A new heading lists the networks Keepsake
+  remembers, most recent first, with "(connected)" on the current one. Picking one asks
+  "Forget this Wi-Fi?", and **Forget** removes it (`wifi_service::ForgetNetwork`), with a
+  toast either way. With none saved, a toast points to Network.
 - **Charging card and low-battery nudges** (#84).
   - Plugging in the charger shows a **Charging** card with Mochi (new `charging` sprite)
     and the percentage. It closes by itself after ~16 s or when unplugged.

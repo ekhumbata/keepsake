@@ -62,6 +62,8 @@ esp_err_t ShowNoteCard(const std::string& title, const std::string& body,
 // "Let's reconnect" (#43): the saved Wi-Fi password was rejected; "Set up" sets
 // InteractionResult::request_wifi_setup.
 esp_err_t ShowReconnectCard(const std::string& network);
+// "Forget this Wi-Fi?" (#43): "Forget" sets InteractionResult::request_forget_network.
+esp_err_t ShowForgetNetworkCard(const std::string& network);
 // "Let's get online" (#86): after first-run onboarding when no Wi-Fi is known. "Set up" sets
 // request_wifi_setup; "Later" sets request_due_cards.
 esp_err_t ShowGetOnlineCard();

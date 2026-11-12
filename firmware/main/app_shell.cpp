@@ -56,6 +56,7 @@
 #include "follow_up_page_runtime.h"
 #include "notes_page_runtime.h"
 #include "onboarding_page_runtime.h"
+#include "saved_networks_runtime.h"
 #include "special_days_runtime.h"
 #include "status_bar_runtime.h"
 #include "test_console_runtime.h"
@@ -1638,6 +1639,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
                 overlay_result.select_modal_selected_index) &&
             !settings_topics_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
+            !saved_networks_runtime::HandleSelection(overlay_result.select_modal_selected_index) &&
             !book_list_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
             !book_reader_page_runtime::HandleMenuSelection(
@@ -1653,6 +1655,9 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
     }
     if (overlay_result.request_delete_topic) {
         (void)settings_topics_page_runtime::DeleteConfirmedTopic();
+    }
+    if (overlay_result.request_forget_network) {
+        saved_networks_runtime::ForgetConfirmed();
     }
     if (overlay_result.request_delete_book) {
         (void)book_list_page_runtime::DeleteConfirmedBook();
@@ -1759,6 +1764,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         HandleDetailsBackIfRequested();
         HandleOnboardingDismissIfRequested();
         ShowOnboardingFromSettingsIfRequested();
+        (void)saved_networks_runtime::ShowListIfRequested();
         ShowSettingsSubPageIfRequested();
         ShowTopicEntriesScreenIfRequested();
         HandleTopicEntriesBackIfRequested();

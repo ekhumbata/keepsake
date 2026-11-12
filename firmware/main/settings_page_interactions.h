@@ -13,6 +13,7 @@ enum class ActivateIntent : uint8_t {
     kNone = 0,
     kShowHome,
     kShowNetwork,
+    kShowSavedWifi,  // the saved networks list (#43)
     kShowTime,
     kShowStorage,
     kShowTodos,
@@ -32,6 +33,7 @@ using FocusMoveResult = page_actions::FocusMoveOutcome;
 struct ActivateCallbacks {
     std::function<void()> show_home;
     std::function<void()> show_network;
+    std::function<void()> show_saved_wifi;
     std::function<void()> show_time;
     std::function<void()> show_storage;
     std::function<void()> show_todos;
