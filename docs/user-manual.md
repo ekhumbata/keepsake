@@ -328,10 +328,12 @@ mass storage, from Settings > Storage) and they'll show up here.
 
 ## Settings
 
-Settings is a hub, like a phone's settings app: six headings, each
+Settings is a hub, like a phone's settings app: seven headings, each
 opening its own page, plus one action below them:
 
 - **Network** — WiFi and Access Point.
+- **Saved Wi-Fi** — the networks Keepsake remembers; forget one you no
+  longer use.
 - **Time** — timezone and clock.
 - **Storage** — SD card status and management.
 - **Todos** — todo archiving.
@@ -364,6 +366,11 @@ Keepsake remembers up to five networks you've connected to (for example home, a
 friend's place and a phone hotspot). It joins the one it used most recently, and if
 that one stops answering it tries the others before giving up. When a sixth is added,
 the one used longest ago is forgotten.
+
+To see them, open **Settings → Saved Wi-Fi**: the list starts with the most
+recent, and the one you're on says "(connected)". Pick one and choose
+**Forget** to remove it. Keepsake won't join it again until you set it up
+again here. **Close** leaves the list as it is.
 
 If your Wi-Fi password changes, Keepsake notices that the network turned it away and
 shows **Let's reconnect** (once per start-up). Choose **Set up** and it opens its own

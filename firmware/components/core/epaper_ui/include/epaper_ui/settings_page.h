@@ -12,12 +12,13 @@
 
 namespace epaper_ui {
 
-// Settings is a hub: 6 headings, each navigating to a dedicated sub-page, in this fixed slot
+// Settings is a hub: 7 headings, each navigating to a dedicated sub-page, in this fixed slot
 // order (must match kSettingsMenuLabels in settings_page.cpp).
-inline constexpr int kSettingsMenuItemCount = 6;
+inline constexpr int kSettingsMenuItemCount = 7;
 
 enum class SettingsMenuItem : int {
     kNetwork = 0,
+    kSavedWifi,  // the saved networks (#43): pick one to forget
     kTime,
     kStorage,
     kTodos,

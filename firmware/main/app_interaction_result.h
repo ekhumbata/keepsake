@@ -28,6 +28,8 @@ struct InputResult {
     bool request_delete_book = false;
     // Set by the "Let's reconnect" card's "Set up" action (#43): open the hotspot setup.
     bool request_wifi_setup = false;
+    // Set by "Forget" on the forget-network confirmation (#43).
+    bool request_forget_network = false;
     bool select_modal_submitted = false;
     int select_modal_selected_index = -1;
     // Populated only when the submitted modal was multi_select -- the final checked state of

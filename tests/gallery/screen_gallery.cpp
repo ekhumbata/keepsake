@@ -421,6 +421,27 @@ std::map<std::string, Renderer> Screens()
         }
         DrawSelectModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
     });
+    // Settings -> Saved Wi-Fi (#43): the list, then the confirmation.
+    screens["saved_wifi"] = over_home([](uint8_t* fb) {
+        SelectModalState state = {};
+        state.visible = true;
+        state.title_text = "Saved Wi-Fi";
+        for (const char* label : {"Home Network (connected)", "Office", "Grandma's", "Close"}) {
+            SelectModalItemState item = {};
+            item.label_text = label;
+            state.items.push_back(item);
+        }
+        DrawSelectModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+    });
+    screens["saved_wifi_forget"] = over_home([](uint8_t* fb) {
+        CardModalState state = {};
+        state.visible = true;
+        state.title_text = "Forget this Wi-Fi?";
+        state.body_text =
+            "Keepsake won't join Office again until it's set up again from Settings > Network.";
+        state.action_labels = {"Cancel", "Forget"};
+        DrawCardModal(fb, kRawWidth, kRawHeight, kPortraitWidth, kPortraitHeight, state);
+    });
     screens["overlay_card_modal"] = over_home([](uint8_t* fb) {
         CardModalState state = {};
         state.visible = true;

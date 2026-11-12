@@ -15,6 +15,8 @@ ActivateResult HandlePrimaryActivate(const SettingsPageCoordinator& coordinator)
 
     if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuNetwork)) {
         result.intent = ActivateIntent::kShowNetwork;
+    } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuSavedWifi)) {
+        result.intent = ActivateIntent::kShowSavedWifi;
     } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuTime)) {
         result.intent = ActivateIntent::kShowTime;
     } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuStorage)) {
@@ -47,6 +49,11 @@ void ApplyPrimaryActivateResult(const ActivateResult& result, const ActivateCall
         case ActivateIntent::kShowNetwork:
             if (callbacks.show_network) {
                 callbacks.show_network();
+            }
+            break;
+        case ActivateIntent::kShowSavedWifi:
+            if (callbacks.show_saved_wifi) {
+                callbacks.show_saved_wifi();
             }
             break;
         case ActivateIntent::kShowTime:

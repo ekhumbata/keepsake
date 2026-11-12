@@ -29,7 +29,9 @@ overlay_keyboard 61511ea5
 overlay_select_modal fcf8ecb5
 overlay_sticky_note 22e6fc02
 overlay_toast a84e7df2
-settings db306845
+saved_wifi db38ece2
+saved_wifi_forget 5285cd93
+settings 6db7c406
 settings_about d33b33f0
 settings_about_update_ready 2327f758
 settings_storage 638d3036

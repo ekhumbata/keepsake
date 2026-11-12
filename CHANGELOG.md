@@ -10,6 +10,11 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Settings → Saved Wi-Fi** (#43). A new heading lists the networks Keepsake
+  remembers, most recent first, with "(connected)" on the current one. Picking one asks
+  "Forget this Wi-Fi?", and **Forget** removes it (`wifi_service::ForgetNetwork`), with a
+  toast either way. With none saved, a toast points to Network.
+
 - **Updates over the air** (#40). Once a day (and from Settings → About → **Check for
   updates**) Keepsake looks at the latest GitHub release, downloads a newer firmware into
   the other app slot over HTTPS, and checks its size, SHA-256 and app header before it can

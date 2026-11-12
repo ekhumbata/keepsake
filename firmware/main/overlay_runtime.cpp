@@ -36,6 +36,7 @@ enum class CardModalPurpose : uint8_t {
     kBookListConfirmDelete,
     kNote,  // a message for the friend (#85): title/body from s_note_title/s_note_body
     kReconnect,  // the saved Wi-Fi password stopped working (#43); body from s_note_body
+    kForgetNetwork,  // confirm forgetting a saved network (#43); body from s_note_body
 };
 
 std::mutex s_state_mutex;
@@ -144,6 +145,11 @@ epaper_ui::CardModalState BuildCardModalState(CardModalPurpose purpose)
             state.body_text = s_note_body;
             state.image = s_note_image;
             state.action_labels = {"Close"};
+            break;
+        case CardModalPurpose::kForgetNetwork:
+            state.title_text = "Forget this Wi-Fi?";
+            state.body_text = s_note_body;
+            state.action_labels = {"Cancel", "Forget"};
             break;
         case CardModalPurpose::kReconnect:
             state.title_text = "Let's reconnect";
@@ -710,6 +716,16 @@ esp_err_t ShowReconnectCard(const std::string& network)
     return ShowCardModal(CardModalPurpose::kReconnect, "reconnect");
 }
 
+esp_err_t ShowForgetNetworkCard(const std::string& network)
+{
+    {
+        std::lock_guard<std::mutex> lock(s_state_mutex);
+        s_note_body = "Keepsake won't join " + network +
+                      " again until it's set up again from Settings > Network.";
+    }
+    return ShowCardModal(CardModalPurpose::kForgetNetwork, "forget_network");
+}
+
 esp_err_t DismissStorageModal()
 {
     return DismissCardModal();
@@ -1080,6 +1096,13 @@ app_interaction::InputResult HandleButtonEvent(const button_service::ButtonEvent
                             case CardModalPurpose::kBookListConfirmDelete:
                                 if (index == 1) {
                                     result.request_delete_book = true;
+                                } else {
+                                    play_click = true;
+                                }
+                                break;
+                            case CardModalPurpose::kForgetNetwork:
+                                if (index == 1) {
+                                    result.request_forget_network = true;
                                 } else {
                                     play_click = true;
                                 }
