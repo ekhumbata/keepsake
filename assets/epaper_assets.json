@@ -314,6 +314,18 @@
       "symbol": "kMascotDayAnniversary"
     },
     {
+      "path": "assets/mascots/charging.png",
+      "symbol": "kMascotCharging"
+    },
+    {
+      "path": "assets/mascots/sleepy.png",
+      "symbol": "kMascotSleepy"
+    },
+    {
+      "path": "assets/mascots/hello.png",
+      "symbol": "kMascotHello"
+    },
+    {
       "path": "assets/mascots/day_first_date.png",
       "symbol": "kMascotDayFirstDate"
     },

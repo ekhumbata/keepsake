@@ -38,6 +38,9 @@ bool IsInputCaptured();
 
 esp_err_t ShowShutdownModal();
 esp_err_t DismissShutdownModal();
+// Closes the note card if it's still the one called `title` (e.g. the charging card once the
+// charger is unplugged, #84); leaves any other card alone.
+esp_err_t DismissNoteCardTitled(const std::string& title);
 esp_err_t ShowStorageModalNoSdCard();
 esp_err_t ShowStorageModalConfirmFormat();
 esp_err_t ShowStorageModalFormatting();
@@ -61,6 +64,9 @@ esp_err_t ShowNoteCard(const std::string& title, const std::string& body,
 esp_err_t ShowReconnectCard(const std::string& network);
 // "Forget this Wi-Fi?" (#43): "Forget" sets InteractionResult::request_forget_network.
 esp_err_t ShowForgetNetworkCard(const std::string& network);
+// "Let's get online" (#86): after first-run onboarding when no Wi-Fi is known. "Set up" sets
+// request_wifi_setup; "Later" sets request_due_cards.
+esp_err_t ShowGetOnlineCard();
 esp_err_t ShowSelectModal(const epaper_ui::SelectModalState& state);
 esp_err_t DismissSelectModal();
 esp_err_t ShowKeyboard(const epaper_ui::KeyboardState& state,

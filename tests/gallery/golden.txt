@@ -1,6 +1,8 @@
 # Screen gallery golden hashes (CRC-32 of each 800x480 framebuffer).
 # Regenerate after an intended UI change, and look at the PNGs first:
 #   build/tests/screen_gallery --out build/tests/gallery --golden tests/gallery/golden.txt --update
+battery_charging e8ac2de1
+battery_low 4e7d1121
 book_list 104c37df
 book_list_continue 1441eeee
 book_reader_bookmarked d51caa09
@@ -23,7 +25,14 @@ lock_screen 72ee2da4
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
 notes_empty eac3007f
-onboarding dd10143d
+onboarding fb34d758
+onboarding_2 35816308
+onboarding_3 0d431df3
+onboarding_4 d538578e
+onboarding_5 82a83169
+onboarding_6 d7eaa53d
+onboarding_7 c931eedc
+onboarding_no_wifi 77ff1211
 overlay_card_modal d1706242
 overlay_keyboard 61511ea5
 overlay_select_modal fcf8ecb5

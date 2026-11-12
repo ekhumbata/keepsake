@@ -30,6 +30,9 @@ struct InputResult {
     bool request_wifi_setup = false;
     // Set by "Forget" on the forget-network confirmation (#43).
     bool request_forget_network = false;
+    // Set by "Later" on the "Let's get online" card after first-run onboarding (#86): show
+    // the cards that were waiting behind it (the welcome note, today's special day).
+    bool request_due_cards = false;
     bool select_modal_submitted = false;
     int select_modal_selected_index = -1;
     // Populated only when the submitted modal was multi_select -- the final checked state of

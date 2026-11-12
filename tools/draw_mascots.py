@@ -339,6 +339,18 @@ def compose() -> dict[str, Grid]:
     g.stamp(big, 33, 1)
     sprites["day_anniversary"] = g
 
+    # Hello (onboarding, the welcome card): the two together, Mochi waving.
+    g = Grid(80, 40)
+    worm, _ = bookworm()
+    cloud, _ = mochi()
+    g.stamp(worm, 0, 0)
+    g.stamp(cloud, 40, 0)
+    # The raised arm and two little motion marks.
+    dots(g, [(77, 26), (78, 25), (78, 24), (79, 23), (76, 18), (77, 17), (79, 19), (79, 20)])
+    g.stamp(sparkle(), 34, 3)
+    g.stamp(sparkle(), 46, 6)
+    sprites["hello"] = g
+
     # First date: Bookworm with a flower, a heart above.
     g, _ = bookworm()
     g.stamp(flower(), 33, 14)
@@ -351,6 +363,32 @@ def compose() -> dict[str, Grid]:
     g.stamp(bat(), 1, 3)
     g.stamp(bat(), 29, 6)
     sprites["day_halloween"] = g
+
+    # Charging (#84): Mochi having a snack of electricity, a bolt above.
+    g, _ = mochi()
+    g.stamp(from_rows([
+        "....##",
+        "...##.",
+        "..##..",
+        ".#####",
+        "...##.",
+        "..##..",
+        ".##...",
+        ".#....",
+    ]), 18, 0)
+    dots(g, [(5, 8), (34, 6), (36, 12)])
+    sprites["charging"] = g
+
+    # Sleepy (#84, low battery): Mochi with closed eyes, a "z z" drifting up.
+    g, _ = mochi()
+    for x, y in ((15, 25), (16, 25), (15, 26), (16, 26), (25, 25), (26, 25), (25, 26), (26, 26)):
+        g.set(x, y, 0)
+    dots(g, [(14, 26), (15, 26), (16, 26), (17, 26), (24, 26), (25, 26), (26, 26), (27, 26)])
+    z_big = from_rows(["#####", "...#.", "..#..", ".#...", "#####"])
+    z_small = from_rows(["###", "..#", ".#.", "#..", "###"])
+    g.stamp(z_big, 33, 2)
+    g.stamp(z_small, 27, 0)
+    sprites["sleepy"] = g
 
     # Any other special day: Mochi with sparkles all around.
     g, _ = mochi()

@@ -402,7 +402,9 @@ bool OnUsbPower(int* battery_percent)
     if (status.battery.available) {
         *battery_percent = status.battery.state_of_charge_percent;
     }
-    return status.usb_detected || status.power_input_valid;
+    // power_input_valid is always true on this board (it means "the sample is valid");
+    // usb_detected is VBUS itself.
+    return status.usb_detected;
 }
 
 // The job itself, on the network jobs task.

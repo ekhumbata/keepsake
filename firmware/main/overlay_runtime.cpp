@@ -37,6 +37,7 @@ enum class CardModalPurpose : uint8_t {
     kNote,  // a message for the friend (#85): title/body from s_note_title/s_note_body
     kReconnect,  // the saved Wi-Fi password stopped working (#43); body from s_note_body
     kForgetNetwork,  // confirm forgetting a saved network (#43); body from s_note_body
+    kGetOnline,  // first run without Wi-Fi (#86): offer the phone setup
 };
 
 std::mutex s_state_mutex;
@@ -154,6 +155,13 @@ epaper_ui::CardModalState BuildCardModalState(CardModalPurpose purpose)
         case CardModalPurpose::kReconnect:
             state.title_text = "Let's reconnect";
             state.body_text = s_note_body;
+            state.action_labels = {"Later", "Set up"};
+            break;
+        case CardModalPurpose::kGetOnline:
+            state.title_text = "Let's get online";
+            state.body_text =
+                "Wi-Fi keeps the clock right and brings little updates. Set it up from your "
+                "phone now? Keepsake will open its own Wi-Fi (Keepsake-...) for you to join.";
             state.action_labels = {"Later", "Set up"};
             break;
         case CardModalPurpose::kNone:
@@ -632,6 +640,17 @@ esp_err_t ShowShutdownModal()
     return ShowCardModal(CardModalPurpose::kShutdownConfirm, "shutdown_confirm");
 }
 
+esp_err_t DismissNoteCardTitled(const std::string& title)
+{
+    {
+        std::lock_guard<std::mutex> lock(s_state_mutex);
+        if (s_card_modal_purpose != CardModalPurpose::kNote || s_note_title != title) {
+            return ESP_ERR_INVALID_STATE;
+        }
+    }
+    return DismissCardModal();
+}
+
 esp_err_t DismissShutdownModal()
 {
     return DismissCardModal();
@@ -724,6 +743,11 @@ esp_err_t ShowForgetNetworkCard(const std::string& network)
                       " again until it's set up again from Settings > Network.";
     }
     return ShowCardModal(CardModalPurpose::kForgetNetwork, "forget_network");
+}
+
+esp_err_t ShowGetOnlineCard()
+{
+    return ShowCardModal(CardModalPurpose::kGetOnline, "get_online");
 }
 
 esp_err_t DismissStorageModal()
@@ -1111,6 +1135,14 @@ app_interaction::InputResult HandleButtonEvent(const button_service::ButtonEvent
                                 if (index == 1) {
                                     result.request_wifi_setup = true;
                                 } else {
+                                    play_click = true;
+                                }
+                                break;
+                            case CardModalPurpose::kGetOnline:
+                                if (index == 1) {
+                                    result.request_wifi_setup = true;
+                                } else {
+                                    result.request_due_cards = true;
                                     play_click = true;
                                 }
                                 break;

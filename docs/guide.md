@@ -37,6 +37,7 @@ update) · 💤 later
 | Weather | 📋 [#37](https://github.com/ekhumbata/keepsake/issues/37) | Open-Meteo (no account), hourly, "updated X h ago" when offline |
 | Cute visual identity | 🚧 [#19](https://github.com/ekhumbata/keepsake/issues/19)–[#25](https://github.com/ekhumbata/keepsake/issues/25) | Rounded font (Nunito) and book font (Literata) are in; placeholder pixel Bookworm and Mochi mascots are in (`tools/draw_mascots.py`, final art to come); chunky icons, warm copy to come |
 | Choose your own fonts | 🎁 [#104](https://github.com/ekhumbata/keepsake/issues/104) | Settings → Fonts: pick the interface and book fonts separately, from fonts copied onto the SD card (Quicksand included) |
+| First-run introduction | 🚧 [#86](https://github.com/ekhumbata/keepsake/issues/86) | A hello by name, then Bookworm, Mochi, the buttons, power and Wi-Fi. Without Wi-Fi it offers the phone setup ("Let's get online"); the welcome note follows with both mascots (to be checked on the device and on an iPhone and an Android phone) |
 | Personal touches | 🚧 [#85](https://github.com/ekhumbata/keepsake/issues/85) | Home greets by name; on special days (birthday, anniversary, first date, your own days, Christmas, New Year, Valentine's, Halloween) it says so and shows a card with a mascot once that day; the welcome message shows once. Values come from the provisioning file, never the repo. A birthday jingle is still to come |
 | Keepsake branding | 🚧 [#9](https://github.com/ekhumbata/keepsake/issues/9) | Boot screen, About page, `Keepsake-XXXXXX` hotspot |
 
@@ -60,7 +61,7 @@ update) · 💤 later
 | Auto-sleep | ✅ | Screen rests after ~3 min, deep sleep after ~30 min |
 | Power management | 🚧 [#16](https://github.com/ekhumbata/keepsake/issues/16) | Slower CPU while idle (frequency scaling is in; to be measured on the device) |
 | Wi-Fi only when needed | 🚧 [#17](https://github.com/ekhumbata/keepsake/issues/17) | Radio off by default; jobs batched; a new recording brings it up to transcribe straight away. Built, behind a menuconfig switch until it's checked on the board |
-| Charging screen + low-battery nudges | 📋 [#84](https://github.com/ekhumbata/keepsake/issues/84) | Mochi while charging; gentle warnings at 20/10/5% |
+| Charging screen + low-battery nudges | 🚧 [#84](https://github.com/ekhumbata/keepsake/issues/84) | A Charging card with Mochi on plug-in (closes by itself); a gentle note at 20% and a sleepy-Mochi card at 10% and 5%; a smoothed battery percentage (to be checked on the device) |
 | Battery saver + profiles | 🎁 [#58](https://github.com/ekhumbata/keepsake/issues/58) | Always fresh / Balanced / Max battery |
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |
 | Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device) |
@@ -143,7 +144,8 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 - 📋 Battery profiles come after the gift ([#58](https://github.com/ekhumbata/keepsake/issues/58)).
 
 ### Charge and power off
-- Charge with USB-C; the status bar shows the battery and a charging mark.
+- Charge with USB-C: a Charging card with Mochi appears, and the status bar shows the battery and a charging mark.
+- Keepsake nudges at 20%, 10% and 5% battery, once each.
 - Hold PWR ~1 s → **Shut down**. On USB power it stays on until unplugged.
 
 ### Fix common problems
