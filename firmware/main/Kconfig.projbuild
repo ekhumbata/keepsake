@@ -96,4 +96,13 @@ menu "Chroninkle Settings"
             archiving ("Never"). Overridden by a runtime NVS setting once
             changed from the Settings page.
 
+    config KEEPSAKE_TEST_CONSOLE
+        bool "Board test console over USB"
+        default y
+        help
+            Answers "kst ..." commands from tools/board/ on a computer plugged into the
+            USB port: self-test, screenshots, simulated button presses, small SD card
+            files. It only reads the USB serial line, so it costs nothing until used.
+            Turn it off for a build that should not accept commands.
+
 endmenu

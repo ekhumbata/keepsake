@@ -55,6 +55,7 @@
 #include "notes_page_runtime.h"
 #include "onboarding_page_runtime.h"
 #include "status_bar_runtime.h"
+#include "test_console_runtime.h"
 #include "todos_page_runtime.h"
 #include "storage_service.h"
 #include "summary_service.h"
@@ -2408,6 +2409,8 @@ void Run()
         ShowWelcomeNoteIfDue();  // after onboarding instead, when it's showing
     }
     ShowProvisioningOutcome();
+    // Lets tools/board/ on a computer check a plugged-in board (#15, docs/board-tests.md).
+    test_console_runtime::Start();
 }
 
 }  // namespace app_shell

@@ -209,6 +209,15 @@ esp_err_t Init()
     return ESP_OK;
 }
 
+void InjectEvent(const ButtonEventInfo& event)
+{
+    ESP_LOGI(kTag, "INJECT button=%d event=%d", static_cast<int>(event.button),
+             static_cast<int>(event.event));
+    if (s_event_handler != nullptr) {
+        s_event_handler(event, s_event_handler_context);
+    }
+}
+
 void SetEventHandler(EventHandler handler, void* context)
 {
     s_event_handler = handler;
