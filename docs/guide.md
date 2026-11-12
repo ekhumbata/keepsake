@@ -66,7 +66,7 @@ update) · 💤 later
 | Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device; only the first Wi-Fi network is used until [#43](https://github.com/ekhumbata/keepsake/issues/43)) |
 | Several saved networks | 📋 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5; friendly "Let's reconnect" when a password changes |
 | Over-the-air updates | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Updates from GitHub Releases, with automatic rollback |
-| Crash reports | 🚧 [#39](https://github.com/ekhumbata/keepsake/issues/39), [#41](https://github.com/ekhumbata/keepsake/issues/41) | A crash leaves a core dump in flash (final partition table, needs one USB flash); copying it to the SD card for Eric is next |
+| Crash reports | 🚧 [#39](https://github.com/ekhumbata/keepsake/issues/39), [#41](https://github.com/ekhumbata/keepsake/issues/41) | A crash leaves a report and core dump on the SD card for Eric (to be checked on the device) |
 | Works offline | 📋 [#45](https://github.com/ekhumbata/keepsake/issues/45) | Everything but downloads, weather and AI works without Wi-Fi |
 
 ## Controls
@@ -167,5 +167,5 @@ Full commands and conventions live in [`CLAUDE.md`](../CLAUDE.md); this is the c
 | Regenerate fonts | `python3 tools/generate_epaper_fonts.py --output … <font.ttf:symbol:size>…` (command in [asset-generation.md](asset-generation.md)) |
 | Setup portal (web) | `cd web && npm ci && npm run build`, then copy `dist/index.*` to `firmware/components/services/wifi_service/portal/` |
 | Cut a release / OTA | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) |
-| Read crash logs | 📋 [#41](https://github.com/ekhumbata/keepsake/issues/41) |
+| Read crash logs | After a crash, the next boot writes `/.keepsake/crash/crash-NNN.txt` on the SD card (reset reason, crashed task, backtrace, the last ~8 KB of log) and `crash-NNN.elf` (the core dump). Copy them off over USB; decode with `idf.py coredump-info -c crash-NNN.elf` against the matching build. The last 10 are kept ([#41](https://github.com/ekhumbata/keepsake/issues/41)) |
 | What's next on the board | issues labelled [`hardware`](https://github.com/ekhumbata/keepsake/issues?q=is%3Aopen+label%3Ahardware) and PRs labelled `needs-device-test` |

@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Added
+
+- **Crash reports on the SD card** (#41). After a crash (panic, watchdog or brownout)
+  the next start writes `/.keepsake/crash/crash-NNN.txt` with the reset reason, the
+  crashed task and backtrace, and the last log lines from before the crash, plus the core
+  dump as `crash-NNN.elf`. The last 10 are kept. Nothing is shown on screen.
+
 ### Changed
 
 - **Final flash layout, with room for crash dumps** (#39). The two app slots are 128 KB
