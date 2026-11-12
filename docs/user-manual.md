@@ -22,6 +22,7 @@ until it's reflashed.
 - [Viewing a recording's details](#viewing-a-recordings-details)
 - [Topics](#topics)
 - [Books](#books)
+- [Photos](#photos)
 - [Settings](#settings)
 - [Locking, sleep, and battery](#locking-sleep-and-battery)
 - [Shutting down and charging](#shutting-down-and-charging)
@@ -178,6 +179,7 @@ Below that is the main menu, in this order:
   including Gemini-generated summaries.
 - **Books** — browse and read `.txt` files from the device's [Books
   folder](#books).
+- **Photos** — flip through your [photos](#photos).
 
 Move between them by tilting the rocker and pressing it in to **Select**.
 
@@ -347,6 +349,33 @@ mass storage, from Settings > Storage) and they'll show up here.
   titles and progress; deleting it is harmless, it's rebuilt the next time you open
   Books. Next to each book there's also a `.pos` file (where you are) and, once you
   add one, a `.bm` file (your bookmarks).
+
+## Photos
+
+**Photos** on the Home screen shows your pictures one at a time, full screen, in black
+and white. It opens at the photo you looked at last.
+
+- **Tilt the rocker** down for the next photo and up for the previous one. After the
+  last photo it starts again from the first. Each new photo redraws the whole screen,
+  so expect a short flash.
+- **Press the rocker in** to hide or show the caption line under the photo (for
+  example "First date, May 20, 2019", and "3 / 12" on the right).
+- **A quick press of Record** goes back to Home.
+
+Photos go oldest first. A photo's date comes from its file name if it starts with one
+("2019-05-20 First date.jpg"), otherwise from when it was taken. The rest of the name is
+the caption; a camera name like `IMG_1234` gives just the date. Sideways photos are shown
+across the screen, the right way up.
+
+**Adding photos:** turn on USB drive mode (Settings → Storage → **Enable OTG**), connect
+Keepsake to a computer, and copy JPEG or PNG files into the **photos** folder on the
+card. Folders inside it are fine. After you leave USB mode they show up the next time
+you open Photos. The first time a photo is shown Keepsake prepares it, which takes a
+moment; after that it's quick.
+
+If Keepsake can't open a photo, it says why instead:
+- **iPhone HEIC photos:** save them as JPEG first.
+- **Very large files that aren't plain JPEGs:** use a smaller copy.
 
 ## Settings
 

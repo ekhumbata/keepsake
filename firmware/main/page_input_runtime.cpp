@@ -17,6 +17,7 @@
 #include "onboarding_page_runtime.h"
 #include "ota_service.h"
 #include "overlay_runtime.h"
+#include "photo_page_runtime.h"
 #include "saved_networks_runtime.h"
 #include "todos_page_interactions.h"
 #include "todos_page_runtime.h"
@@ -1332,6 +1333,63 @@ ButtonResult HandleBookReaderButtonEvent(const button_service::ButtonEventInfo& 
     }
 }
 
+// --- Photo viewer (#136) -----------------------------------------------------
+
+FocusMoveResult ApplyPhotoMoveResult(const page_actions::FocusMoveOutcome& outcome)
+{
+    FocusMoveResult result = {};
+    if (!outcome.handled) {
+        return result;
+    }
+    result.handled = true;
+    result.interaction_result = MakeConsumedResult(outcome.play_navigation_cue);
+    if (outcome.apply_page_state) {
+        // A dithered photo ghosts badly with a partial refresh: each new photo is a full one.
+        (void)photo_page_runtime::UpdateDisplayStateAndRequestRefresh({
+            .refresh_mode = display_service::RefreshMode::kFull,
+        });
+    }
+    return result;
+}
+
+ButtonResult HandlePhotoButtonEvent(const button_service::ButtonEventInfo& event)
+{
+    ButtonResult result = {};
+    // A quick Record press goes back to Home.
+    if (button_service::IsBackGesture(event)) {
+        photo_page_runtime::RequestBack();
+        result.handled = true;
+        result.interaction_result = MakeConsumedResult(true);
+        return result;
+    }
+    if (!button_service::IsSelectButton(event.button)) {
+        return result;
+    }
+    switch (event.event) {
+        case button_service::ButtonEvent::kSingleClick:
+            // The rocker press hides or shows the caption line.
+            result.handled = true;
+            result.interaction_result = MakeConsumedResult(photo_page_runtime::ToggleCaption());
+            if (result.interaction_result.play_feedback) {
+                (void)photo_page_runtime::UpdateDisplayStateAndRequestRefresh({
+                    .refresh_mode = display_service::RefreshMode::kPartial,
+                });
+            }
+            return result;
+        case button_service::ButtonEvent::kPressDown:
+        case button_service::ButtonEvent::kPressUp:
+        case button_service::ButtonEvent::kPressRepeat:
+        case button_service::ButtonEvent::kLongPressStart:
+        case button_service::ButtonEvent::kLongPressUp:
+            result.handled = true;
+            result.interaction_result.consumed = true;
+            return result;
+        case button_service::ButtonEvent::kDoubleClick:
+        default:
+            return result;
+    }
+}
+
 // --- Topic entries page ------------------------------------------------------
 
 esp_err_t ApplyTopicEntriesPageAndFooterDisplayState()
@@ -2330,6 +2388,8 @@ footer_runtime::ProjectionState BuildFooterProjectionForScreen(display_service::
             return book_list_page_runtime::BuildFooterProjectionState();
         case display_service::ScreenId::kBookReader:
             return book_reader_page_runtime::BuildFooterProjectionState();
+        case display_service::ScreenId::kPhotos:
+            return photo_page_runtime::BuildFooterProjectionState();
         case display_service::ScreenId::kLockScreen:
         default:
             return {};
@@ -2393,6 +2453,9 @@ void ResetFocusForScreen(display_service::ScreenId screen)
         case display_service::ScreenId::kBookReader:
             book_reader_page_runtime::ResetFocus();
             return;
+        case display_service::ScreenId::kPhotos:
+            photo_page_runtime::ResetFocus();
+            return;
         case display_service::ScreenId::kLockScreen:
         default:
             return;
@@ -2438,6 +2501,8 @@ FocusMoveResult MoveFocusForCurrentScreen(int delta, bool page_jump)
             return ApplyBookListMoveResult(book_list_page_runtime::MoveFocus(delta));
         case display_service::ScreenId::kBookReader:
             return ApplyBookReaderMoveResult(book_reader_page_runtime::MoveFocus(delta));
+        case display_service::ScreenId::kPhotos:
+            return ApplyPhotoMoveResult(photo_page_runtime::MoveFocus(delta));
         case display_service::ScreenId::kLockScreen:
         default:
             return {};
@@ -2484,6 +2549,8 @@ ButtonResult HandleButtonEventForScreen(display_service::ScreenId screen,
             return HandleBookListButtonEvent(event);
         case display_service::ScreenId::kBookReader:
             return HandleBookReaderButtonEvent(event);
+        case display_service::ScreenId::kPhotos:
+            return HandlePhotoButtonEvent(event);
         case display_service::ScreenId::kLockScreen:
         default:
             return {};

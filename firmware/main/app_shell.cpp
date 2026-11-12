@@ -39,6 +39,8 @@
 #include "lock_screen_runtime.h"
 #include "ota_service.h"
 #include "overlay_runtime.h"
+#include "photo_page_runtime.h"
+#include "photo_service.h"
 #include "page_input_runtime.h"
 #include "power_key_runtime.h"
 #include "power_service.h"
@@ -677,6 +679,32 @@ void HandleBookReaderBackIfRequested()
     }
 }
 
+// The photo viewer (#136): full screen, no footer.
+esp_err_t ShowPhotosScreen(display_service::RefreshMode refresh_mode)
+{
+    footer_runtime::LayoutState hidden_footer = {};
+    hidden_footer.visible = false;
+    footer_runtime::SetLayoutState(hidden_footer);
+    page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kPhotos);
+    const esp_err_t open_err = photo_page_runtime::Open();
+    if (open_err != ESP_OK && open_err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Photo viewer state failed: %s", esp_err_to_name(open_err));
+    }
+    return display_service::SetCurrentScreen(display_service::ScreenId::kPhotos, refresh_mode,
+                                             "show_photos_screen");
+}
+
+void HandlePhotosBackIfRequested()
+{
+    if (!photo_page_runtime::ConsumePendingBack()) {
+        return;
+    }
+    const esp_err_t err = ShowHomeScreen(display_service::RefreshMode::kFull);
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Photo viewer back navigation failed: %s", esp_err_to_name(err));
+    }
+}
+
 // True while onboarding was opened via the Settings "Manual" button (as opposed to first boot). In
 // that mode dismissal returns to Settings and does NOT touch the "onboarded" flag.
 bool s_onboarding_from_settings = false;
@@ -1000,6 +1028,14 @@ bool HandleDashboardMenuItem(int menu_index, void*)
         const esp_err_t err = ShowBookListScreen(display_service::RefreshMode::kPartial);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             ESP_LOGW(kTag, "Show book list screen failed: %s", esp_err_to_name(err));
+        }
+        return true;
+    }
+    if (menu_index == static_cast<int>(epaper_ui::DashboardMenuItem::kPhotos)) {
+        // A photo wants a full refresh (a partial one ghosts the dithering).
+        const esp_err_t err = ShowPhotosScreen(display_service::RefreshMode::kFull);
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGW(kTag, "Show photos screen failed: %s", esp_err_to_name(err));
         }
         return true;
     }
@@ -1653,6 +1689,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         ShowDetailsScreenIfRequested();
         ShowBookReaderScreenIfRequested();
         HandleBookReaderBackIfRequested();
+        HandlePhotosBackIfRequested();
     }
     if (overlay_result.request_delete_topic) {
         (void)settings_topics_page_runtime::DeleteConfirmedTopic();
@@ -1773,6 +1810,7 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         HandleTopicSummaryBackIfRequested();
         ShowBookReaderScreenIfRequested();
         HandleBookReaderBackIfRequested();
+        HandlePhotosBackIfRequested();
         FlushOverlayFeedback();
         return;
     }
@@ -2421,6 +2459,10 @@ void Run()
     // delayed by SD detect/mount latency.
     InitDisplayService();
     InitStorageService();
+    // Photos (#136): the background preparer; the folder is listed when the viewer opens.
+    if (const esp_err_t photo_err = photo_service::Init(); photo_err != ESP_OK) {
+        ESP_LOGW(kTag, "Photo service init failed: %s", esp_err_to_name(photo_err));
+    }
     if (storage_service::IsMounted()) {
         ota_service::ReportHealth(firmware_update::kHealthStorageOk);
     }
