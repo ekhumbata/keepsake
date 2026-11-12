@@ -23,6 +23,9 @@
 >   `kBackground` jobs, anything a person is waiting on as `kUser`. With
 >   `CONFIG_KEEPSAKE_WIFI_ON_DEMAND` (off by default until checked on the board) the jobs decide
 >   when the radio is on; don't hold Wi-Fi up any other way.
+> - **Board tests:** when the board is plugged into the computer, `python3 tools/board/run_board_tests.py`
+>   runs the on-device checks (self-test, screenshots, UI tour; `--interactive`, `--destructive`, `--flash`).
+>   See `docs/board-tests.md` and the `board-check` skill. New hardware features get a self-test check.
 > - The rest of this file is Chroninkle's original guide. It's still accurate for the inherited code until the
 >   "Agent docs" issue rewrites it.
 
