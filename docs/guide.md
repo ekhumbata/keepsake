@@ -63,8 +63,8 @@ update) · 💤 later
 | Charging screen + low-battery nudges | 📋 [#84](https://github.com/ekhumbata/keepsake/issues/84) | Mochi while charging; gentle warnings at 20/10/5% |
 | Battery saver + profiles | 🎁 [#58](https://github.com/ekhumbata/keepsake/issues/58) | Always fresh / Balanced / Max battery |
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |
-| Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device; only the first Wi-Fi network is used until [#43](https://github.com/ekhumbata/keepsake/issues/43)) |
-| Several saved networks | 📋 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5; friendly "Let's reconnect" when a password changes |
+| Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device) |
+| Several saved networks | 🚧 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5, most recent first, moving on when one stops answering (to be checked on the device); a saved-networks list in Settings and the friendly "Let's reconnect" screen still to come |
 | Over-the-air updates | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Updates from GitHub Releases, with automatic rollback |
 | Crash reports | 🚧 [#39](https://github.com/ekhumbata/keepsake/issues/39), [#41](https://github.com/ekhumbata/keepsake/issues/41) | A crash leaves a core dump in flash (final partition table, needs one USB flash); copying it to the SD card for Eric is next |
 | Works offline | 📋 [#45](https://github.com/ekhumbata/keepsake/issues/45) | Everything but downloads, weather and AI works without Wi-Fi |
