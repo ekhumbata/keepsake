@@ -24,7 +24,7 @@ home 6651ce8f
 home_weather 64ed2b0a
 lock_screen 72ee2da4
 lock_screen_ambient 1413bbef
-lock_screen_night e58c8b49
+lock_screen_night daaae14d
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
 notes_empty eac3007f

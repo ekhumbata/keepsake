@@ -243,7 +243,7 @@ std::map<std::string, Renderer> Screens()
         state.ambient.enabled = true;
         state.ambient.night = true;
         state.ambient.night_note = "Tomorrow: water the fern";
-        state.ambient.mascot = project_assets::GetImage(EmbeddedImageId::kMascotDayCelebrate);
+        state.ambient.mascot = project_assets::GetImage(EmbeddedImageId::kMascotSleepy);
         DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
     });
     screens["lock_screen_shutdown"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
