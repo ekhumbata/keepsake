@@ -122,6 +122,9 @@ wifi_networks::NetworkList s_networks;
 // How many saved networks the reconnect loop has moved past since the last success or user
 // action: when one network's attempts run out, the next one is tried before giving up.
 size_t s_rotation_tried = 0;
+// Why the station last dropped (wifi_err_reason_t), to tell "the password was rejected" from
+// "out of range" when the reconnect loop gives up (#43).
+uint8_t s_last_disconnect_reason = 0;
 ScanSnapshot s_scan_snapshot = {};
 std::mutex s_state_mutex;
 std::mutex s_callback_mutex;
@@ -254,6 +257,20 @@ std::string IpInfoToUrl(esp_netif_t* netif)
     char url[32] = {};
     std::snprintf(url, sizeof(url), "http://%u.%u.%u.%u", IP2STR(&ip_info.ip));
     return url;
+}
+
+// The network answered but refused the saved password (it was probably changed), as opposed
+// to not being there at all.
+bool PasswordRejected(uint8_t reason)
+{
+    switch (static_cast<wifi_err_reason_t>(reason)) {
+        case WIFI_REASON_AUTH_FAIL:
+        case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+        case WIFI_REASON_HANDSHAKE_TIMEOUT:
+            return true;
+        default:
+            return false;
+    }
 }
 
 std::string DisconnectReasonToString(uint8_t reason)
@@ -1683,6 +1700,7 @@ void HandleWifiEvent(int32_t event_id, void* event_data)
             std::lock_guard<std::mutex> lock(s_state_mutex);
             suppress = s_suppress_disconnect_event;
             if (!suppress) {
+                s_last_disconnect_reason = event != nullptr ? event->reason : 0;
                 s_connected = false;
                 s_ip_address.clear();
                 s_rssi = 0;
@@ -1719,7 +1737,8 @@ void HandleWifiEvent(int32_t event_id, void* event_data)
         if (!suppress) {
             Notify(State::kDisconnected,
                    attempts_exhausted
-                       ? "RECONNECT_EXHAUSTED"
+                       ? (PasswordRejected(s_last_disconnect_reason) ? "PASSWORD_REJECTED"
+                                                                      : "RECONNECT_EXHAUSTED")
                        : (event != nullptr ? DisconnectReasonToString(event->reason)
                                            : "DISCONNECTED"));
             if (attempts_exhausted) {

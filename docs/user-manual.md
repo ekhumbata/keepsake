@@ -361,6 +361,12 @@ friend's place and a phone hotspot). It joins the one it used most recently, and
 that one stops answering it tries the others before giving up. When a sixth is added,
 the one used longest ago is forgotten.
 
+If your Wi-Fi password changes, Keepsake notices that the network turned it away and
+shows **Let's reconnect** (once per start-up). Choose **Set up** and it opens its own
+Wi-Fi, `Keepsake-XXXXXX`: join it from a phone and pick your network again, as in the
+first setup. **Later** puts it off. Being out of range doesn't bring this up; Keepsake
+simply tries again later.
+
 ### Time
 
 Set your timezone from a picker, or enter the date and time by hand in the
