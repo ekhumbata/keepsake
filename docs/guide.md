@@ -168,4 +168,5 @@ Full commands and conventions live in [`CLAUDE.md`](../CLAUDE.md); this is the c
 | Setup portal (web) | `cd web && npm ci && npm run build`, then copy `dist/index.*` to `firmware/components/services/wifi_service/portal/` |
 | Cut a release / OTA | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) |
 | Read crash logs | After a crash, the next boot writes `/.keepsake/crash/crash-NNN.txt` on the SD card (reset reason, crashed task, backtrace, the last ~8 KB of log) and `crash-NNN.elf` (the core dump). Copy them off over USB; decode with `idf.py coredump-info -c crash-NNN.elf` against the matching build. The last 10 are kept ([#41](https://github.com/ekhumbata/keepsake/issues/41)) |
+| Test a plugged-in board | `python3 tools/board/run_board_tests.py` (self-test, screenshots, UI tour; `--flash`, `--interactive`, `--destructive`): [board-tests.md](board-tests.md) |
 | What's next on the board | issues labelled [`hardware`](https://github.com/ekhumbata/keepsake/issues?q=is%3Aopen+label%3Ahardware) and PRs labelled `needs-device-test` |

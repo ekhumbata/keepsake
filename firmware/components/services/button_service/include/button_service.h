@@ -58,6 +58,8 @@ using EventHandler = void (*)(const ButtonEventInfo& event, void* context);
 
 esp_err_t Init();
 void SetEventHandler(EventHandler handler, void* context);
+// Board tests (#15): delivers an event as if the button had produced it (logged as INJECT).
+void InjectEvent(const ButtonEventInfo& event);
 
 // Stops / restarts the shared iot_button polling timer.
 //
