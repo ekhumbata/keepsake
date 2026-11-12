@@ -20,6 +20,7 @@ extern const EmbeddedImageAsset kMascotDayValentines;
 extern const EmbeddedImageAsset kMascotDayAnniversary;
 extern const EmbeddedImageAsset kMascotCharging;
 extern const EmbeddedImageAsset kMascotSleepy;
+extern const EmbeddedImageAsset kMascotHello;
 extern const EmbeddedImageAsset kMascotDayFirstDate;
 extern const EmbeddedImageAsset kMascotDayHalloween;
 extern const EmbeddedImageAsset kMascotDayCelebrate;

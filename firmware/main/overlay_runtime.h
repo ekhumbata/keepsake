@@ -62,6 +62,9 @@ esp_err_t ShowNoteCard(const std::string& title, const std::string& body,
 // "Let's reconnect" (#43): the saved Wi-Fi password was rejected; "Set up" sets
 // InteractionResult::request_wifi_setup.
 esp_err_t ShowReconnectCard(const std::string& network);
+// "Let's get online" (#86): after first-run onboarding when no Wi-Fi is known. "Set up" sets
+// request_wifi_setup; "Later" sets request_due_cards.
+esp_err_t ShowGetOnlineCard();
 esp_err_t ShowSelectModal(const epaper_ui::SelectModalState& state);
 esp_err_t DismissSelectModal();
 esp_err_t ShowKeyboard(const epaper_ui::KeyboardState& state,

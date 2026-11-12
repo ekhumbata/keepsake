@@ -322,6 +322,10 @@
       "symbol": "kMascotSleepy"
     },
     {
+      "path": "assets/mascots/hello.png",
+      "symbol": "kMascotHello"
+    },
+    {
       "path": "assets/mascots/day_first_date.png",
       "symbol": "kMascotDayFirstDate"
     },

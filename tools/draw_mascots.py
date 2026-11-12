@@ -339,6 +339,18 @@ def compose() -> dict[str, Grid]:
     g.stamp(big, 33, 1)
     sprites["day_anniversary"] = g
 
+    # Hello (onboarding, the welcome card): the two together, Mochi waving.
+    g = Grid(80, 40)
+    worm, _ = bookworm()
+    cloud, _ = mochi()
+    g.stamp(worm, 0, 0)
+    g.stamp(cloud, 40, 0)
+    # The raised arm and two little motion marks.
+    dots(g, [(77, 26), (78, 25), (78, 24), (79, 23), (76, 18), (77, 17), (79, 19), (79, 20)])
+    g.stamp(sparkle(), 34, 3)
+    g.stamp(sparkle(), 46, 6)
+    sprites["hello"] = g
+
     # First date: Bookworm with a flower, a heart above.
     g, _ = bookworm()
     g.stamp(flower(), 33, 14)

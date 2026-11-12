@@ -7,9 +7,7 @@ it, and Keepsake keeps it organized — transcribed, summarized, and sorted
 into Notes, Todos, and Follow-ups — on a screen that sips power and stays
 legible even when it's "asleep."
 
-This manual describes the device as it actually behaves today. A couple of
-spots in the on-device onboarding carousel describe older button gestures
-that no longer apply — this manual is the accurate reference. Keepsake is
+This manual describes the device as it actually behaves today. Keepsake is
 built on **Chroninkle** (itself renamed from **Followup**); a device still
 running older firmware broadcasts its Wi-Fi setup hotspot under the old name
 until it's reflashed.
@@ -58,12 +56,31 @@ A few things worth knowing up front:
 
 ## First-time setup
 
-On first boot, Keepsake walks you through a short introduction carousel.
-Use the **rocker** to move through it (tilt to move, press in to confirm),
-and close it on the final slide. You can replay this carousel any time from
-**Settings → Manual**.
+On first boot, Keepsake says hello (by name, if it was set up with yours) and
+walks you through a short introduction:
 
-To actually get set up, Keepsake opens its own WiFi hotspot named
+- the two friends who live there: **Bookworm**, who looks after your books,
+  and **Mochi**, who keeps you company;
+- the rocker, Back and voice notes, and resting and power;
+- Wi-Fi.
+
+Tilt the **rocker** to move through it and press it in to choose. Close it on
+the last slide. You can replay it any time from **Settings → Manual**.
+
+If Keepsake already knows a Wi-Fi network (it came with a setup file), the
+last slide says you're all set, and Home opens with your welcome note, if
+there is one.
+
+Otherwise a **Let's get online** card offers to set up Wi-Fi from your phone:
+
+- **Set up** opens the setup hotspot (below) and the Wi-Fi page that explains
+  it.
+- **Later** skips it for now; Keepsake works without Wi-Fi, but the clock
+  and updates need it.
+
+The welcome note shows once you're back on Home either way.
+
+To set up Wi-Fi by hand, Keepsake opens its own WiFi hotspot named
 **`Keepsake-XXXXXX`** (the last few characters are unique to your device)
 whenever it doesn't have saved WiFi credentials yet. Connect a phone or laptop to
 that hotspot — it's open, no password needed — and your device should
@@ -122,8 +139,8 @@ This is the core interaction:
 **Without a Gemini key** (the default), every recording is simply a voice
 note: it saves to the SD card, its details page offers **Play** and reads
 "A voice note. Press Play to listen.", and nothing ever shows as waiting.
-Topic pages don't offer **Summarize**, and the first-time introduction skips
-the Gemini slide.
+Topic pages don't offer **Summarize**, and the first-time introduction doesn't
+mention AI.
 
 **If you're offline when you record** (with a Gemini key set), the clip still
 saves to the SD card — it just gets marked as pending. The moment Keepsake
@@ -139,8 +156,9 @@ Home is Keepsake's dashboard. Near the top you'll see:
 - Today's date and a rotating welcome message. When Keepsake was set up with your
   name, it also greets you ("Good evening, Sam"), and on your birthday it says so all
   day.
-- If a welcome note was included at setup, it appears once as a card the first time
-  you reach Home. Press **Close** to put it away.
+- If a welcome note was included at setup, it appears once as a card, with Bookworm
+  and Mochi saying hello, the first time you reach Home. Press **Close** to put it
+  away.
 - On special days Home says so all day, and the first time you reach Home that day a
   card with one of Keepsake's two mascots (Bookworm, who reads, and Mochi, a little
   cloud) wishes you well: your birthday, your anniversary, the day of your first date,
