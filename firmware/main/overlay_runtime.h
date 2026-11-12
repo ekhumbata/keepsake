@@ -52,6 +52,8 @@ esp_err_t ShowStorageModalUsbError();
 esp_err_t DismissStorageModal();
 esp_err_t ShowTopicsModalConfirmDelete();
 esp_err_t ShowBookListModalConfirmDelete();
+// A message card with one Close button (the welcome note, #85).
+esp_err_t ShowNoteCard(const std::string& title, const std::string& body);
 esp_err_t ShowSelectModal(const epaper_ui::SelectModalState& state);
 esp_err_t DismissSelectModal();
 esp_err_t ShowKeyboard(const epaper_ui::KeyboardState& state,

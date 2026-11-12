@@ -1,6 +1,9 @@
 #ifndef DASHBOARD_PAGE_COORDINATOR_H_
 #define DASHBOARD_PAGE_COORDINATOR_H_
 
+#include <string>
+
+#include "app_state_service.h"
 #include "epaper_ui/dashboard_page.h"
 #include "page_navigation/navigation_model.h"
 #include "page_navigation/roving_focus.h"
@@ -39,6 +42,8 @@ private:
     // Random welcome-message phase, chosen once per boot; the day count is added on top so
     // the greeting also rotates daily (see BuildState).
     uint32_t welcome_seed_ = 0;
+    // The friend's name and birthday (#85), read from the device when Home is entered.
+    app_state_service::PersonalSettings personal_ = {};
     bool welcome_seeded_ = false;
 };
 

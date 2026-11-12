@@ -27,6 +27,9 @@ struct PersonalSettings {
 PersonalSettings Personal();
 // Saves the non-empty fields of `settings` (an empty field leaves the saved one alone).
 bool SavePersonal(const PersonalSettings& settings);
+// The welcome note (#85/#86) is shown once; a new welcome message (provisioning) shows again.
+bool WelcomeNoteShown();
+void MarkWelcomeNoteShown(bool shown);
 
 }  // namespace app_state_service
 

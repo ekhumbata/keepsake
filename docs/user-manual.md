@@ -136,7 +136,11 @@ Home is Keepsake's dashboard. Near the top you'll see:
 
 - A **task tracker** — "`done`/`total` completed" with a progress bar, or
   "No tasks yet" if you haven't tagged anything as a Task.
-- Today's date and a rotating welcome message.
+- Today's date and a rotating welcome message. When Keepsake was set up with your
+  name, it also greets you ("Good evening, Sam"), and on your birthday it says so all
+  day.
+- If a welcome note was included at setup, it appears once as a card the first time
+  you reach Home. Press **Close** to put it away.
 
 Below that is the main menu, in this order:
 

@@ -10,6 +10,13 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Personal touches** (#85). With a name in the provisioning file, Home alternates its
+  usual prompts with a greeting ("Good evening, Sam"); on the birthday it reads "Happy
+  birthday, Sam!" all day (Feb 29 birthdays on Feb 28 in other years). The welcome
+  message from the provisioning file shows once as a card on the first Home (after
+  onboarding, if that's showing); a new provisioning file with a new message shows it
+  again.
+
 - **Board tests** (#15). A test console in the firmware (on by default, USB serial,
   `kst ...` commands) and `tools/board/run_board_tests.py` on the computer: plug the board
   in and run it for a self-test of every chip (PMIC, RTC, IMU, sensor, SD card, display,

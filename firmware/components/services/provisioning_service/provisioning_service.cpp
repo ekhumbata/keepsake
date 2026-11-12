@@ -164,6 +164,8 @@ bool Apply(const provisioning::Provision& provision)
     personal.weather_location = provision.weather_location;
     if (!app_state_service::SavePersonal(personal)) {
         ok = false;
+    } else if (!provision.welcome_message.empty()) {
+        app_state_service::MarkWelcomeNoteShown(false);  // a new note: show it once (#85)
     }
     return ok;
 }

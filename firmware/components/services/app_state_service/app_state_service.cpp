@@ -15,6 +15,7 @@ constexpr const char* kFriendNameKey = "friend_name";
 constexpr const char* kBirthdayKey = "birthday";
 constexpr const char* kWelcomeKey = "welcome";
 constexpr const char* kWeatherLocationKey = "weather_loc";
+constexpr const char* kNoteShownKey = "note_shown";
 constexpr size_t kMaxPersonalBytes = 512;
 
 std::string ReadString(nvs_handle_t handle, const char* key)
@@ -126,6 +127,30 @@ bool SavePersonal(const PersonalSettings& settings)
         ESP_LOGW(kTag, "Personal settings: save failed (%s)", esp_err_to_name(err));
     }
     return err == ESP_OK;
+}
+
+bool WelcomeNoteShown()
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READONLY, &handle) != ESP_OK) {
+        return false;
+    }
+    uint8_t shown = 0;
+    const esp_err_t err = nvs_get_u8(handle, kNoteShownKey, &shown);
+    nvs_close(handle);
+    return err == ESP_OK && shown != 0;
+}
+
+void MarkWelcomeNoteShown(bool shown)
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READWRITE, &handle) != ESP_OK) {
+        return;
+    }
+    if (nvs_set_u8(handle, kNoteShownKey, shown ? 1 : 0) == ESP_OK) {
+        (void)nvs_commit(handle);
+    }
+    nvs_close(handle);
 }
 
 }  // namespace app_state_service
