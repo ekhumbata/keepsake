@@ -30,6 +30,13 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Several saved Wi-Fi networks** (#43). Keepsake remembers up to five networks,
+  joins the most recently used one, and tries the others in turn when it stops
+  answering. Networks from a provisioning file are all saved (the first one is used
+  first). Forgetting a network now forgets just that one.
+
+### Added
+
 - **Provisioning file** (#42). Put `.keepsake/provision.json` on the SD card (format:
   `provision.example.json`) and Keepsake imports it at start-up: Wi-Fi network,
   timezone, Gemini key, and the friend's name, birthday, welcome message and weather

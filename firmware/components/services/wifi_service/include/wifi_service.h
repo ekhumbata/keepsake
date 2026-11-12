@@ -86,6 +86,11 @@ bool ClearSavedCredentials();
 // Saves a network as the one to join (provisioning file, #42) without connecting now: the next
 // Start() or reconnect uses it. Replaces the saved network.
 bool SaveNetwork(const std::string& ssid, const std::string& password);
+// Saved networks (#43), most recently used first (up to 5). Wi-Fi joins the most recent one
+// and moves on to the next when one stops answering.
+std::vector<std::string> SavedNetworks();
+// Forgets one saved network. Forgetting the current one makes the next saved one current.
+bool ForgetNetwork(const std::string& ssid);
 // Stops the Wi-Fi radio before esp_light_sleep_start(), so the light-sleep window
 // (up to 30 minutes by default) doesn't leave it fully associated the whole time --
 // esp_wifi_set_ps(WIFI_PS_NONE) means it otherwise never enters even modem sleep. A
