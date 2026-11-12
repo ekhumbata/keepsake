@@ -31,11 +31,11 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
+| Photos | 📋 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card and added later by dropping them into `photos` over USB. A Photos row on Home opens them full screen; the rocker flips through, with a caption from the file name |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
 | Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
 | Ambient lock screen | 📋 [#38](https://github.com/ekhumbata/keepsake/issues/38) | Big clock, date + month, weather, indoor temperature/humidity, night mode |
 | Indoor climate | 📋 [#36](https://github.com/ekhumbata/keepsake/issues/36) | The board's SHTC3 temperature/humidity sensor |
-| Weather | 📋 [#37](https://github.com/ekhumbata/keepsake/issues/37) | Open-Meteo (no account), hourly, "updated X h ago" when offline |
 | Cute visual identity | 🚧 [#19](https://github.com/ekhumbata/keepsake/issues/19)–[#25](https://github.com/ekhumbata/keepsake/issues/25) | Rounded font (Nunito) and book font (Literata) are in; placeholder pixel Bookworm and Mochi mascots are in (`tools/draw_mascots.py`, final art to come); chunky icons, warm copy to come |
 | Choose your own fonts | 🎁 [#104](https://github.com/ekhumbata/keepsake/issues/104) | Settings → Fonts: pick the interface and book fonts separately, from fonts copied onto the SD card (Quicksand included) |
 | First-run introduction | 🚧 [#86](https://github.com/ekhumbata/keepsake/issues/86) | A hello by name, then Bookworm, Mochi, the buttons, power and Wi-Fi. Without Wi-Fi it offers the phone setup ("Let's get online"); the welcome note follows with both mascots (to be checked on the device and on an iPhone and an Android phone) |
@@ -50,6 +50,7 @@ update) · 💤 later
 | Todos, follow-ups, topics | ✅ | Organize notes; pending todos show on the lock screen |
 | Transcription + summaries (Gemini) | ✅ optional | Only with a Gemini key; without one, notes stay as playable audio |
 | No-key polish | 🚧 [#44](https://github.com/ekhumbata/keepsake/issues/44) | Without a key: voice notes with Play, no AI wording, no "waiting" badges (to be checked on the device) |
+| Google Calendar reminders | 🎁 [#132](https://github.com/ekhumbata/keepsake/issues/132) | Events from a Google Calendar (its secret iCal address) ring as reminders; two-way sync only if needed |
 | Reminders (time picker) | 🎁 [#50](https://github.com/ekhumbata/keepsake/issues/50)–[#52](https://github.com/ekhumbata/keepsake/issues/52) | Presets or a time, a label or a short voice memo, rings even from sleep |
 | Focus timers | 🎁 [#53](https://github.com/ekhumbata/keepsake/issues/53) | 5/15/25/50 minutes |
 | Voice reminders (AI) | 🎁 [#54](https://github.com/ekhumbata/keepsake/issues/54) | "Remind me tomorrow at 3 to call the dentist" (needs a key) |
