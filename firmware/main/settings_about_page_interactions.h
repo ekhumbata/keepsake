@@ -13,6 +13,7 @@ enum class ActivateIntent : uint8_t {
     kNone = 0,
     kShowHome,
     kShowSettings,
+    kUpdate,  // check for updates, or restart into a downloaded one (#40)
 };
 
 struct ActivateResult {
@@ -26,6 +27,7 @@ using FocusMoveResult = page_actions::FocusMoveOutcome;
 struct ActivateCallbacks {
     std::function<void()> show_home;
     std::function<void()> show_settings;
+    std::function<void()> update;
 };
 
 ActivateResult HandlePrimaryActivate(const SettingsAboutPageCoordinator& coordinator);

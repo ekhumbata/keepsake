@@ -90,6 +90,7 @@ enum class NavigationItemRole : uint8_t {
     kSettingsTopicsTopicRow,
     kSettingsTopicsNewTopicButton,
     kSettingsTopicsBackButton,
+    kSettingsAboutUpdateButton,
     kSettingsAboutBackButton,
     kDashboardMenuItem,
     kTopicsBrowseTopicRow,

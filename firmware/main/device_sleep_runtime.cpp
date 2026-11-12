@@ -20,6 +20,7 @@
 #include "freertos/task.h"
 #include "imu_service.h"
 #include "lock_screen_runtime.h"
+#include "ota_service.h"
 #include "recording_service.h"
 #include "status_bar_runtime.h"
 #include "waveshare_board_config.h"
@@ -349,6 +350,12 @@ esp_err_t EnterLightSleep()
 {
     ESP_LOGI(kTag, "Light-sleep entry begin");
     LogLightSleepPins("entry");
+
+    // A downloaded update starts now, while nobody's using the device, instead of the sleep
+    // (#40). It restarts without the start-up sound; this doesn't return.
+    if (ota_service::RestartIfUpdateReady()) {
+        return ESP_OK;
+    }
 
     esp_err_t err = ConfigurePowerButtonWakeInput("light-sleep wake");
     if (err != ESP_OK) {

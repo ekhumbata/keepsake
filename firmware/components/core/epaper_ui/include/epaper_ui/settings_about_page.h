@@ -13,6 +13,7 @@ namespace epaper_ui {
 
 enum class SettingsAboutPageItemId : uint8_t {
     kNone = 0,
+    kUpdate,
     kBack,
 };
 
@@ -21,6 +22,10 @@ struct SettingsAboutPageState {
     std::string_view title_text = "About";
     // e.g. "Version 0.7.0" -- built at BuildState() time from esp_app_get_description().
     std::string version_text;
+    // Updates over the air (#40): one plain sentence, and the button under it ("Check for
+    // updates", "Restart to update", ...).
+    std::string update_status_text;
+    ButtonState update = {};
     std::string_view acknowledgment_text =
         "Keepsake is built on Chroninkle by mach1na, which began as Followup by ALXV Labs. "
         "Thank you to both for the design and code it grows from. Free software under the "

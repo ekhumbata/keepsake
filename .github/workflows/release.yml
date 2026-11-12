@@ -1,0 +1,84 @@
+name: release
+
+# Publishes a firmware release when a version tag is pushed (#40): `git tag v1.22.0 && git push
+# origin v1.22.0`, after firmware/version.txt says 1.22.0. Devices check the "latest" release's
+# latest.json once a day and update themselves. A tag with a suffix (v1.22.0-rc1) makes a
+# prerelease, which devices never install on their own. See "Cut a release" in docs/guide.md.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    container: espressif/idf:v5.5
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches firmware/version.txt
+        run: |
+          version="$(tr -d '[:space:]' < firmware/version.txt)"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "${tag%%-*}" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match firmware/version.txt ($version)."
+            exit 1
+          fi
+          echo "VERSION=$tag" >> "$GITHUB_ENV"
+
+      - name: Build (tracked sdkconfig.defaults only, no personal settings)
+        working-directory: firmware
+        run: |
+          git config --global --add safe.directory '*'
+          . "$IDF_PATH/export.sh"
+          rm -f sdkconfig
+          idf.py set-target esp32s3
+          idf.py build 2>&1 | tee build/build.log
+          if grep -Ei '(^|[^[:alpha:]])warning:' build/build.log; then
+            echo "::error::The firmware build produced warnings (listed above)."
+            exit 1
+          fi
+
+      - name: Package
+        run: |
+          . "$IDF_PATH/export.sh"
+          mkdir -p dist
+          # The OTA image (what devices download).
+          cp firmware/build/chroninkle.bin "dist/keepsake-$VERSION.bin"
+          # One image for a full serial flash at 0x0 (bootloader, partitions, app), for a
+          # fresh board: esptool.py --chip esp32s3 write_flash 0x0 keepsake-<v>-full.bin
+          (cd firmware/build && python -m esptool --chip esp32s3 merge_bin \
+              -o "$GITHUB_WORKSPACE/dist/keepsake-$VERSION-full.bin" @flash_args)
+          python3 tools/release/make_manifest.py \
+              --image "dist/keepsake-$VERSION.bin" --version "$VERSION" \
+              --url "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/keepsake-$VERSION.bin" \
+              --notes-file firmware/whats_new.txt --out dist/latest.json
+          (cd dist && sha256sum *.bin > SHA256SUMS)
+          {
+            echo "### Keepsake $VERSION"
+            echo '```json'
+            cat dist/latest.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Keepsake ${{ env.VERSION }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/keepsake-${{ env.VERSION }}.bin
+            dist/keepsake-${{ env.VERSION }}-full.bin
+            dist/latest.json
+            dist/SHA256SUMS

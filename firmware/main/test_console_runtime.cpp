@@ -35,6 +35,7 @@
 #include "freertos/task.h"
 #include "imu_service.h"
 #include "nvs.h"
+#include "ota_service.h"
 #include "power_service.h"
 #include "storage_service.h"
 #include "wifi_service.h"
@@ -127,6 +128,26 @@ Check CheckFirmware()
         Format("%s on %s, coredump partition %s", esp_app_get_description()->version,
                running != nullptr ? running->label : "?", coredump != nullptr ? "yes" : "missing");
     return {"firmware", coredump != nullptr ? "pass" : "fail", detail};
+}
+
+// Updates (#40): both app slots exist, and whether this boot is an update being verified.
+Check CheckOta()
+{
+    const esp_partition_t* running = esp_ota_get_running_partition();
+    const esp_partition_t* next = esp_ota_get_next_update_partition(nullptr);
+    const ota_service::Info info = ota_service::GetInfo();
+    if (running == nullptr || next == nullptr) {
+        return {"ota", "fail", "no second app slot to update into"};
+    }
+    std::string detail = Format("running %s (%s), next %s (%u KB)", running->label,
+                                info.slot_state.c_str(), next->label,
+                                static_cast<unsigned>(next->size / 1024));
+    detail += ", " + firmware_update::Describe(ota_service::GetStatus());
+    if (!info.bad_version.empty()) {
+        detail += ", rolled back before: " + info.bad_version;
+    }
+    // Pending verify is normal for the first ~20 s after an update, so only a warning.
+    return {"ota", ota_service::VerifyingUpdate() ? "warn" : "pass", detail};
 }
 
 Check CheckMemory()
@@ -294,7 +315,7 @@ void CommandSelftest()
 {
     std::vector<Check> checks = {CheckFirmware(), CheckMemory(), CheckNvs(),     CheckPower(),
                                  CheckRtc(),      CheckImu(),    CheckClimate(), CheckSdCard(),
-                                 CheckDisplay(),  CheckWifi()};
+                                 CheckDisplay(),  CheckWifi(),   CheckOta()};
     bool ok = true;
     for (const Check& check : checks) {
         ok = ok && check.status != "fail";
@@ -498,6 +519,66 @@ void CommandRemove(const std::vector<std::string>& args)
     Reply(JsonWriter().Add("cmd", "rm").Add("ok", ok).Add("path", args[1]).Finish());
 }
 
+// ota                 -> the update state
+// ota check           -> look for an update now (and download it), like Settings -> About
+// ota restart         -> restart into a downloaded update
+// ota fail-next yes   -> rehearsal: the next update fails its health check and rolls back
+// ota clear-bad       -> after the rehearsal: that version may be installed again
+void CommandOta(const std::vector<std::string>& args)
+{
+    const std::string sub = args.size() >= 2 ? args[1] : std::string();
+    if (sub == "check") {
+        ota_service::CheckNow();
+        Reply(JsonWriter().Add("cmd", "ota").Add("ok", true).Add("started", "check").Finish());
+        return;
+    }
+    if (sub == "restart") {
+        if (ota_service::GetStatus().phase != firmware_update::Phase::kReady) {
+            ReplyError("ota", "no downloaded update to restart into");
+            return;
+        }
+        Reply(JsonWriter().Add("cmd", "ota").Add("ok", true).Add("started", "restart").Finish());
+        vTaskDelay(pdMS_TO_TICKS(100));
+        ota_service::RestartIntoUpdate();
+        return;
+    }
+    if (sub == "fail-next") {
+        if (args.size() < 3 || args[2] != "yes") {
+            ReplyError("ota", "say \"ota fail-next yes\": the next update rolls back on purpose");
+            return;
+        }
+        ota_service::FailNextHealthCheck();
+        Reply(JsonWriter().Add("cmd", "ota").Add("ok", true).Add("armed", "fail-next").Finish());
+        return;
+    }
+    if (sub == "clear-bad") {
+        ota_service::ClearBadVersion();
+        Reply(JsonWriter().Add("cmd", "ota").Add("ok", true).Add("cleared", "bad_version").Finish());
+        return;
+    }
+    if (!sub.empty()) {
+        ReplyError("ota", "usage: ota [check|restart|fail-next yes|clear-bad]");
+        return;
+    }
+    const esp_partition_t* next = esp_ota_get_next_update_partition(nullptr);
+    const ota_service::Info info = ota_service::GetInfo();
+    const firmware_update::Status status = ota_service::GetStatus();
+    Reply(JsonWriter()
+              .Add("cmd", "ota")
+              .Add("ok", true)
+              .Add("version", esp_app_get_description()->version)
+              .Add("running", info.running_slot)
+              .Add("state", info.slot_state)
+              .Add("next", next != nullptr ? next->label : "")
+              .Add("verifying", ota_service::VerifyingUpdate())
+              .Add("health_passed", static_cast<int>(info.health_passed))
+              .Add("bad_version", info.bad_version)
+              .Add("last_check", info.last_check)
+              .Add("phase", static_cast<int>(status.phase))
+              .Add("status", firmware_update::Describe(status))
+              .Finish());
+}
+
 void CommandHelp()
 {
     Reply(JsonWriter()
@@ -506,7 +587,8 @@ void CommandHelp()
               .AddRaw("commands",
                       R"(["help","version","selftest","screen","screenshot",)"
                       R"("press <action|fn|up|down> [click|hold|double]","ls [/path]",)"
-                      R"("get /path","put /path <base64>","rm /path","reboot","crash yes"])")
+                      R"("get /path","put /path <base64>","rm /path","reboot","crash yes",)"
+                      R"("ota [check|restart|fail-next yes|clear-bad]"])")
               .Finish());
 }
 
@@ -523,6 +605,7 @@ void Run(const std::vector<std::string>& args)
     else if (command == "get") CommandGet(args);
     else if (command == "put") CommandPut(args);
     else if (command == "rm") CommandRemove(args);
+    else if (command == "ota") CommandOta(args);
     else if (command == "reboot") {
         Reply(JsonWriter().Add("cmd", "reboot").Add("ok", true).Finish());
         vTaskDelay(pdMS_TO_TICKS(100));

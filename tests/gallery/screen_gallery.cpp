@@ -254,6 +254,17 @@ std::map<std::string, Renderer> Screens()
     screens["settings_about"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         SettingsAboutPageState state = {};
         state.version_text = "Version 1.3.0";
+        state.update_status_text = "You're up to date.";
+        state.update = {.label_text = "Check for updates", .selected = true};
+        state.back = {.label_text = "Back"};
+        DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
+    screens["settings_about_update_ready"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        SettingsAboutPageState state = {};
+        state.version_text = "Version 1.3.0";
+        state.update_status_text = "Version 1.4.0 is ready. Restart to finish.";
+        state.update = {.label_text = "Restart to update", .selected = true};
+        state.back = {.label_text = "Back"};
         DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
     screens["settings_todos"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {

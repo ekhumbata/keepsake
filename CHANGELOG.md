@@ -10,6 +10,25 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Updates over the air** (#40). Once a day (and from Settings → About → **Check for
+  updates**) Keepsake looks at the latest GitHub release, downloads a newer firmware into
+  the other app slot over HTTPS, and checks its size, SHA-256 and app header before it can
+  start. The update starts the next time the device goes to sleep (quietly, without the
+  start-up sound), on any restart, or from **Restart to update**. A new firmware has to
+  reach Home with a working display, and a working SD card if it had one, and keep running
+  for 20 s. Otherwise the device goes back to the previous firmware (rollback was already
+  enabled) and never offers that version again. After a good update, Home shows a
+  "Keepsake updated" card with Mochi and the release's notes (`firmware/whats_new.txt`).
+  Background checks wait for 30 % battery (15 % when asked) or USB.
+- **Release workflow** (`.github/workflows/release.yml`): pushing a `vX.Y.Z` tag that
+  matches `firmware/version.txt` builds with the tracked defaults only and publishes the
+  OTA image, a full-flash image, `latest.json` (`tools/release/make_manifest.py`) and
+  `SHA256SUMS`. A tag with a suffix (`v1.22.0-rc1`) makes a prerelease, which devices
+  never install on their own.
+- Board tests: the self-test reports the app slots and update state, and the console gains
+  `kst ota [check|restart|fail-next yes|clear-bad]`. `run_board_tests.py --ota` rehearses
+  a forced rollback and then a real install.
+
 - **Special days with the mascots** (#85, #20). Besides the birthday: the anniversary
   and the first date ("Happy 5th anniversary!", "7 years since your first date" when the
   year is given), days of your own from the provisioning file (`special_days`: date,

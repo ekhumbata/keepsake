@@ -16,6 +16,7 @@ It exits non-zero if anything failed.
 |---|---|
 | `--flash` | builds and flashes this checkout first (needs ESP-IDF: `idf.py` on `PATH`) |
 | `--interactive` | asks you to press each real button and checks the firmware saw it |
+| `--ota` | rehearses an update from GitHub Releases: a forced rollback, then a real install (needs Wi-Fi and a release newer than the board's firmware, so flash an older build first) |
 | `--destructive` | crashes the board on purpose (checks the crash report, #41) and tries a broken provisioning file (#42); both reboot it |
 | `--port /dev/…` | when there's more than one board, or detection picks the wrong port |
 
@@ -28,7 +29,7 @@ port), with an SD card in.
 - **selftest** (run on the board): firmware + coredump partition, free memory and PSRAM, NVS
   write/read, PMIC and battery, RTC (readable, ticking, set), IMU (about 1 g at rest), temperature
   and humidity sensor, SD card write/read/free space, display (drawn), Wi-Fi state and saved
-  networks. Each is `pass`, `warn` (works but worth a look, e.g. the clock isn't set yet) or `fail`.
+  networks, update slots and state (`warn` while a fresh update is still being checked). Each is `pass`, `warn` (works but worth a look, e.g. the clock isn't set yet) or `fail`.
 - **screenshot**: the panel's current image, saved as a PNG; checks it isn't blank.
 - **sd/round-trip**: writes, reads back and deletes a file through the console.
 - **ui/tour**: from Home, simulated rocker presses open a few screens (each screenshotted), and
@@ -36,6 +37,12 @@ port), with an SD card in.
 - `--interactive` **buttons**: each physical button reaches the firmware.
 - `--destructive` **crash-report**: `kst crash yes` → after the restart a new
   `/.keepsake/crash/crash-NNN.txt` says "Reset reason: panic" (and usually a `.elf` core dump).
+- `--ota` **ota/rollback**: `kst ota fail-next yes`, then `kst ota check` downloads the newest
+  release and `kst ota restart` starts it. Its health check fails on purpose, so after ~90 s the
+  board must be back on the version it had, with that release marked not to install
+  (`kst ota clear-bad` then lifts the mark).
+- `--ota` **ota/install**: the same without the forced failure. The board must end up on the new
+  version, marked valid.
 - `--destructive` **provisioning/refusal**: a provisioning file with a too-short password is
   left on the card, nothing is imported, and `provision-problems.txt` names the field.
 
@@ -71,6 +78,7 @@ mistaken for logs (`core/board_test` has the format):
 | `press <action\|fn\|up\|down> [click\|hold\|double]` | simulates a button (logged as `INJECT`) |
 | `ls [/path]`, `get /path`, `put /path <base64>`, `rm /path` | small files on the SD card (16 KB max; no `..`) |
 | `reboot`, `crash yes` | restart; crash on purpose (for the crash report test) |
+| `ota`, `ota check`, `ota restart`, `ota fail-next yes`, `ota clear-bad` | update state; check/download now; start a downloaded update; make the next update roll back on purpose; offer a rolled-back version again |
 
 Anyone with the board and a cable can use these. They can't reach anything the person holding
 the board couldn't already, but turn the console off for a build that shouldn't accept commands.

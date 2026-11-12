@@ -1,0 +1,4 @@
+# What's new, for the "Keepsake updated" card the device shows after an update (#40).
+# One or two friendly sentences in plain words, under 240 characters, in the first paragraph
+# below these comment lines. Rewrite it for each release; leave it empty for the default
+# ("Version X is on now."). tools/release/make_manifest.py puts it in the release manifest.

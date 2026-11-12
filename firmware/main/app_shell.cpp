@@ -36,6 +36,7 @@
 #include "input_focus_runtime.h"
 #include "input_runtime_setup.h"
 #include "lock_screen_runtime.h"
+#include "ota_service.h"
 #include "overlay_runtime.h"
 #include "page_input_runtime.h"
 #include "power_key_runtime.h"
@@ -82,6 +83,7 @@ namespace {
 // Whether the "Let's reconnect" card was offered this boot (#43).
 std::atomic<bool> s_reconnect_offered{false};
 void ShowWelcomeNoteIfDue();
+void ShowUpdatedNoticeIfAny();
 
 constexpr const char* kTag = "AppShell";
 constexpr bool kEnablePowerButtonShutdown = true;
@@ -259,6 +261,7 @@ esp_err_t ShowHomeScreen(display_service::RefreshMode refresh_mode)
     // A special day that began while the device was on (#85): its card, once, on Home.
     if (err == ESP_OK && s_startup_complete.load(std::memory_order_relaxed)) {
         special_days_runtime::ShowCardIfDue();
+        ShowUpdatedNoticeIfAny();
     }
     return err;
 }
@@ -1010,18 +1013,6 @@ bool HandleDashboardMenuItem(int menu_index, void*)
     return false;
 }
 
-void ConfirmPendingOtaImage()
-{
-    const esp_partition_t* running = esp_ota_get_running_partition();
-    esp_ota_img_states_t ota_state = ESP_OTA_IMG_UNDEFINED;
-
-    if (running != nullptr &&
-        esp_ota_get_state_partition(running, &ota_state) == ESP_OK &&
-        ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
-        ESP_ERROR_CHECK(esp_ota_mark_app_valid_cancel_rollback());
-    }
-}
-
 const char* ButtonIdName(button_service::ButtonId button)
 {
     switch (button) {
@@ -1495,6 +1486,8 @@ void HandleTimezoneEvent(const timezone_service::Event& event, void*)
             ESP_LOGW(kTag, "Dashboard welcome rotation after time event failed: %s",
                      esp_err_to_name(welcome_err));
         }
+        // An update passes its health check ~20 s after boot (#40): say so on the next tick.
+        ShowUpdatedNoticeIfAny();
     }
 }
 
@@ -2116,6 +2109,26 @@ void ShowWelcomeNoteIfDue()
     }
 }
 
+// The first boot after an update that passed its health check says so, once, with the
+// release's notes (#40). Waits for a later boot if another card is already up.
+void ShowUpdatedNoticeIfAny()
+{
+    if (overlay_runtime::IsInputCaptured()) {
+        return;
+    }
+    std::string title;
+    std::string body;
+    if (!ota_service::TakeUpdatedNotice(&title, &body)) {
+        return;
+    }
+    const esp_err_t err = overlay_runtime::ShowNoteCard(
+        title, epaper_ui::ToDisplayText(body),
+        project_assets::GetImage(EmbeddedImageId::kMascotMochiHappy));
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Update card failed: %s", esp_err_to_name(err));
+    }
+}
+
 // Result of importing the provisioning file at boot (#42), shown once the first screen is up.
 provisioning_service::Outcome s_provisioning_outcome = {};
 
@@ -2161,6 +2174,13 @@ void InitWifiService()
     if (const esp_err_t jobs_err = net_jobs_service::Init(); jobs_err != ESP_OK) {
         ESP_LOGW(kTag, "Network jobs init failed: %s", esp_err_to_name(jobs_err));
     }
+    // Updates (#40): Settings -> About shows how it's going; the daily check runs as a job.
+    ota_service::SetStatusListener([] {
+        if (ScreenActiveForRefresh(display_service::ScreenId::kSettingsAbout)) {
+            (void)settings_about_page_runtime::UpdateDisplayStateAndRequestRefresh();
+        }
+    });
+    ota_service::Start();
     // A provisioning file on the SD card (#42) sets the network (and more) before Wi-Fi starts,
     // so the first connection already uses it. Its toast waits for the first screen.
     s_provisioning_outcome = provisioning_service::ImportFromSdCard();
@@ -2351,7 +2371,8 @@ void Run()
     if (const esp_err_t err = cpu_boost::Init(); err != ESP_OK) {
         ESP_LOGW(kTag, "CPU frequency scaling unavailable: %s", esp_err_to_name(err));
     }
-    ConfirmPendingOtaImage();
+    // After an update, starts the health check that keeps it or rolls it back (#40).
+    ota_service::Init();
     ESP_ERROR_CHECK(power_service::Init());
     power_service::LogDebugStatus();
     // Gemini's shared worker task (32KB stack, see gemini_service::RunOnWorker) needs the
@@ -2365,6 +2386,9 @@ void Run()
     // delayed by SD detect/mount latency.
     InitDisplayService();
     InitStorageService();
+    if (storage_service::IsMounted()) {
+        ota_service::ReportHealth(firmware_update::kHealthStorageOk);
+    }
     // A crash before this boot leaves a report on the SD card for Eric (#41).
     if (const int reports = crash_report_service::CollectAfterReset(); reports > 0) {
         ESP_LOGW(kTag, "%d crash report(s) in /.keepsake/crash", reports);
@@ -2379,7 +2403,9 @@ void Run()
         .button_handler = &HandleButtonEvent,
         .button_handler_context = nullptr,
     });
-    PlayFeedback(feedback_service::FeedbackEvent::kStartup);
+    if (!ota_service::QuietBoot()) {  // a restart into an update while nobody was looking
+        PlayFeedback(feedback_service::FeedbackEvent::kStartup);
+    }
     InitImuService();
     InitDeviceSleepRuntime();
     InitTimezoneService();
@@ -2410,6 +2436,10 @@ void Run()
     if (initial_err != ESP_OK && initial_err != ESP_ERR_INVALID_STATE) {
         ESP_LOGW(kTag, "Initial %s show failed: %s", show_onboarding ? "onboarding" : "home screen",
                  esp_err_to_name(initial_err));
+    }
+    if (initial_err == ESP_OK && display_service::IsInitialized()) {
+        ota_service::ReportHealth(firmware_update::kHealthHomeReached |
+                                  firmware_update::kHealthDisplayOk);
     }
     s_startup_complete.store(true, std::memory_order_relaxed);
     if (!show_onboarding) {

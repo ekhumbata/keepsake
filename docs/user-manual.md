@@ -336,7 +336,7 @@ opening its own page, plus one action below them:
 - **Storage** — SD card status and management.
 - **Todos** — todo archiving.
 - **Topics** — create, rename, and delete topics.
-- **About** — firmware version and acknowledgments.
+- **About** — firmware version, updates, and acknowledgments.
 - **Manual** — replays the first-time onboarding carousel. This one isn't
   a heading — it's a direct action, since there's nothing to configure on
   it.
@@ -402,9 +402,23 @@ still archive individual items manually). Default is 7 days.
 
 ### About
 
-Shows the installed firmware version and an acknowledgment: Keepsake is
-built on Chroninkle by mach1na, which began as Followup by ALXV Labs. It's
-free software under the GNU GPL v3.
+Shows the installed firmware version, how updates are going, and an
+acknowledgment: Keepsake is built on Chroninkle by mach1na, which began as
+Followup by ALXV Labs. It's free software under the GNU GPL v3.
+
+**Updates** install by themselves. Once a day, when Wi-Fi is around,
+Keepsake checks for a newer version and downloads it in the background. It
+starts the next time Keepsake goes to sleep. You'll find it on Home when you
+come back, with a card saying what's new. Nothing you've saved is touched.
+
+- **Check for updates** looks right away. The line above it says what's
+  happening: "Checking...", "Downloading 1.22.0... 40%", "You're up to date."
+- When an update is ready, the button becomes **Restart to update** if you'd
+  rather not wait.
+- With a low battery (under 30%), the daily check waits until you plug in.
+  Asking by hand works down to 15%.
+- If an update doesn't start properly, Keepsake goes back to the version it
+  had by itself, and won't try that update again.
 
 ### Manage topics
 

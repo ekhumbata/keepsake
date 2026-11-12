@@ -65,7 +65,7 @@ update) · 💤 later
 | Wi-Fi setup hotspot | ✅ | `Keepsake-XXXXXX` hotspot + setup page |
 | Provisioning file | 🚧 [#42](https://github.com/ekhumbata/keepsake/issues/42) | Drop a file on the SD card and it sets everything up, then deletes itself (to be checked on the device) |
 | Several saved networks | 🚧 [#43](https://github.com/ekhumbata/keepsake/issues/43) | Up to 5, most recent first, moving on when one stops answering (to be checked on the device); a "Let's reconnect" card offers the setup hotspot when the password is rejected; a saved-networks list in Settings is still to come |
-| Over-the-air updates | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Updates from GitHub Releases, with automatic rollback |
+| Over-the-air updates | 🚧 [#40](https://github.com/ekhumbata/keepsake/issues/40) | Checks the latest GitHub release once a day (or Settings → About → Check for updates) and downloads a newer one in the background. It starts the next time the device sleeps. If it fails its health check it rolls back and isn't offered again. A "Keepsake updated" card says what's new (to be checked on the device) |
 | Crash reports | 🚧 [#39](https://github.com/ekhumbata/keepsake/issues/39), [#41](https://github.com/ekhumbata/keepsake/issues/41) | A crash leaves a report and core dump on the SD card for Eric (to be checked on the device) |
 | Works offline | 📋 [#45](https://github.com/ekhumbata/keepsake/issues/45) | Everything but downloads, weather and AI works without Wi-Fi |
 
@@ -168,7 +168,7 @@ Full commands and conventions live in [`CLAUDE.md`](../CLAUDE.md); this is the c
 | Regenerate images/logos/icons | `pip install -r tools/requirements.txt && python3 tools/generate_epaper_project_assets.py` ([asset-generation.md](asset-generation.md)) |
 | Regenerate fonts | `python3 tools/generate_epaper_fonts.py --output … <font.ttf:symbol:size>…` (command in [asset-generation.md](asset-generation.md)) |
 | Setup portal (web) | `cd web && npm ci && npm run build`, then copy `dist/index.*` to `firmware/components/services/wifi_service/portal/` |
-| Cut a release / OTA | 📋 [#40](https://github.com/ekhumbata/keepsake/issues/40) |
+| Cut a release / OTA | Bump `firmware/version.txt` (and CHANGELOG), write one friendly line in `firmware/whats_new.txt` (the "Keepsake updated" card), merge, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The `release` workflow builds and publishes the images and `latest.json`, and devices pick it up within a day. `vX.Y.Z-rc1` makes a prerelease that devices ignore. Rehearse on a board with `run_board_tests.py --ota` ([#40](https://github.com/ekhumbata/keepsake/issues/40)) |
 | Read crash logs | After a crash, the next boot writes `/.keepsake/crash/crash-NNN.txt` on the SD card (reset reason, crashed task, backtrace, the last ~8 KB of log) and `crash-NNN.elf` (the core dump). Copy them off over USB; decode with `idf.py coredump-info -c crash-NNN.elf` against the matching build. The last 10 are kept ([#41](https://github.com/ekhumbata/keepsake/issues/41)) |
 | Test a plugged-in board | `python3 tools/board/run_board_tests.py` (self-test, screenshots, UI tour; `--flash`, `--interactive`, `--destructive`): [board-tests.md](board-tests.md) |
 | What's next on the board | issues labelled [`hardware`](https://github.com/ekhumbata/keepsake/issues?q=is%3Aopen+label%3Ahardware) and PRs labelled `needs-device-test` |
