@@ -8,6 +8,7 @@
 // in DIR show what it looks like now. With --update, the golden file is rewritten. All sample
 // text is original.
 #include <cstdint>
+#include <memory>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -32,6 +33,7 @@
 #include "greeting/special_days.h"
 #include "epaper_ui/notes_page.h"
 #include "epaper_ui/onboarding_page.h"
+#include "epaper_ui/onboarding_slides.h"
 #include "epaper_ui/select_modal.h"
 #include "epaper_ui/settings_about_page.h"
 #include "epaper_ui/settings_page.h"
@@ -209,17 +211,42 @@ std::map<std::string, Renderer> Screens()
         state.for_shutdown = true;
         DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
     });
-    screens["onboarding"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
-        OnboardingPageState state = {};
-        state.carousel.slide_count = 6;
-        state.carousel.show_close = false;
-        state.carousel.next_selected = true;
-        state.slide_title = "Welcome to Keepsake";
-        state.slide_body = "Your pocket voice notebook. Capture thoughts out loud and let "
-                           "Keepsake keep them organized.";
-        state.slide_image = project_assets::GetImage(EmbeddedImageId::kSlide1);
-        DrawOnboardingPage(fb, rw, rh, pw, ph, state, StatusBar());
-    });
+    // Onboarding (#86): every slide, as a first run shows it (with Wi-Fi from a provisioning
+    // file), plus the last slide without Wi-Fi.
+    {
+        epaper_ui::OnboardingContext context = {};
+        context.friend_name = "Sam";
+        context.wifi_ready = true;
+        const auto slides = std::make_shared<std::vector<OnboardingSlide>>(OnboardingSlides(context));
+        for (size_t i = 0; i < slides->size(); ++i) {
+            const std::string name = i == 0 ? "onboarding" : "onboarding_" + std::to_string(i + 1);
+            screens[name] = page([slides, i](uint8_t* fb, int rw, int rh, int pw, int ph) {
+                OnboardingPageState state = {};
+                state.carousel.slide_count = static_cast<int>(slides->size());
+                state.carousel.active_index = static_cast<int>(i);
+                state.carousel.show_close = i + 1 == slides->size();
+                state.carousel.next_selected = !state.carousel.show_close;
+                state.carousel.close_selected = state.carousel.show_close;
+                state.slide_title = (*slides)[i].title;
+                state.slide_body = (*slides)[i].body;
+                state.slide_image = (*slides)[i].image;
+                DrawOnboardingPage(fb, rw, rh, pw, ph, state, StatusBar());
+            });
+        }
+        context.wifi_ready = false;
+        const OnboardingSlide last = OnboardingSlides(context).back();
+        screens["onboarding_no_wifi"] = page([last](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            OnboardingPageState state = {};
+            state.carousel.slide_count = 7;
+            state.carousel.active_index = 6;
+            state.carousel.show_close = true;
+            state.carousel.close_selected = true;
+            state.slide_title = last.title;
+            state.slide_body = last.body;
+            state.slide_image = last.image;
+            DrawOnboardingPage(fb, rw, rh, pw, ph, state, StatusBar());
+        });
+    }
     screens["notes"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         NotesPageState state = {};
         state.timeline = Timeline("Notes");

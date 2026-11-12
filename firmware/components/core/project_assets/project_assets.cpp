@@ -188,6 +188,8 @@ const EmbeddedImageAsset* GetImage(EmbeddedImageId id)
             return &epaper_images::kMascotDayValentines;
         case EmbeddedImageId::kMascotDayAnniversary:
             return &epaper_images::kMascotDayAnniversary;
+        case EmbeddedImageId::kMascotHello:
+            return &epaper_images::kMascotHello;
         case EmbeddedImageId::kMascotDayFirstDate:
             return &epaper_images::kMascotDayFirstDate;
         case EmbeddedImageId::kMascotDayHalloween:

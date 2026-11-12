@@ -259,7 +259,9 @@ esp_err_t ShowHomeScreen(display_service::RefreshMode refresh_mode)
     const esp_err_t err = display_service::SetCurrentScreen(display_service::ScreenId::kHome,
                                                             refresh_mode, "show_home_screen");
     // A special day that began while the device was on (#85): its card, once, on Home.
-    if (err == ESP_OK && s_startup_complete.load(std::memory_order_relaxed)) {
+    if (err == ESP_OK && s_startup_complete.load(std::memory_order_relaxed) &&
+        app_state_service::OnboardingViewed()) {
+        ShowWelcomeNoteIfDue();  // e.g. after the Wi-Fi setup that onboarding offered
         special_days_runtime::ShowCardIfDue();
         ShowUpdatedNoticeIfAny();
     }
@@ -727,6 +729,15 @@ void HandleOnboardingDismissIfRequested()
     const esp_err_t err = ShowHomeScreen(display_service::RefreshMode::kFull);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         ESP_LOGW(kTag, "Onboarding dismiss -> home failed: %s", esp_err_to_name(err));
+    }
+    // No Wi-Fi yet (no provisioning file): offer the phone setup first (#86). The welcome note
+    // waits behind it, and shows after "Later" or when Home comes back after the setup.
+    if (wifi_service::SavedNetworks().empty() && !wifi_service::IsAccessPointMode()) {
+        const esp_err_t card_err = overlay_runtime::ShowGetOnlineCard();
+        FlushOverlayFeedback();
+        if (card_err == ESP_OK) {
+            return;
+        }
     }
     ShowWelcomeNoteIfDue();
     special_days_runtime::ShowCardIfDue();
@@ -1645,6 +1656,10 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
     if (overlay_result.request_delete_book) {
         (void)book_list_page_runtime::DeleteConfirmedBook();
     }
+    if (overlay_result.request_due_cards) {
+        ShowWelcomeNoteIfDue();
+        special_days_runtime::ShowCardIfDue();
+    }
     if (overlay_result.request_wifi_setup) {
         // "Let's reconnect" -> Set up (#43): the setup hotspot, and the page that explains it.
         wifi_service::SetAccessPointEnabled(true);
@@ -2090,7 +2105,7 @@ void InitGeminiService()
 // The welcome note (#85/#86): the provisioning file's welcome message, shown once on Home.
 void ShowWelcomeNoteIfDue()
 {
-    if (app_state_service::WelcomeNoteShown()) {
+    if (app_state_service::WelcomeNoteShown() || overlay_runtime::IsInputCaptured()) {
         return;
     }
     const app_state_service::PersonalSettings personal = app_state_service::Personal();
@@ -2100,8 +2115,10 @@ void ShowWelcomeNoteIfDue()
     const std::string title = personal.friend_name.empty()
                                   ? std::string("A note for you")
                                   : "For " + epaper_ui::ToDisplayText(personal.friend_name);
-    const esp_err_t err =
-        overlay_runtime::ShowNoteCard(title, epaper_ui::ToDisplayText(personal.welcome_message));
+    // Bookworm and Mochi say hello along with it (#86).
+    const esp_err_t err = overlay_runtime::ShowNoteCard(
+        title, epaper_ui::ToDisplayText(personal.welcome_message),
+        project_assets::GetImage(EmbeddedImageId::kMascotHello));
     if (err == ESP_OK) {
         app_state_service::MarkWelcomeNoteShown(true);
     } else if (err != ESP_ERR_INVALID_STATE) {

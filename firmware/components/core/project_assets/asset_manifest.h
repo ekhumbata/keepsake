@@ -90,6 +90,7 @@ enum class EmbeddedImageId : uint8_t {
     kMascotDayNewYear,
     kMascotDayValentines,
     kMascotDayAnniversary,
+    kMascotHello,
     kMascotDayFirstDate,
     kMascotDayHalloween,
     kMascotDayCelebrate,
