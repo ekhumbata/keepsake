@@ -1,8 +1,8 @@
 # Screen gallery golden hashes (CRC-32 of each 800x480 framebuffer).
 # Regenerate after an intended UI change, and look at the PNGs first:
 #   build/tests/screen_gallery --out build/tests/gallery --golden tests/gallery/golden.txt --update
-battery_charging a310b152
-battery_low 05c18d92
+battery_charging b02817ad
+battery_low df731e83
 book_list 104c37df
 book_list_continue 1441eeee
 book_reader_bookmarked 501ac2d1
@@ -10,18 +10,19 @@ book_reader_epub 95167366
 book_reader_epub_large 5d09e60c
 book_reader_epub_small 94255fa3
 book_reader_txt 7b41949c
-day_anniversary 8ef2d55b
-day_birthday c8d27aec
-day_christmas 1d306b94
-day_custom 84c6d846
-day_first_date d24ea524
-day_halloween 2715c780
-day_new_year aab98a4e
-day_valentines 2ffb8131
+day_anniversary 5440464a
+day_birthday 1260e9fd
+day_christmas c782f885
+day_custom ff90803f
+day_first_date a918fd5d
+day_halloween fda75491
+day_new_year d1efd237
+day_valentines 54add948
 details 2fceeb80
 follow_up 598654cd
-home 2ded523c
-home_weather 983ea28b
+home b70e1915
+home_menu_scrolled f5cadf14
+home_weather 8effe32a
 lock_screen 72ee2da4
 lock_screen_photo fb7ed0e4
 lock_screen_photo_shutdown 10d4cc27
@@ -36,17 +37,17 @@ onboarding_5 82a83169
 onboarding_6 d7eaa53d
 onboarding_7 c931eedc
 onboarding_no_wifi 77ff1211
-overlay_card_modal 9accfef1
-overlay_keyboard 61511ea5
-overlay_select_modal b7447006
+overlay_card_modal bd882178
+overlay_keyboard 1036c6dd
+overlay_select_modal cc12287f
 overlay_sticky_note 22e6fc02
-overlay_toast 72d4abea
+overlay_toast 572b222b
 photo_cant_open 6d03646e
 photo_landscape e58d709b
 photo_portrait 8d4c5849
 photos_empty c7f2dc31
-saved_wifi 90847051
-saved_wifi_forget 19395120
+saved_wifi 88f6e489
+saved_wifi_forget 5d3a41c9
 settings 6db7c406
 settings_about 1b97aef4
 settings_about_note 6b5b64f6
