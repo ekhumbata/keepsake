@@ -52,14 +52,18 @@ epaper_ui::BookReaderPageState BuildStateLocked()
 
 void SavePositionLocked()
 {
-    s_coordinator.SavePosition();
+    if (s_coordinator.OpenedOk()) {
+        s_coordinator.SavePosition();
+    }
 }
 
 // Moves the book to the top of the shelf with its current progress. Called on open and on
 // leaving the reader, not per page turn (that's one SD write per turn already, for .pos).
+// A book showing its "can't open this" message isn't being read, so it doesn't take over
+// Continue reading (#145).
 void RecordOpenedLocked()
 {
-    if (!s_coordinator.filename().empty()) {
+    if (s_coordinator.OpenedOk()) {
         text_reader_service::RecordOpened(s_coordinator.filename(),
                                           s_coordinator.ProgressPercent());
     }

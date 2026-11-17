@@ -14,6 +14,7 @@ enum class ActivateIntent : uint8_t {
     kShowHome,
     kShowSettings,
     kShowArchiveAfterModal,
+    kShowLockScreenModal,
 };
 
 struct ActivateResult {
@@ -28,6 +29,7 @@ struct ActivateCallbacks {
     std::function<void()> show_home;
     std::function<void()> show_settings;
     std::function<void()> show_archive_after_modal;
+    std::function<void()> show_lock_screen_modal;
 };
 
 ActivateResult HandlePrimaryActivate(const SettingsTodosPageCoordinator& coordinator);

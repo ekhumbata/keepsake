@@ -270,6 +270,19 @@ std::map<std::string, Renderer> Screens()
             state.position_text = "5 / 12";
             DrawPhotoPage(fb, rw, rh, pw, ph, state);
         });
+        // The lock screen set to show a photo (#148), and the shutdown frame that way.
+        screens["lock_screen_photo"] = page([portrait](uint8_t* fb, int rw, int rh, int pw, int ph) {
+            LockScreenState state = {};
+            state.photo = portrait;
+            DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
+        });
+        screens["lock_screen_photo_shutdown"] =
+            page([landscape](uint8_t* fb, int rw, int rh, int pw, int ph) {
+                LockScreenState state = {};
+                state.photo = landscape;
+                state.for_shutdown = true;
+                DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
+            });
     }
     screens["lock_screen"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         LockScreenState state = {};
