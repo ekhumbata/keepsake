@@ -259,7 +259,7 @@ std::shared_ptr<const cover_image::Thumbnail> PickLockScreenPhoto()
     return nullptr;
 }
 
-esp_err_t ShowImpl(bool for_shutdown)
+esp_err_t ShowImpl()
 {
     // If a todo-summary scan is already in flight (e.g. the user just recorded something and
     // immediately locked), give it a short bounded window to finish so the very first paint
@@ -277,7 +277,7 @@ esp_err_t ShowImpl(bool for_shutdown)
         ESP_LOGI(kTag, "Waited %dms for in-flight todo summary scan before showing", waited_ms);
     }
 
-    // Already locked (e.g. the shutdown frame over the lock screen) keeps the photo it shows.
+    // Already locked: keep the photo it shows.
     bool locked_now = false;
     {
         std::lock_guard<std::mutex> lock(s_mutex);
@@ -307,11 +307,6 @@ esp_err_t ShowImpl(bool for_shutdown)
         s_active = true;
         state = s_state;
     }
-    // Set on the local copy only, never persisted into s_state -- this is a one-shot
-    // terminal paint (the device is about to lose power), not lock-screen state that
-    // should survive into a later, normal repaint.
-    state.for_shutdown = for_shutdown;
-
     ESP_RETURN_ON_ERROR(PushState(state, false, false), kTag, "push lock state failed");
     const esp_err_t status_bar_err = status_bar_runtime::UpdateDisplayState();
     if (status_bar_err != ESP_OK && status_bar_err != ESP_ERR_INVALID_STATE) {
@@ -321,8 +316,7 @@ esp_err_t ShowImpl(bool for_shutdown)
 
     // Always paint synchronously via WakeDisplayToScreen -- it blocks until the panel hardware
     // is actually done and repaints unconditionally, even if the panel is currently asleep.
-    // Shutdown needs this so power never cuts mid-refresh; the normal lock path needs it just as
-    // much so ForceDisplaySleep() below can never fire before the paint it's supposed to follow
+    // Locking needs this so ForceDisplaySleep() below can never fire before the paint it's supposed to follow
     // has genuinely landed (the previous async SetCurrentScreen path raced ForceDisplaySleep's
     // own async dispatch through a completely separate queue/task, with no ordering guarantee
     // between the two).
@@ -333,15 +327,13 @@ esp_err_t ShowImpl(bool for_shutdown)
         return err;
     }
 
-    if (!for_shutdown) {
-        // Locking is meant to put the display to sleep immediately rather than sit lit
-        // until the normal inactivity timer elapses on its own. Light sleep (which is what
-        // actually drops Wi-Fi) still follows its usual configured timeout from this point
-        // -- it isn't forced -- since it costs a real Wi-Fi reassociation and a forced SD
-        // remount on wake, which a quick lock/unlock cycle shouldn't have to pay every time.
-        // No-op if already asleep or auto-sleep is disabled/misconfigured.
-        (void)device_sleep_service::ForceDisplaySleep();
-    }
+    // Locking is meant to put the display to sleep immediately rather than sit lit until the
+    // normal inactivity timer elapses on its own. Light sleep (which is what actually drops
+    // Wi-Fi) still follows its usual configured timeout from this point -- it isn't forced --
+    // since it costs a real Wi-Fi reassociation and a forced SD remount on wake, which a quick
+    // lock/unlock cycle shouldn't have to pay every time. No-op if already asleep or
+    // auto-sleep is disabled/misconfigured.
+    (void)device_sleep_service::ForceDisplaySleep();
     return err;
 }
 
@@ -424,12 +416,7 @@ bool IsActive()
 
 esp_err_t Show()
 {
-    return ShowImpl(false);
-}
-
-esp_err_t ShowForShutdown()
-{
-    return ShowImpl(true);
+    return ShowImpl();
 }
 
 esp_err_t Hide()

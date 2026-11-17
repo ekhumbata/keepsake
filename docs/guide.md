@@ -31,7 +31,7 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
-| Lock screen photo | 🚧 [#148](https://github.com/ekhumbata/keepsake/issues/148) | Settings → Display & sound → Lock screen shows: **A photo** shows a random photo from `photos` each time it locks (and when switched off); falls back to the todos (to be checked on the device) |
+| Lock screen photo | 🚧 [#148](https://github.com/ekhumbata/keepsake/issues/148) | Settings → Display & sound → Lock screen shows: **A photo** shows a random photo from `photos` each time it locks; falls back to the todos (to be checked on the device) |
 | Photos | 🚧 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card (see "Preload photos") and added later by dropping them into `photos` over USB (unedited phone photos work too, #143). A Photos row on Home opens them full screen: the rocker flips through, oldest first; a press hides or shows the caption from the file name (to be checked on the device) |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
 | Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
@@ -156,7 +156,7 @@ The user manual has the same steps for the person using it:
 ### Charge and power off
 - Charge with USB-C: a Charging card with Mochi appears, and the status bar shows the battery and a charging mark.
 - Keepsake nudges at 20%, 10% and 5% battery, once each.
-- Hold PWR ~1 s → **Shut down**. On USB power it stays on until unplugged.
+- Hold PWR ~1 s → **Shut down**: the screen clears to white, then it powers off (#168). On USB power it stays on until unplugged.
 
 ### Fix common problems
 | Problem | Try this |
