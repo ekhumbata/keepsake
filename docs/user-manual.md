@@ -517,8 +517,9 @@ Followup by ALXV Labs. It's free software under the GNU GPL v3.
 **Replay the introduction** plays the first-time introduction again; when
 it ends you're back in Settings.
 
-**Updates** install by themselves. Once a day, when Wi-Fi is around,
-Keepsake checks for a newer version and downloads it in the background. It
+**Updates** install by themselves. About once a month, when Wi-Fi is around,
+Keepsake checks for a newer version and downloads it in the background
+(**Check for updates** looks right away). It
 starts the next time Keepsake goes to sleep. You'll find it on Home when you
 come back, with a card saying what's new. Nothing you've saved is touched.
 
@@ -526,7 +527,7 @@ come back, with a card saying what's new. Nothing you've saved is touched.
   happening: "Checking...", "Downloading 1.22.0... 40%", "You're up to date."
 - When an update is ready, the button becomes **Restart to update** if you'd
   rather not wait.
-- With a low battery (under 30%), the daily check waits until you plug in.
+- With a low battery (under 30%), the monthly check waits until you plug in.
   Asking by hand works down to 15%.
 - If an update doesn't start properly, Keepsake goes back to the version it
   had by itself, and won't try that update again.

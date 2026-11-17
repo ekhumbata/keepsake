@@ -2,7 +2,7 @@ name: release
 
 # Publishes a firmware release when a version tag is pushed (#40): `git tag v1.22.0 && git push
 # origin v1.22.0`, after firmware/version.txt says 1.22.0. Devices check the "latest" release's
-# latest.json once a day and update themselves. A tag with a suffix (v1.22.0-rc1) makes a
+# latest.json once a month (#173) and update themselves. A tag with a suffix (v1.22.0-rc1) makes a
 # prerelease, which devices never install on their own. See "Cut a release" in docs/guide.md.
 on:
   push:

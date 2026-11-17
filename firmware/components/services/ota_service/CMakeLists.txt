@@ -1,4 +1,4 @@
-# Updates over the air from GitHub Releases (#40): the daily check, the download into the other
+# Updates over the air from GitHub Releases (#40): the monthly check (#173), the download into the other
 # app slot, the health check after an update and the rollback. The decisions live in
 # core/firmware_update (host-tested).
 idf_component_register(

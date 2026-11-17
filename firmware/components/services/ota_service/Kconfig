@@ -4,7 +4,7 @@ menu "Keepsake updates"
         bool "Check for updates on GitHub Releases"
         default y
         help
-            Once a day (and from Settings -> About), fetch the latest release's manifest and,
+            Once a month (and from Settings -> About), fetch the latest release's manifest and,
             if it is newer, download the image into the other app slot. See #40 and the
             release how-to in docs/guide.md.
 
@@ -19,8 +19,12 @@ menu "Keepsake updates"
     config KEEPSAKE_OTA_CHECK_INTERVAL_HOURS
         int "Background check interval (hours)"
         depends on KEEPSAKE_OTA_ENABLED
-        range 1 168
-        default 24
+        range 1 2160
+        default 720
+        help
+            How often Keepsake looks for a new release on its own: every 30 days by default,
+            to match a monthly release cadence and keep Wi-Fi and TLS off the battery the rest
+            of the time (#173). Settings -> About -> Check for updates always checks at once.
 
     config KEEPSAKE_OTA_HEALTH_TIMEOUT_SECONDS
         int "Health check timeout after an update (seconds)"

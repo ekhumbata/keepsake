@@ -129,6 +129,9 @@ TEST_CASE("the daily check")
     CHECK(CheckDue(kNow - kDay, kNow, kDay));
     CHECK(CheckDue(kNow + 3600, kNow, kDay));       // the clock went back
     CHECK_FALSE(CheckDue(kNow - 3 * kDay, 1000, kDay));  // clock not set yet
+    // The monthly check (#173): 30 days.
+    CHECK_FALSE(CheckDue(kNow - 29 * kDay, kNow, 30 * kDay));
+    CHECK(CheckDue(kNow - 30 * kDay, kNow, 30 * kDay));
 }
 
 TEST_CASE("updates wait for enough battery")

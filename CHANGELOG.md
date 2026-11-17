@@ -10,6 +10,13 @@ via `git log`, not backfilled here.
 
 ### Changed
 
+- **Updates are checked once a month, not daily** (#173). Releases come about monthly, so the
+  background check (Wi-Fi up, a TLS request to GitHub) now runs every 30 days
+  (`CONFIG_KEEPSAKE_OTA_CHECK_INTERVAL_HOURS` 24 → 720; range 1-2160). Settings → About →
+  Check for updates still checks at once.
+
+### Changed
+
 - **Switched off means a blank screen** (#168). Shutting down now clears the e-paper to white
   with a full refresh before the power goes (`display_service::ClearForShutdown`), instead of
   freezing the lock screen (or, with the photo lock screen, a photo) on the panel. A white
