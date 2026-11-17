@@ -10,6 +10,12 @@ via `git log`, not backfilled here.
 
 ### Fixed
 
+- **Board tests from Windows** (#142). `keepsake_board.py` opens the port with DTR/RTS
+  released (pyserial's defaults reset the ESP32-S3 over its USB, so every command rebooted the
+  board), a garbled screenshot line fails the reply instead of crashing (and screenshots
+  retry), and the test console yields after every screenshot data line (a full frame starved
+  IDLE0 into the task watchdog when the host drained the port slowly).
+
 - **A card put in while Keepsake is on is picked up** (#146). The board has no card-detect
   line, so the card was only mounted at boot. Opening Books, Photos or Settings → Storage now
   tries to mount it (`storage_service::MountIfNeeded`, at most every 5 s, never during USB

@@ -20,6 +20,9 @@ It exits non-zero if anything failed.
 | `--destructive` | crashes the board on purpose (checks the crash report, #41) and tries a broken provisioning file (#42); both reboot it |
 | `--port /dev/…` | when there's more than one board, or detection picks the wrong port |
 
+**From Windows** (e.g. WSL, where the board's USB isn't visible): run the same scripts with
+Windows Python (`pip install pyserial`) and `--port COM3` (the port Device Manager shows).
+
 The board must be awake, on a normal screen (not in **USB storage** mode, which takes over the USB
 port), with an SD card in.
 
