@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <mutex>
 
+#include "app_state_service.h"
 #include "overlay_runtime.h"
 #include "page_navigation/navigation_model.h"
 #include "page_navigation/page_focus_projection.h"
@@ -26,9 +27,13 @@ constexpr ArchiveAfterOption kArchiveAfterOptions[] = {
     {"60 days", 60}, {"90 days", 90}, {"Never", 0},
 };
 
+// The lock screen picker (#148): index 0 = the todos, 1 = a photo.
+constexpr const char* kLockScreenOptions[] = {"Todos", "A photo"};
+
 std::mutex s_mutex;
 SettingsTodosPageCoordinator s_coordinator = {};
 bool s_archive_after_modal_active = false;
+bool s_lock_screen_modal_active = false;
 
 footer_runtime::FooterFocusItem FooterItemForSelectedIndex(int selected_index)
 {
@@ -93,7 +98,8 @@ bool FooterProjectionChangedForFocusIndexes(int old_focus_index, int new_focus_i
 
 epaper_ui::SettingsTodosPageState BuildStateLocked()
 {
-    return s_coordinator.BuildState(recording_archive_service::GetArchiveAfterDays());
+    return s_coordinator.BuildState(recording_archive_service::GetArchiveAfterDays(),
+                                    app_state_service::LockScreenShowsPhoto());
 }
 
 }  // namespace
@@ -206,19 +212,48 @@ esp_err_t ShowArchiveAfterModal()
             }
         }
         s_archive_after_modal_active = true;
+        s_lock_screen_modal_active = false;
+    }
+    return overlay_runtime::ShowSelectModal(state);
+}
+
+esp_err_t ShowLockScreenModal()
+{
+    epaper_ui::SelectModalState state = {};
+    {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        state.visible = true;
+        state.title_text = "Lock screen shows";
+        for (const char* label : kLockScreenOptions) {
+            state.items.push_back({.label_text = label});
+        }
+        state.selected_index = app_state_service::LockScreenShowsPhoto() ? 1 : 0;
+        s_lock_screen_modal_active = true;
+        s_archive_after_modal_active = false;
     }
     return overlay_runtime::ShowSelectModal(state);
 }
 
 bool HandleSelectModalSubmit(int selected_index)
 {
-    bool was_active = false;
+    bool archive_active = false;
+    bool lock_screen_active = false;
     {
         std::lock_guard<std::mutex> lock(s_mutex);
-        was_active = s_archive_after_modal_active;
+        archive_active = s_archive_after_modal_active;
+        lock_screen_active = s_lock_screen_modal_active;
         s_archive_after_modal_active = false;
+        s_lock_screen_modal_active = false;
     }
-    if (!was_active) {
+    if (lock_screen_active) {
+        if (selected_index >= 0 &&
+            selected_index < static_cast<int>(std::size(kLockScreenOptions))) {
+            app_state_service::SetLockScreenShowsPhoto(selected_index == 1);
+        }
+        (void)UpdateDisplayStateAndRequestRefresh(display_service::RefreshMode::kPartial);
+        return true;
+    }
+    if (!archive_active) {
         return false;
     }
     if (selected_index >= 0 && selected_index < static_cast<int>(std::size(kArchiveAfterOptions))) {
@@ -233,6 +268,7 @@ void ClearPendingSelectModal()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     s_archive_after_modal_active = false;
+    s_lock_screen_modal_active = false;
 }
 
 }  // namespace settings_todos_page_runtime
