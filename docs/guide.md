@@ -1,8 +1,9 @@
 # Keepsake guide
 
 The short version: what Keepsake does, how to use it, and how to work on it. For every screen in detail, see the
-[user manual](user-manual.md) (inherited from Chroninkle; this guide replaces it over time). The plan of record is
-[plan.md](plan.md).
+[user manual](user-manual.md) (inherited from Chroninkle; this guide replaces it over time). For building, setting
+up and gifting one (flashing, the SD card, every setup-file field, checking a board, releases, troubleshooting), see
+the [creator's manual](creator-manual.md). The plan of record is [plan.md](plan.md).
 
 **Status key:** ✅ works · 🚧 in progress · 📋 planned for the gift · 🎁 planned for after the gift (over-the-air
 update) · 💤 later

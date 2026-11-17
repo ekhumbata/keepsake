@@ -27,7 +27,9 @@ features on top.
 - **Wi-Fi setup** through the device's own `Keepsake-XXXXXX` hotspot.
 
 The [guide](docs/guide.md) has the feature list (with status), controls and how-tos; the full walkthrough of every
-screen is in the [user manual](docs/user-manual.md).
+screen is in the [user manual](docs/user-manual.md). Building one, setting it up and giving it away (flashing, the SD
+card, the setup file, checking a board, releases, troubleshooting) is in the
+[creator's manual](docs/creator-manual.md).
 
 ## Coming next
 
