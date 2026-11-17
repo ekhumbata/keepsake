@@ -210,7 +210,9 @@ python3 tools/board/keepsake_board.py screenshot now.png
 python3 tools/board/keepsake_board.py raw "press down click"
 ```
 
-Add `--port COM3` on Windows (from WSL, run them with Windows Python). The runner writes a
+Add `--port COM3` on Windows (from WSL, run them with Windows Python). After about 30 minutes
+untouched Keepsake goes into a deeper sleep that switches its USB port off; tap PWR first if
+the port is missing. The runner writes a
 report with real screenshots to `build/board-tests/<time>/`. The self-test covers memory,
 NVS, the power chip and battery, the clock, the motion and climate sensors, the SD card, the
 display, Wi-Fi and the update slots. Everything else, including every console command, is in
@@ -270,7 +272,7 @@ down (white screen) rather than leaving it on a page.
 
 | Problem | Try |
 |---|---|
-| The board doesn't show up on the computer | Another cable (charge-only cables are common); then [download mode](#download-mode) |
+| The board doesn't show up on the computer | If it was left alone for about 30 minutes it's in deep sleep, and its USB port is off: **tap PWR** and the port comes back. Otherwise another cable (charge-only cables are common), then [download mode](#download-mode) |
 | The screen shows Chinese menus | That's the Waveshare factory demo: flash Keepsake |
 | Flashing works but nothing changes on screen | Unplug and plug back in (the reset after flashing doesn't always take over USB) |
 | Frozen, buttons do nothing | Hold PWR 6 seconds (cuts power in hardware), then press PWR |

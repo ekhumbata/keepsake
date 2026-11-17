@@ -8,6 +8,11 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Home's "more above" arrow sat on the edge of the progress bar or banner when the menu
+  scrolled (#162): the menu now leaves a little room above its rows for it.
+
 ### Changed
 
 - **Updates are checked once a month, not daily** (#173). Releases come about monthly, so the

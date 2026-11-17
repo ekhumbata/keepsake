@@ -67,6 +67,7 @@ constexpr int kMenuFooterGap = design::spacing::k8;
 // The "more rows" arrows (#162): a small solid triangle at the right of the menu.
 constexpr int kMoreArrowWidth = 14;
 constexpr int kMoreArrowHeight = 7;
+constexpr int kMoreArrowGap = 4;  // between the "more above" arrow and the first row
 
 struct Layout {
     UiRect welcome = {};
@@ -100,7 +101,13 @@ Layout BuildLayout(int portrait_width, int portrait_height, const DashboardPageS
     // As many rows as fit above the footer; the window follows the selection (#162).
     const int footer_top = portrait_height - design::global_footer::kBottomPadding -
                            design::global_footer::kButtonSize - kMenuFooterGap;
-    const int fit = std::max(1, (footer_top - layout.menu_y) / design::menu_item::kHeight);
+    int fit = std::max(1, (footer_top - layout.menu_y) / design::menu_item::kHeight);
+    if (fit < kDashboardMenuItemCount) {
+        // Scrolling: leave room above the rows for the "more above" arrow, clear of the
+        // progress bar or banner.
+        layout.menu_y += kMoreArrowHeight + kMoreArrowGap;
+        fit = std::max(1, (footer_top - layout.menu_y) / design::menu_item::kHeight);
+    }
     layout.visible_rows = std::min(fit, kDashboardMenuItemCount);
     const int selected = state.menu.selected_index;
     if (selected >= layout.visible_rows) {
@@ -264,7 +271,7 @@ void DrawDashboardPage(uint8_t* framebuffer,
     const int arrow_x = kMargin + page_width - design::spacing::k16;
     if (layout.first_row > 0) {
         DrawMoreArrow(framebuffer, raw_width, raw_height, portrait_width, portrait_height, arrow_x,
-                      layout.menu_y - kMoreArrowHeight - 1, /*up=*/true);
+                      layout.menu_y - kMoreArrowHeight - kMoreArrowGap, /*up=*/true);
     }
     if (last_row < kDashboardMenuItemCount - 1) {
         DrawMoreArrow(framebuffer, raw_width, raw_height, portrait_width, portrait_height, arrow_x,
