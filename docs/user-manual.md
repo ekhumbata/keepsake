@@ -23,6 +23,7 @@ until it's reflashed.
 - [Topics](#topics)
 - [Books](#books)
 - [Photos](#photos)
+- [Copying books and photos from a computer](#copying-books-and-photos-from-a-computer)
 - [Settings](#settings)
 - [Locking, sleep, and battery](#locking-sleep-and-battery)
 - [Shutting down and charging](#shutting-down-and-charging)
@@ -292,8 +293,8 @@ with this topic yet" and no Summarize button.
 ## Books
 
 The Home screen's **Books** item opens the on-device reader for **EPUB** (`.epub`)
-books and plain `.txt` files. Copy them onto the SD card's `books` folder (over USB
-mass storage, from Settings > Storage) and they'll show up here.
+books and plain `.txt` files. Copy them onto the SD card's `books` folder and they'll
+show up here (see [Copying books and photos from a computer](#copying-books-and-photos-from-a-computer)).
 
 - When you're partway through a book, the top of the Books screen shows it under
   **Continue reading**: its cover (for EPUBs that have one, in black and white),
@@ -376,12 +377,43 @@ across the screen, the right way up.
 **Adding photos:** turn on USB drive mode (Settings → Storage → **Enable OTG**), connect
 Keepsake to a computer, and copy JPEG or PNG files into the **photos** folder on the
 card. Folders inside it are fine. After you leave USB mode they show up the next time
-you open Photos. The first time a photo is shown Keepsake prepares it, which takes a
-moment; after that it's quick.
+you open Photos (step by step: [Copying books and photos from a
+computer](#copying-books-and-photos-from-a-computer)). The first time a photo is shown
+Keepsake prepares it, which takes a moment; after that it's quick.
 
 If Keepsake can't open a photo, it says why instead:
 - **iPhone HEIC photos:** save them as JPEG first.
 - **Very large files that aren't plain JPEGs:** use a smaller copy.
+
+## Copying books and photos from a computer
+
+You don't need to take the SD card out: Keepsake can lend it to a computer as a USB
+drive.
+
+1. Connect Keepsake to the computer with a USB-C cable that carries data (some cables
+   only charge; if nothing shows up in step 3, try another).
+2. On Keepsake: **Settings → Storage → Enable OTG**. Keepsake shows that the card is in
+   use by the computer.
+3. On the computer, a new drive appears (on Windows, in File Explorer under **This PC**;
+   on a Mac, on the desktop and in Finder).
+4. Copy files onto it:
+   - books (`.epub` or `.txt`) into the **`books`** folder;
+   - photos (`.jpg` or `.png`) into the **`photos`** folder.
+   Folders inside them are fine.
+5. **Eject the drive on the computer first** (Windows: right-click the drive → **Eject**;
+   Mac: drag it to the Trash or press the eject button in Finder). This makes sure
+   everything has finished copying.
+6. On Keepsake: **Disable OTG mode**. Keepsake has the card back.
+7. Open **Books** or **Photos**: the new files are there.
+
+While the computer has the card, Keepsake can't read books, show photos or save
+recordings, and there's no way out of this mode except **Disable OTG mode**. That's on
+purpose, so Keepsake never touches the card while the computer is using it. If you
+forget step 6, Keepsake will say the card is missing until you do it.
+
+You can also take the card out, copy the files with a card reader, and put it back.
+Keepsake picks up a card put in while it's on the next time you open Books, Photos or
+Storage.
 
 ## Settings
 
@@ -446,7 +478,8 @@ clock.
 1. Free space and usage percent on the SD card (only shown when a card is
    inserted and mounted).
 2. **Enable OTG** — mounts the SD card as a USB drive on a computer you've
-   connected via USB-C, so you can pull files off directly. While this is
+   connected via USB-C, so you can copy files on or off directly (step by step:
+   [Copying books and photos from a computer](#copying-books-and-photos-from-a-computer)). While this is
    active, the card is unavailable to Keepsake itself, and you'll need to
    explicitly **Disable OTG mode** to get it back (there's no accidental
    way out of this while the cable's connected — that's intentional, so

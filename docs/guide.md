@@ -18,7 +18,7 @@ update) · 💤 later
 | Reader with a book font | 🚧 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata at three text sizes, chapter + % footer and a menu with Contents, bookmarks and Go to %, and hold-to-skip-chapter are in |
 | Library with covers | 🚧 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Titles, progress and "reading now" first are in, subfolders too, with a Continue reading card showing the cover; covers on every book still to come |
 | Friendly file messages | 🚧 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash (shown as text in the reader today; the mascot card comes with the redesign) |
-| Add books over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
+| Add books and photos over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
 | Add books from a phone | 📋 [#32](https://github.com/ekhumbata/keepsake/issues/32) | Open "Add books", go to `keepsake.local` on the phone, upload or search |
 | Free books (Project Gutenberg) | 📋 [#31](https://github.com/ekhumbata/keepsake/issues/31), [#33](https://github.com/ekhumbata/keepsake/issues/33) | Search and download public-domain books, from the phone or on the device |
 | MOBI / AZW3 (DRM-free) | 📋 stretch [#34](https://github.com/ekhumbata/keepsake/issues/34) | Kindle-format files that aren't DRM-locked |
@@ -114,11 +114,15 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
   welcome note as if it were new (#161). Switching off during the introduction keeps it for next time.
 - Never commit a filled-in copy (`provision.json` is in `.gitignore`).
 
-### Add books over USB
-1. Plug Keepsake into a computer with a USB-C data cable.
+### Add books and photos over USB
+1. Plug Keepsake into a computer with a USB-C data cable (a charge-only cable shows no drive).
 2. On Keepsake: **Settings → Storage → Enable OTG**. The SD card appears on the computer as a drive.
-3. Copy `.epub` or `.txt` books into the `books` folder.
+3. Copy `.epub` or `.txt` books into `books`, and `.jpg` / `.png` photos into `photos`.
 4. **Eject the drive on the computer first**, then on Keepsake choose **Disable OTG mode**.
+5. Open Books or Photos: the new files are there. (Checked on the board, 2026-11-17.)
+
+The user manual has the same steps for the person using it:
+[Copying books and photos from a computer](user-manual.md#copying-books-and-photos-from-a-computer).
 
 ### Add books from a phone
 📋 Planned ([#32](https://github.com/ekhumbata/keepsake/issues/32)): open **Add books** on Keepsake, scan the QR code
