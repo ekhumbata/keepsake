@@ -1655,8 +1655,8 @@ void HandleWifiEvent(const wifi_service::Event& event, void*)
 }
 
 // A back tap the page didn't use itself (nothing entered to back out of) goes up one level:
-// a Settings sub-page to Settings, a topic's pages to the one before, and any other page to
-// Home. Home, the lock screen and the first-run introduction have nowhere to go back to.
+// a Settings sub-page (Network and Time included) to Settings, a topic's pages to the one
+// before, and any other page to Home. Home, the lock screen and the first-run introduction have nowhere to go back to.
 bool NavigateUpFromCurrentScreen()
 {
     esp_err_t err = ESP_OK;
@@ -1665,6 +1665,8 @@ bool NavigateUpFromCurrentScreen()
         case display_service::ScreenId::kSettingsTodos:
         case display_service::ScreenId::kSettingsTopics:
         case display_service::ScreenId::kSettingsAbout:
+        case display_service::ScreenId::kWifi:
+        case display_service::ScreenId::kTime:
             err = ShowSettingsScreen(display_service::RefreshMode::kPartial);
             break;
         case display_service::ScreenId::kTopicEntries:
@@ -1681,8 +1683,6 @@ bool NavigateUpFromCurrentScreen()
             err = ShowBookListScreen(display_service::RefreshMode::kPartial);
             break;
         case display_service::ScreenId::kSettings:
-        case display_service::ScreenId::kWifi:
-        case display_service::ScreenId::kTime:
         case display_service::ScreenId::kNotes:
         case display_service::ScreenId::kTodos:
         case display_service::ScreenId::kFollowUp:

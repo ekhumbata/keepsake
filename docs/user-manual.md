@@ -46,8 +46,8 @@ A few things worth knowing up front:
   **Select** in this manual — selects/confirms.
 - **The Record button does double duty.** A quick tap is **Back** — it
   backs out of whatever you're currently inside, and with nothing open it
-  goes up a level: from a Settings page to Settings, and from any other page
-  to Home. Press and *hold* it, and
+  goes up a level: from a Settings page (Network, Time, Storage…) to
+  Settings, and from any other page to Home. Press and *hold* it, and
   it starts recording instead. You don't need to reach for a different
   control to back out of a list versus to record.
 - **Holding PWR for a full 6 seconds forces the power off**, no matter what
