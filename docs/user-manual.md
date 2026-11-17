@@ -313,6 +313,8 @@ mass storage, from Settings > Storage) and they'll show up here.
   start of the next chapter, hold up to go back to the start of this one (or, if
   you're already there, the one before). Each book remembers where you were, so leaving and reopening it picks up
   where you stopped.
+- The reading view has no Home or mic icons at the bottom, so the page gets that room.
+  A quick press of Record goes back to your books; holding it still records a note.
 - **EPUB books** show their title at the top and, at the bottom, the chapter name,
   the page within that chapter, and how far through the whole book you are (for
   example `Chapter Two - 3/12 - 41%`; a long chapter counts for more of the book

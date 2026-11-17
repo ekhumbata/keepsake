@@ -32,6 +32,10 @@ via `git log`, not backfilled here.
 
 ### Changed
 
+- **No footer while reading** (#147). The reader hides the Home and mic icons (focus never
+  reached Home, and Record tap / the menu already go back) and the text uses the space: the
+  page indicator sits at the bottom edge. Holding Record still records.
+
 - **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
   or scroll view first; on a page with nothing open it now goes up a level (a Settings page,
   Network and Time included, to Settings, a topic's pages to the one before, everything else to Home) instead of doing

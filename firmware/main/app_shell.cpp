@@ -639,7 +639,13 @@ esp_err_t ShowBookReaderScreen(display_service::RefreshMode refresh_mode)
 {
     SyncStatusBarState("show_book_reader_screen");
     page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kBookReader);
-    footer_runtime::SetLayoutState(FooterLayoutForScreen(display_service::ScreenId::kBookReader));
+    // No footer while reading (#147): the rocker turns pages, a Record tap goes back and the
+    // menu has "Back to books", so Home and the mic icon only took room from the text.
+    // Holding Record still records.
+    footer_runtime::LayoutState hidden_footer = {};
+    hidden_footer.visible = false;
+    hidden_footer.show_mic = false;
+    footer_runtime::SetLayoutState(hidden_footer);
     footer_runtime::SetProjectionState(page_input_runtime::BuildFooterProjectionForScreen(
         display_service::ScreenId::kBookReader));
     const esp_err_t footer_err = footer_runtime::UpdateDisplayState();
