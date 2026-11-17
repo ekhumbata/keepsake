@@ -9,16 +9,21 @@
 #include <utility>
 #include <vector>
 
+#include "app_state_service.h"
+#include "cpu_boost.h"
 #include "device_sleep_service.h"
 #include "display_service.h"
 #include "esp_check.h"
 #include "esp_log.h"
+#include "esp_random.h"
 #include "esp_timer.h"
 #include "chroninkle_task_config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "photo_service.h"
 #include "recording_archive_service.h"
 #include "status_bar_runtime.h"
+#include "storage_service.h"
 #include "timeline_format.h"
 #include "ui_refresh_runtime.h"
 
@@ -210,6 +215,50 @@ void OnClockTimer(void*)
     (void)SyncClockState(false);
 }
 
+// The lock screen's photo (#148): the one picked for next time when there is one (it was
+// prepared in the background after the last lock, so it's usually cached), otherwise random.
+std::atomic<int> s_next_photo_index{-1};
+
+int RandomPhotoIndex(int count, int avoid)
+{
+    if (count <= 1) {
+        return 0;
+    }
+    int index = static_cast<int>(esp_random() % static_cast<uint32_t>(count - 1));
+    if (index >= avoid && avoid >= 0) {
+        ++index;  // any photo but the one just shown
+    }
+    return index;
+}
+
+// Null when the setting is Todos, or there's no card or no photo that opens: then the lock
+// screen shows the todos as before. Blocks while a photo is prepared, so call it unlocked.
+std::shared_ptr<const cover_image::Thumbnail> PickLockScreenPhoto()
+{
+    if (!app_state_service::LockScreenShowsPhoto() || !storage_service::IsMounted()) {
+        return nullptr;
+    }
+    const int count = photo_service::Rescan();
+    if (count <= 0) {
+        return nullptr;
+    }
+    const cpu_boost::ScopedBoost boost("lock photo");
+    const int next = s_next_photo_index.load(std::memory_order_relaxed);
+    int index = next >= 0 && next < count ? next : RandomPhotoIndex(count, -1);
+    for (int attempt = 0; attempt < 3; ++attempt) {
+        photo_service::Loaded loaded = photo_service::Load(index);
+        if (loaded.bitmap != nullptr) {
+            const int upcoming = RandomPhotoIndex(count, index);
+            s_next_photo_index.store(upcoming, std::memory_order_relaxed);
+            photo_service::Prefetch(upcoming);
+            return loaded.bitmap;
+        }
+        index = RandomPhotoIndex(count, index);  // that one can't be opened: try another
+    }
+    ESP_LOGW(kTag, "No lock screen photo opened; showing the todos");
+    return nullptr;
+}
+
 esp_err_t ShowImpl(bool for_shutdown)
 {
     // If a todo-summary scan is already in flight (e.g. the user just recorded something and
@@ -228,6 +277,15 @@ esp_err_t ShowImpl(bool for_shutdown)
         ESP_LOGI(kTag, "Waited %dms for in-flight todo summary scan before showing", waited_ms);
     }
 
+    // Already locked (e.g. the shutdown frame over the lock screen) keeps the photo it shows.
+    bool locked_now = false;
+    {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        locked_now = s_active;
+    }
+    std::shared_ptr<const cover_image::Thumbnail> photo =
+        locked_now ? nullptr : PickLockScreenPhoto();
+
     epaper_ui::LockScreenState state = {};
     bool already_active = false;
     {
@@ -236,6 +294,9 @@ esp_err_t ShowImpl(bool for_shutdown)
             return ESP_ERR_INVALID_STATE;
         }
         already_active = s_active;
+        if (!already_active) {
+            s_state.photo = std::move(photo);
+        }
         if (!s_active) {
             const display_service::ScreenId current_screen = display_service::GetCurrentScreen();
             if (current_screen != display_service::ScreenId::kLockScreen) {
@@ -299,6 +360,7 @@ esp_err_t HideImpl(bool waking)
         was_active = s_active;
         s_active = false;
         restore_screen = s_restore_screen;
+        s_state.photo.reset();  // the next lock picks another (#148)
     }
 
     const esp_err_t status_bar_err = status_bar_runtime::UpdateDisplayState();

@@ -31,7 +31,8 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
-| Photos | 🚧 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card (see "Preload photos") and added later by dropping them into `photos` over USB. A Photos row on Home opens them full screen: the rocker flips through, oldest first; a press hides or shows the caption from the file name (to be checked on the device) |
+| Lock screen photo | 🚧 [#148](https://github.com/ekhumbata/keepsake/issues/148) | Settings → Todos → Lock screen shows: **A photo** shows a random photo from `photos` each time it locks (and when switched off); falls back to the todos (to be checked on the device) |
+| Photos | 🚧 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card (see "Preload photos") and added later by dropping them into `photos` over USB (unedited phone photos work too, #143). A Photos row on Home opens them full screen: the rocker flips through, oldest first; a press hides or shows the caption from the file name (to be checked on the device) |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
 | Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
 | Ambient lock screen | 📋 [#38](https://github.com/ekhumbata/keepsake/issues/38) | Big clock, date + month, weather, indoor temperature/humidity, night mode |
@@ -154,7 +155,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 | Problem | Try this |
 |---|---|
 | Frozen or not responding | Hold PWR for 6 s, then press PWR to start it again |
-| The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer) |
+| The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer). A card put in while Keepsake is on is picked up when you open Books, Photos or Storage |
 | Wi-Fi won't connect | Make sure the network is 2.4 GHz. In Settings → Network, pick it again and re-enter the password, or turn on **Access Point** and use the setup page |
 | A book doesn't show up | It must be an `.epub` or `.txt` file inside `books` (subfolders up to 4 deep are fine), and its name mustn't start with a dot |
 | Notes aren't transcribed | Expected without a Gemini key; they're saved as audio |

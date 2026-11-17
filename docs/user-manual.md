@@ -462,6 +462,11 @@ Todos](#archiving-completed-todos)). Choices are 7, 14, 30, 60, or 90
 days, or **Never** to turn off automatic archiving entirely (you can
 still archive individual items manually). Default is 7 days.
 
+**Lock screen shows** — **Todos** (the date and your pending Todos, the
+default) or **A photo**: a different photo from the `photos` folder each
+time the screen locks, full screen. With no photos (or no SD card) it
+shows the Todos instead.
+
 ### About
 
 Shows the installed firmware version, how updates are going, and an
@@ -521,6 +526,11 @@ on the Home screen in one step rather than needing a second press.
   follow-up is shown first). If there are more than five, you'll see a
   "+N more pending" line instead of a longer list. If you're all caught
   up, it just says so.
+
+If **Settings → Todos → Lock screen shows** is set to **A photo**, the lock
+screen is a random photo instead, with the battery and lock icon on top.
+Switching off shows one too, and it stays on the screen while Keepsake is
+off.
 
 **Auto-sleep** (when you're not locked, but the device has just been left
 alone): after about 3 minutes of no motion, the screen goes to sleep —
