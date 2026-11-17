@@ -155,7 +155,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 | Problem | Try this |
 |---|---|
 | Frozen or not responding | Hold PWR for 6 s, then press PWR to start it again |
-| The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer) |
+| The SD card is missing on Keepsake | Settings → Storage → **Disable OTG mode** (USB drive mode keeps the card for the computer). A card put in while Keepsake is on is picked up when you open Books, Photos or Storage |
 | Wi-Fi won't connect | Make sure the network is 2.4 GHz. In Settings → Network, pick it again and re-enter the password, or turn on **Access Point** and use the setup page |
 | A book doesn't show up | It must be an `.epub` or `.txt` file inside `books` (subfolders up to 4 deep are fine), and its name mustn't start with a dot |
 | Notes aren't transcribed | Expected without a Gemini key; they're saved as audio |

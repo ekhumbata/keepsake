@@ -10,6 +10,11 @@ via `git log`, not backfilled here.
 
 ### Fixed
 
+- **A card put in while Keepsake is on is picked up** (#146). The board has no card-detect
+  line, so the card was only mounted at boot. Opening Books, Photos or Settings → Storage now
+  tries to mount it (`storage_service::MountIfNeeded`, at most every 5 s, never during USB
+  drive mode or a format).
+
 - **Reading progress can't be wiped by a failed read** (#144). Any failure to open
   `/books/.library` used to look like "no index yet", so the shelf rebuilt it from scratch and
   saved over everyone's progress (seen once on the board). Now a missing index is rebuilt but
