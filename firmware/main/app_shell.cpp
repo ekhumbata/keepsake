@@ -1654,6 +1654,55 @@ void HandleWifiEvent(const wifi_service::Event& event, void*)
     (void)SyncWifiPageState(true);
 }
 
+// A back tap the page didn't use itself (nothing entered to back out of) goes up one level:
+// a Settings sub-page to Settings, a topic's pages to the one before, and any other page to
+// Home. Home, the lock screen and the first-run introduction have nowhere to go back to.
+bool NavigateUpFromCurrentScreen()
+{
+    esp_err_t err = ESP_OK;
+    switch (display_service::GetCurrentScreen()) {
+        case display_service::ScreenId::kSettingsStorage:
+        case display_service::ScreenId::kSettingsTodos:
+        case display_service::ScreenId::kSettingsTopics:
+        case display_service::ScreenId::kSettingsAbout:
+            err = ShowSettingsScreen(display_service::RefreshMode::kPartial);
+            break;
+        case display_service::ScreenId::kTopicEntries:
+            err = ShowTopicsBrowseScreen(display_service::RefreshMode::kPartial);
+            break;
+        case display_service::ScreenId::kTopicSummary:
+            err = ShowTopicEntriesScreen(display_service::RefreshMode::kPartial);
+            break;
+        case display_service::ScreenId::kDetails:
+            details_page_runtime::RequestBack();
+            HandleDetailsBackIfRequested();
+            return true;
+        case display_service::ScreenId::kBookReader:
+            err = ShowBookListScreen(display_service::RefreshMode::kPartial);
+            break;
+        case display_service::ScreenId::kSettings:
+        case display_service::ScreenId::kWifi:
+        case display_service::ScreenId::kTime:
+        case display_service::ScreenId::kNotes:
+        case display_service::ScreenId::kTodos:
+        case display_service::ScreenId::kFollowUp:
+        case display_service::ScreenId::kTopicsBrowse:
+        case display_service::ScreenId::kBookList:
+        case display_service::ScreenId::kPhotos:
+            err = ShowHomeScreen(display_service::RefreshMode::kFull);
+            break;
+        case display_service::ScreenId::kHome:
+        case display_service::ScreenId::kOnboarding:
+        case display_service::ScreenId::kLockScreen:
+        default:
+            return false;
+    }
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Back navigation failed: %s", esp_err_to_name(err));
+    }
+    return true;
+}
+
 void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
 {
     ESP_LOGI(kTag, "Button intent: button=%s event=%s pressed_ms=%lu",
@@ -1812,6 +1861,11 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
         HandleBookReaderBackIfRequested();
         HandlePhotosBackIfRequested();
         FlushOverlayFeedback();
+        return;
+    }
+
+    if (button_service::IsBackGesture(event) && NavigateUpFromCurrentScreen()) {
+        PlayFeedback(feedback_service::FeedbackEvent::kButtonClick);
         return;
     }
 
