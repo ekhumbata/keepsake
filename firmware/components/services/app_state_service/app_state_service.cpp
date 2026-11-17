@@ -11,6 +11,7 @@ constexpr const char* kNvsNamespace = "app_state";
 constexpr const char* kOnboardingKey = "onboarded";
 constexpr const char* kReaderTextSizeKey = "text_size";
 constexpr uint8_t kDefaultReaderTextSize = 1;
+constexpr const char* kLockScreenPhotoKey = "lock_photo";
 constexpr const char* kFriendNameKey = "friend_name";
 constexpr const char* kBirthdayKey = "birthday";
 constexpr const char* kWelcomeKey = "welcome";
@@ -87,6 +88,33 @@ void SetReaderTextSize(uint8_t size)
         return;
     }
     if (nvs_set_u8(handle, kReaderTextSizeKey, size) == ESP_OK) {
+        (void)nvs_commit(handle);
+    }
+    nvs_close(handle);
+}
+
+bool LockScreenShowsPhoto()
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READONLY, &handle) != ESP_OK) {
+        return false;
+    }
+    uint8_t value = 0;
+    if (nvs_get_u8(handle, kLockScreenPhotoKey, &value) != ESP_OK) {
+        value = 0;
+    }
+    nvs_close(handle);
+    return value == 1;
+}
+
+void SetLockScreenShowsPhoto(bool photo)
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READWRITE, &handle) != ESP_OK) {
+        ESP_LOGW(kTag, "Lock screen setting: nvs_open failed");
+        return;
+    }
+    if (nvs_set_u8(handle, kLockScreenPhotoKey, photo ? 1 : 0) == ESP_OK) {
         (void)nvs_commit(handle);
     }
     nvs_close(handle);

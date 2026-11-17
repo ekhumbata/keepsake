@@ -9,6 +9,7 @@
 #include <ctime>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -34,6 +35,12 @@ constexpr size_t kMaxCoverCacheBytes = 64u * 1024u;
 constexpr int kMaxFolderDepth = 4;
 constexpr size_t kMaxBooks = 2000;
 constexpr size_t kMaxIndexBytes = 512u * 1024u;
+// The index is rewritten as a whole: written here first, then swapped in (#144).
+constexpr const char* kIndexTempSuffix = ".tmp";
+
+// Every read-modify-write of the index holds this, so a shelf refresh and a reader recording
+// its progress can't interleave and lose one another's change.
+std::mutex s_index_mutex;
 
 std::string JoinPath(const std::string& left, const std::string& right)
 {
@@ -164,11 +171,22 @@ std::string IndexPath()
     return JoinPath(FolderPath(), kIndexFileName);
 }
 
-std::vector<library::BookRecord> LoadIndex()
+enum class IndexRead {
+    kOk,
+    kMissing,     // no index yet (first visit, or it was deleted): build one
+    kUnreadable,  // it's there but couldn't be read: never overwrite it (#144)
+};
+
+IndexRead ReadIndexFile(const std::string& path, std::vector<library::BookRecord>* records)
 {
-    FILE* file = std::fopen(IndexPath().c_str(), "rb");
+    errno = 0;
+    FILE* file = std::fopen(path.c_str(), "rb");
     if (file == nullptr) {
-        return {};
+        if (errno == ENOENT) {
+            return IndexRead::kMissing;
+        }
+        ESP_LOGW(kTag, "Reading the library index failed: errno=%d", errno);
+        return IndexRead::kUnreadable;
     }
     std::string text;
     char buffer[1024];
@@ -176,20 +194,53 @@ std::vector<library::BookRecord> LoadIndex()
     while ((read = std::fread(buffer, 1, sizeof(buffer), file)) > 0 && text.size() < kMaxIndexBytes) {
         text.append(buffer, read);
     }
+    const bool failed = std::ferror(file) != 0;
     std::fclose(file);
-    return library::ParseIndex(text);
+    if (failed) {
+        ESP_LOGW(kTag, "Reading the library index failed part-way");
+        return IndexRead::kUnreadable;
+    }
+    // An unknown version or a damaged file parses as empty, which rebuilds it from the books.
+    *records = library::ParseIndex(text);
+    return IndexRead::kOk;
+}
+
+IndexRead LoadIndex(std::vector<library::BookRecord>* records)
+{
+    records->clear();
+    const IndexRead read = ReadIndexFile(IndexPath(), records);
+    if (read != IndexRead::kMissing) {
+        return read;
+    }
+    // A save that stopped between removing the old index and renaming the new one into place
+    // leaves only the temp file: use it.
+    return ReadIndexFile(IndexPath() + kIndexTempSuffix, records);
 }
 
 void SaveIndex(const std::vector<library::BookRecord>& records)
 {
     const std::string text = library::SerializeIndex(records);
-    FILE* file = std::fopen(IndexPath().c_str(), "wb");
+    const std::string path = IndexPath();
+    const std::string temp = path + kIndexTempSuffix;
+    errno = 0;
+    FILE* file = std::fopen(temp.c_str(), "wb");
     if (file == nullptr) {
-        ESP_LOGW(kTag, "Saving the library index failed");
+        ESP_LOGW(kTag, "Saving the library index failed: errno=%d", errno);
         return;
     }
-    std::fwrite(text.data(), 1, text.size(), file);
-    std::fclose(file);
+    const bool written = std::fwrite(text.data(), 1, text.size(), file) == text.size();
+    const bool closed = std::fclose(file) == 0;
+    if (!written || !closed) {
+        ESP_LOGW(kTag, "Saving the library index failed while writing: errno=%d", errno);
+        std::remove(temp.c_str());
+        return;
+    }
+    // FAT can't rename over an existing file, so the old one goes first; LoadIndex falls back
+    // to the temp file if we stop in between.
+    std::remove(path.c_str());
+    if (std::rename(temp.c_str(), path.c_str()) != 0) {
+        ESP_LOGW(kTag, "Saving the library index failed at rename: errno=%d", errno);
+    }
 }
 
 // Title/author for a book the index doesn't know yet (or that changed on disk).
@@ -212,12 +263,29 @@ void FillMetadata(library::BookRecord* record)
     record->author = book->metadata().author;
 }
 
-std::vector<library::BookRecord> RefreshIndex()
+// Holds s_index_mutex. `saved` (optional) says whether the result is the real index, safe to
+// change and save, rather than a file-name-only stand-in for an index that couldn't be read.
+std::vector<library::BookRecord> RefreshIndexLocked(bool* saved = nullptr)
 {
+    if (saved != nullptr) {
+        *saved = false;
+    }
     std::vector<library::BookRecord> found;
     ScanFolder(FolderPath(), "", 0, &found);
+    std::vector<library::BookRecord> loaded;
+    if (LoadIndex(&loaded) == IndexRead::kUnreadable) {
+        // Show the books by file name and leave the index (and everyone's progress) alone;
+        // the next visit tries again.
+        for (library::BookRecord& record : found) {
+            record.title = library::TitleFromPath(record.path);
+        }
+        return found;
+    }
+    if (saved != nullptr) {
+        *saved = true;
+    }
     std::map<std::string, library::BookRecord> cached;
-    for (library::BookRecord& record : LoadIndex()) {
+    for (library::BookRecord& record : loaded) {
         cached[record.path] = std::move(record);
     }
     bool changed = found.size() != cached.size();
@@ -244,7 +312,11 @@ std::vector<library::BookRecord> RefreshIndex()
 
 std::vector<BookEntry> ListBooks()
 {
-    std::vector<library::BookRecord> records = RefreshIndex();
+    std::vector<library::BookRecord> records;
+    {
+        std::lock_guard<std::mutex> lock(s_index_mutex);
+        records = RefreshIndexLocked();
+    }
     library::SortForShelf(&records);
     std::vector<BookEntry> books;
     books.reserve(records.size());
@@ -261,7 +333,11 @@ std::vector<BookEntry> ListBooks()
 
 void RecordOpened(const std::string& filename, int progress_percent)
 {
-    std::vector<library::BookRecord> records = LoadIndex();
+    std::lock_guard<std::mutex> lock(s_index_mutex);
+    std::vector<library::BookRecord> records;
+    if (LoadIndex(&records) == IndexRead::kUnreadable) {
+        return;  // don't rebuild over an index we couldn't read (#144)
+    }
     const int64_t now = static_cast<int64_t>(std::time(nullptr));
     for (library::BookRecord& record : records) {
         if (record.path == filename) {
@@ -273,7 +349,11 @@ void RecordOpened(const std::string& filename, int progress_percent)
         }
     }
     // Not indexed yet (opened before the list was ever built): rebuild, then record.
-    records = RefreshIndex();
+    bool index_ok = false;
+    records = RefreshIndexLocked(&index_ok);
+    if (!index_ok) {
+        return;
+    }
     for (library::BookRecord& record : records) {
         if (record.path == filename) {
             record.last_opened = std::max<int64_t>(now, 1);

@@ -16,7 +16,31 @@ via `git log`, not backfilled here.
   retry), and the test console yields after every screenshot data line (a full frame starved
   IDLE0 into the task watchdog when the host drained the port slowly).
 
+- **A card put in while Keepsake is on is picked up** (#146). The board has no card-detect
+  line, so the card was only mounted at boot. Opening Books, Photos or Settings → Storage now
+  tries to mount it (`storage_service::MountIfNeeded`, at most every 5 s, never during USB
+  drive mode or a format).
+
+- **Reading progress can't be wiped by a failed read** (#144). Any failure to open
+  `/books/.library` used to look like "no index yet", so the shelf rebuilt it from scratch and
+  saved over everyone's progress (seen once on the board). Now a missing index is rebuilt but
+  an unreadable one is left alone (the shelf shows file names until it reads again), the
+  errno is logged, saves go to a temp file that's then swapped in, and one lock covers every
+  read-modify-write of the index.
+- **A book that can't be opened doesn't take over Continue reading** (#145). A locked or
+  damaged EPUB still shows its friendly message, but it's no longer recorded as the book being
+  read, and no position file is written for it.
+
+- **Full-size phone photos open** (#143). The viewer chose its JPEG decoder by file size, so a
+  12 MP phone photo of 1.5 MB went to the full-size decoder (4 MP cap) and showed "It's too
+  big". It now reads the pixel size from the JPEG's frame header (`photo::JpegSize`, unit
+  tested and fuzzed) and sends anything over the cap to the scaled ROM decoder.
+
 ### Changed
+
+- **No footer while reading** (#147). The reader hides the Home and mic icons (focus never
+  reached Home, and Record tap / the menu already go back) and the text uses the space: the
+  page indicator sits at the bottom edge. Holding Record still records.
 
 - **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
   or scroll view first; on a page with nothing open it now goes up a level (a Settings page,
@@ -24,6 +48,15 @@ via `git log`, not backfilled here.
   nothing.
 - The boot screen shows just the Keepsake logo. The Chroninkle and Followup credits stay on
   the About page and in the README.
+
+### Added
+
+- **Lock screen photo** (#148). Settings → Todos → **Lock screen shows**: Todos (as before)
+  or **A photo**: a random photo from `/photos`, full screen, with the status row and the lock
+  icon on top, a different one each lock. The next one is chosen and prepared in the
+  background after each lock so locking stays quick. The shutdown frame uses a photo too, so
+  a switched-off Keepsake shows one. Falls back to the todos with no card or no photos.
+  `DrawPhotoCentered` is now shared by the photo viewer and the lock screen.
 
 ### Added
 

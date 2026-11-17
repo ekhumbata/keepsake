@@ -65,6 +65,24 @@ TEST_CASE("EXIF orientation and date come out of a phone-style JPEG")
     }
 }
 
+TEST_CASE("the pixel size comes out of the JPEG frame header")
+{
+    int width = 0;
+    int height = 0;
+    REQUIRE(JpegSize(kSideways, &width, &height));
+    CHECK(width == 24);  // as stored, before the EXIF turn
+    CHECK(height == 16);
+
+    CHECK_FALSE(JpegSize("", &width, &height));
+    CHECK_FALSE(JpegSize("not a jpeg", &width, &height));
+    // A head that stops before the frame header (e.g. inside a big EXIF block) says "unknown".
+    const size_t sof = kSideways.find("\xff\xc0");
+    REQUIRE(sof != std::string::npos);
+    for (size_t n = 0; n < sof + 9; ++n) {
+        CHECK_FALSE(JpegSize(std::string_view(kSideways).substr(0, n), &width, &height));
+    }
+}
+
 TEST_CASE("the eight orientations turn the right way")
 {
     const Gray image = Pattern(3, 2);  // 0 1 2 / 3 4 5

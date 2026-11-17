@@ -12,9 +12,11 @@ constexpr int kSideInset = design::spacing::k16;
 constexpr int kTopGap = design::spacing::k24;
 constexpr int kHeadingBottomPadding = design::spacing::k24;
 constexpr int kBackButtonGap = design::spacing::k24;
+constexpr int kInputGap = design::spacing::k16;
 
 struct Layout {
     UiRect archive_after_input = {};
+    UiRect lock_screen_input = {};
     UiRect back = {};
 };
 
@@ -32,14 +34,19 @@ Layout BuildLayout(int portrait_width, int portrait_height, const SettingsTodosP
         page_x, title_bottom + kHeadingBottomPadding, state.archive_after_input,
         archive_after_style);
 
+    const UiRect lock_screen_input = SelectInputBounds(
+        page_x, archive_after_input.bottom() + kInputGap, state.lock_screen_input,
+        archive_after_style);
+
     ButtonStyle back_style = {};
     back_style.width = page_width;
     back_style.center_label = true;
     const UiRect back =
-        ButtonBounds(page_x, archive_after_input.bottom() + kBackButtonGap, state.back, back_style);
+        ButtonBounds(page_x, lock_screen_input.bottom() + kBackButtonGap, state.back, back_style);
 
     return {
         .archive_after_input = archive_after_input,
+        .lock_screen_input = lock_screen_input,
         .back = back,
     };
 }
@@ -55,6 +62,8 @@ UiRect SettingsTodosPageItemBounds(int portrait_width,
     switch (item) {
         case SettingsTodosPageItemId::kArchiveAfterInput:
             return layout.archive_after_input;
+        case SettingsTodosPageItemId::kLockScreenInput:
+            return layout.lock_screen_input;
         case SettingsTodosPageItemId::kBack:
             return layout.back;
         case SettingsTodosPageItemId::kNone:
@@ -76,6 +85,7 @@ bool HitTestSettingsTodosPageItem(int portrait_width,
 
     constexpr SettingsTodosPageItemId kItems[] = {
         SettingsTodosPageItemId::kArchiveAfterInput,
+        SettingsTodosPageItemId::kLockScreenInput,
         SettingsTodosPageItemId::kBack,
     };
     for (SettingsTodosPageItemId candidate : kItems) {
@@ -120,6 +130,9 @@ void DrawSettingsTodosPage(uint8_t* framebuffer,
     DrawSelectInput(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
                     layout.archive_after_input.x, layout.archive_after_input.y,
                     state.archive_after_input, archive_after_style);
+    DrawSelectInput(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                    layout.lock_screen_input.x, layout.lock_screen_input.y,
+                    state.lock_screen_input, archive_after_style);
 
     DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height, layout.back.x,
               layout.back.y, state.back,
