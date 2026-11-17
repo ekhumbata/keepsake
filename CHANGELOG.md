@@ -20,6 +20,11 @@ via `git log`, not backfilled here.
   damaged EPUB still shows its friendly message, but it's no longer recorded as the book being
   read, and no position file is written for it.
 
+- **Full-size phone photos open** (#143). The viewer chose its JPEG decoder by file size, so a
+  12 MP phone photo of 1.5 MB went to the full-size decoder (4 MP cap) and showed "It's too
+  big". It now reads the pixel size from the JPEG's frame header (`photo::JpegSize`, unit
+  tested and fuzzed) and sends anything over the cap to the scaled ROM decoder.
+
 ### Changed
 
 - **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
@@ -28,6 +33,15 @@ via `git log`, not backfilled here.
   nothing.
 - The boot screen shows just the Keepsake logo. The Chroninkle and Followup credits stay on
   the About page and in the README.
+
+### Added
+
+- **Lock screen photo** (#148). Settings → Todos → **Lock screen shows**: Todos (as before)
+  or **A photo**: a random photo from `/photos`, full screen, with the status row and the lock
+  icon on top, a different one each lock. The next one is chosen and prepared in the
+  background after each lock so locking stays quick. The shutdown frame uses a photo too, so
+  a switched-off Keepsake shows one. Falls back to the todos with no card or no photos.
+  `DrawPhotoCentered` is now shared by the photo viewer and the lock screen.
 
 ### Added
 

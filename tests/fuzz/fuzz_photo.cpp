@@ -16,6 +16,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         std::abort();
     }
     (void)photo::FormatName(bytes);
+    int width = 0;
+    int height = 0;
+    if (photo::JpegSize(bytes, &width, &height) && (width <= 0 || height <= 0)) {
+        std::abort();
+    }
     cover_image::Limits limits;
     limits.max_source_pixels = 1u << 20;  // keep each run small
     cover_image::Thumbnail out;

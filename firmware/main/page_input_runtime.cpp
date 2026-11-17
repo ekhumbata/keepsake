@@ -576,6 +576,9 @@ ButtonResult ApplySettingsTodosActivateResult(
     callbacks.show_archive_after_modal = []() {
         (void)settings_todos_page_runtime::ShowArchiveAfterModal();
     };
+    callbacks.show_lock_screen_modal = []() {
+        (void)settings_todos_page_runtime::ShowLockScreenModal();
+    };
     settings_todos_page_interactions::ApplyPrimaryActivateResult(activation, callbacks);
     if (result.footer_item != footer_runtime::FooterFocusItem::kNone) {
         result.interaction_result.play_feedback = false;

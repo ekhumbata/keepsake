@@ -14,6 +14,7 @@ namespace epaper_ui {
 enum class SettingsTodosPageItemId : uint8_t {
     kNone = 0,
     kArchiveAfterInput,
+    kLockScreenInput,
     kBack,
 };
 
@@ -23,6 +24,8 @@ struct SettingsTodosPageState {
     // "Archive todos after" picker: opens a fixed-choice SelectModal, same pattern as the Time
     // page's timezone field.
     SelectInputState archive_after_input = {};
+    // "Lock screen shows": the todos or a random photo (#148), the same picker pattern.
+    SelectInputState lock_screen_input = {};
     // Returns to the Settings hub -- this page is reached only from there.
     ButtonState back = {};
 };
