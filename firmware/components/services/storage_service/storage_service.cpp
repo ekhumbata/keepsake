@@ -32,6 +32,8 @@ constexpr const char* kProbeText = "reTerminal Sticky SD probe\n";
 constexpr const char* kVolumeLabel = "KEEPSAKE";
 constexpr size_t kAllocationUnitSize = 16 * 1024;
 constexpr size_t kMaxFiles = 5;
+// MountIfNeeded (#146): with no card each try waits out the SD timeout, so not more often.
+constexpr int64_t kMountRetryIntervalUs = 5 * 1000 * 1000;
 constexpr size_t kMaxLoggedEntries = 5;
 constexpr uint32_t kWorkerTaskStackWords = 6144;
 constexpr UBaseType_t kQueueDepth = 4;
@@ -792,6 +794,41 @@ esp_err_t RecoverAfterLightSleep()
 
     RefreshMountedSnapshotAndNotify(card, err);
     return err;
+}
+
+bool MountIfNeeded()
+{
+    if (!s_initialized) {
+        return false;
+    }
+    const Mode mode = GetSnapshot().mode;
+    if (mode != Mode::kAppMounted && mode != Mode::kError) {
+        return false;  // formatting or USB drive mode owns the card
+    }
+    SdCard& card = Card();
+    static int64_t s_last_try_us = 0;
+    esp_err_t err = ESP_OK;
+    {
+        std::lock_guard<std::mutex> card_lock(s_card_mutex);
+        if (card.IsMounted()) {
+            return true;
+        }
+        const int64_t now_us = esp_timer_get_time();
+        if (s_last_try_us != 0 && now_us - s_last_try_us < kMountRetryIntervalUs) {
+            return false;
+        }
+        s_last_try_us = now_us;
+        err = MountCardLocked(card);
+        if (err == ESP_OK) {
+            ESP_LOGI(kTag, "SD card found and mounted");
+            (void)EnsureDefaultDirectories(card);
+        }
+    }
+    if (err != ESP_OK) {
+        return false;
+    }
+    RefreshMountedSnapshotAndNotify(card, ESP_OK);
+    return true;
 }
 
 esp_err_t RequestFormatSdCard()

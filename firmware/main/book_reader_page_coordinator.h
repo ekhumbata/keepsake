@@ -63,7 +63,9 @@ public:
     // The current page as a bookmark (place, percent, and a label: chapter or first words).
     library::Bookmark CurrentBookmark() const;
     // False while an EPUB that couldn't be opened is showing its message.
-    bool CanBookmark() const { return !filename_.empty() && !(epub_ && epub_failed_); }
+    bool CanBookmark() const { return OpenedOk(); }
+    // A book is showing (not a "can't open this" message): only then does it count as read.
+    bool OpenedOk() const { return !filename_.empty() && !(epub_ && epub_failed_); }
     // Index of a bookmark on the page showing now, or -1.
     int BookmarkOnPage(const std::vector<library::Bookmark>& bookmarks) const;
     bool GoToBookmark(const library::Bookmark& bookmark, int portrait_width, int portrait_height);

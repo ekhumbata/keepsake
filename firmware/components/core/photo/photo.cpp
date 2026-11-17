@@ -309,6 +309,56 @@ Exif ReadExif(std::string_view jpeg)
     return exif;
 }
 
+bool JpegSize(std::string_view jpeg, int* width, int* height)
+{
+    const auto* bytes = reinterpret_cast<const uint8_t*>(jpeg.data());
+    const size_t size = jpeg.size();
+    if (size < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) {
+        return false;
+    }
+    size_t at = 2;
+    while (at + 4 <= size) {
+        if (bytes[at] != 0xFF) {
+            return false;
+        }
+        const uint8_t marker = bytes[at + 1];
+        if (marker == 0xFF) {  // fill byte
+            ++at;
+            continue;
+        }
+        if (marker == 0xDA || marker == 0xD9) {  // image data or end before any frame header
+            return false;
+        }
+        if (marker == 0x01 || (marker >= 0xD0 && marker <= 0xD7)) {  // no length
+            at += 2;
+            continue;
+        }
+        const size_t length = U16(bytes + at + 2, false);
+        if (length < 2 || at + 2 + length > size) {
+            return false;
+        }
+        // SOF0..SOF15, except DHT (C4), JPG (C8) and DAC (CC), which share the range.
+        const bool frame = marker >= 0xC0 && marker <= 0xCF && marker != 0xC4 && marker != 0xC8 &&
+                           marker != 0xCC;
+        if (frame) {
+            if (length < 7) {
+                return false;
+            }
+            const uint8_t* data = bytes + at + 4;  // precision, height, width, ...
+            const int h = static_cast<int>(U16(data + 1, false));
+            const int w = static_cast<int>(U16(data + 3, false));
+            if (w <= 0 || h <= 0) {
+                return false;
+            }
+            *width = w;
+            *height = h;
+            return true;
+        }
+        at += 2 + length;
+    }
+    return false;
+}
+
 Gray Orient(const Gray& image, int orientation)
 {
     if (orientation < 2 || orientation > 8 || image.width <= 0 || image.height <= 0 ||

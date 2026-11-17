@@ -296,6 +296,7 @@ esp_err_t ShowSettingsScreen(display_service::RefreshMode refresh_mode)
 
 esp_err_t ShowSettingsStorageScreen(display_service::RefreshMode refresh_mode)
 {
+    (void)storage_service::MountIfNeeded();  // a card put in while running (#146)
     SyncStatusBarState("show_settings_storage_screen");
     page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kSettingsStorage);
     footer_runtime::SetLayoutState(
@@ -614,6 +615,7 @@ esp_err_t ShowFollowUpScreen(display_service::RefreshMode refresh_mode)
 
 esp_err_t ShowBookListScreen(display_service::RefreshMode refresh_mode)
 {
+    (void)storage_service::MountIfNeeded();  // a card put in while running (#146)
     SyncStatusBarState("show_book_list_screen");
     page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kBookList);
     footer_runtime::SetLayoutState(FooterLayoutForScreen(display_service::ScreenId::kBookList));
@@ -637,7 +639,13 @@ esp_err_t ShowBookReaderScreen(display_service::RefreshMode refresh_mode)
 {
     SyncStatusBarState("show_book_reader_screen");
     page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kBookReader);
-    footer_runtime::SetLayoutState(FooterLayoutForScreen(display_service::ScreenId::kBookReader));
+    // No footer while reading (#147): the rocker turns pages, a Record tap goes back and the
+    // menu has "Back to books", so Home and the mic icon only took room from the text.
+    // Holding Record still records.
+    footer_runtime::LayoutState hidden_footer = {};
+    hidden_footer.visible = false;
+    hidden_footer.show_mic = false;
+    footer_runtime::SetLayoutState(hidden_footer);
     footer_runtime::SetProjectionState(page_input_runtime::BuildFooterProjectionForScreen(
         display_service::ScreenId::kBookReader));
     const esp_err_t footer_err = footer_runtime::UpdateDisplayState();
@@ -682,6 +690,7 @@ void HandleBookReaderBackIfRequested()
 // The photo viewer (#136): full screen, no footer.
 esp_err_t ShowPhotosScreen(display_service::RefreshMode refresh_mode)
 {
+    (void)storage_service::MountIfNeeded();  // a card put in while running (#146)
     footer_runtime::LayoutState hidden_footer = {};
     hidden_footer.visible = false;
     footer_runtime::SetLayoutState(hidden_footer);

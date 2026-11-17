@@ -72,9 +72,11 @@ void SendData(const std::vector<uint8_t>& data)
         std::printf("%s%u %s\n", std::string(board_test::kDataPrefix).c_str(),
                     static_cast<unsigned>(index), encoded.c_str());
         std::fflush(stdout);
-        if (index % 16 == 15) {
-            vTaskDelay(pdMS_TO_TICKS(5));  // let the USB FIFO drain
-        }
+        // Yield after every line. Writes to the USB serial console busy-wait while the host
+        // is slow to drain it (Windows is), and a 48 KB screenshot without a break starved
+        // IDLE0 long enough to trip the task watchdog, whose report then landed inside a
+        // data line.
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
