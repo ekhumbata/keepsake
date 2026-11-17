@@ -620,7 +620,7 @@ with the cert bundle, through `net_jobs`):
   - make a full serial flash of the release build
   - confirm the factory backup is safe
 - **OTA updates:**
-  - pull-based from GitHub Releases (on Wi-Fi connect, at most daily via `net_jobs`, or Settings → "Check for
+  - pull-based from GitHub Releases (on Wi-Fi connect, at most monthly via `net_jobs` (#173), or Settings → "Check for
     updates"), over HTTPS with the cert bundle and a version check
   - the new image is marked valid only after a health check (boot reaches Home, SD mounts, display works);
     otherwise the existing rollback reverts it

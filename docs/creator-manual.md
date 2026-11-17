@@ -221,7 +221,7 @@ charging and card swaps need hands.
 
 ## Ship an update
 
-Keepsake checks GitHub Releases once a day (or on Settings → About → Check for updates),
+Keepsake checks GitHub Releases once a month (or on Settings → About → Check for updates),
 downloads a newer version in the background, and starts it the next time it sleeps. If the
 new version fails its health check it goes back to the old one and doesn't offer that
 version again.
@@ -233,6 +233,11 @@ To release:
 3. Merge to `main`, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The `release` workflow
    checks the tag matches `version.txt`, builds, and publishes the images and `latest.json`.
 4. A tag like `vX.Y.Z-rc1` makes a prerelease that devices ignore: use it to try a build.
+
+Releases are meant to come about **monthly**, matching the check. A device finds a new release
+within a month of it being published (the 30 days count from its own last check, so devices
+spread out). To get one onto a device sooner, use **Check for updates** on it. The interval is
+`CONFIG_KEEPSAKE_OTA_CHECK_INTERVAL_HOURS` (default 720) in menuconfig → Keepsake updates.
 
 `python3 tools/board/run_board_tests.py --ota` rehearses an update and a rollback on a board.
 

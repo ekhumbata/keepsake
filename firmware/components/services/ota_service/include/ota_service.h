@@ -14,7 +14,7 @@
 //   what works with ReportHealth(), and the new firmware is kept once everything required has
 //   passed and it has kept running for a while. Otherwise the device restarts into the previous
 //   firmware, and that version is never downloaded again.
-// - Start() (once the network jobs exist) checks at most once a day as a background job; a
+// - Start() (once the network jobs exist) checks at most once a month (#173) as a background job; a
 //   person can also ask with CheckNow().
 // - A downloaded update waits in the other app slot. It's applied by RestartIntoUpdate(), by
 //   any restart, or quietly the next time the device goes to sleep (RestartIfUpdateReady()).

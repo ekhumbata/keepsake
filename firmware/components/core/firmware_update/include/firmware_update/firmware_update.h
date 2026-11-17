@@ -12,7 +12,7 @@
 //   {"version": "1.22.0", "url": "https://.../keepsake-1.22.0.bin", "size": 1234567,
 //    "sha256": "<64 hex digits>", "notes": "Optional: one friendly line about what's new."}
 //
-// The device fetches it at most once a day (or when asked in Settings -> About), downloads the
+// The device fetches it at most once a month (or when asked in Settings -> About), downloads the
 // image into the other app slot if it is newer, and restarts into it. The new firmware is only
 // kept once it passes a health check (Home reached, display works, the SD card still mounts);
 // otherwise the bootloader goes back to the previous one, and that version is never offered
@@ -65,7 +65,7 @@ Decision Decide(const Version& running, const Release& release, std::string_view
 bool CheckDue(int64_t last_check, int64_t now, int64_t interval_seconds);
 
 // Whether there's enough power to download and flash. Unknown battery (percent < 0) is
-// allowed. A person asking for the update gets a lower bar than the daily background check.
+// allowed. A person asking for the update gets a lower bar than the monthly background check.
 bool PowerAllows(bool usb_power, int battery_percent, bool asked_by_person);
 inline constexpr int kBackgroundMinBatteryPercent = 30;
 inline constexpr int kAskedMinBatteryPercent = 15;

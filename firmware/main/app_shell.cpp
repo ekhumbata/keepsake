@@ -2334,7 +2334,7 @@ void InitWifiService()
     if (const esp_err_t jobs_err = net_jobs_service::Init(); jobs_err != ESP_OK) {
         ESP_LOGW(kTag, "Network jobs init failed: %s", esp_err_to_name(jobs_err));
     }
-    // Updates (#40): Settings -> About shows how it's going; the daily check runs as a job.
+    // Updates (#40): Settings -> About shows how it's going; the monthly check runs as a job.
     ota_service::SetStatusListener([] {
         if (ScreenActiveForRefresh(display_service::ScreenId::kSettingsAbout)) {
             (void)settings_about_page_runtime::UpdateDisplayStateAndRequestRefresh();
