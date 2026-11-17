@@ -173,17 +173,19 @@ Home is Keepsake's dashboard. Near the top you'll see:
 
 Below that is the main menu, in this order:
 
+- **Books** — browse and read EPUB and `.txt` books from the device's [Books
+  folder](#books).
+- **Photos** — flip through your [photos](#photos).
 - **Follow up** — anything you've flagged for later, regardless of what
   it's tagged as (badge shows how many).
 - **Todos** (badge shows how many) — your Task recordings.
 - **Notes** (badge shows how many) — your Note and Idea recordings.
 - **Topics** — browse everything tagged with a given [topic](#topics),
   including Gemini-generated summaries.
-- **Books** — browse and read `.txt` files from the device's [Books
-  folder](#books).
-- **Photos** — flip through your [photos](#photos).
 
-Move between them by tilting the rocker and pressing it in to **Select**.
+Move between them by tilting the rocker and pressing it in to **Select**. When
+they don't all fit above the buttons at the bottom, the list scrolls as you move,
+and a small arrow shows there's more above or below.
 
 ## Notes, Todos, and Follow-up
 

@@ -14,16 +14,19 @@
 namespace epaper_ui {
 
 // The dashboard's main menu has six fixed items; Follow up / Notes / Todos can show a badge.
+// When they don't all fit above the footer, the menu shows the rows around the selection
+// (#162).
 inline constexpr int kDashboardMenuItemCount = 6;
 
-// Fixed slot order of the dashboard menu (must match kMenuLabels in dashboard_page.cpp).
+// Fixed slot order of the dashboard menu (must match kMenuLabels in dashboard_page.cpp):
+// reading first (#162).
 enum class DashboardMenuItem : int {
-    kFollowUp = 0,
+    kBooks = 0,
+    kPhotos,  // the photo viewer (#136)
+    kFollowUp,
     kTodos,
     kNotes,
     kTopics,
-    kBooks,
-    kPhotos,  // the photo viewer (#136)
 };
 
 struct DashboardPageMenuState {

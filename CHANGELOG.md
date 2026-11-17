@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Home menu: reading first, and it never runs under the footer** (#162). The order is now
+  Books, Photos, Follow up, Todos, Notes, Topics. When the rows don't all fit above the
+  footer (a two-line greeting, the weather), the menu shows the rows around the selection,
+  with a small arrow for the ones scrolled away. Badges now follow their item, not a slot.
+
 ### Fixed
 
 - **Board tests from Windows** (#142). `keepsake_board.py` opens the port with DTR/RTS
