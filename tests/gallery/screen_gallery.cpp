@@ -281,19 +281,12 @@ std::map<std::string, Renderer> Screens()
             state.position_text = "5 / 12";
             DrawPhotoPage(fb, rw, rh, pw, ph, state);
         });
-        // The lock screen set to show a photo (#148), and the shutdown frame that way.
+        // The lock screen set to show a photo (#148).
         screens["lock_screen_photo"] = page([portrait](uint8_t* fb, int rw, int rh, int pw, int ph) {
             LockScreenState state = {};
             state.photo = portrait;
             DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
         });
-        screens["lock_screen_photo_shutdown"] =
-            page([landscape](uint8_t* fb, int rw, int rh, int pw, int ph) {
-                LockScreenState state = {};
-                state.photo = landscape;
-                state.for_shutdown = true;
-                DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
-            });
     }
     screens["lock_screen"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         LockScreenState state = {};
@@ -302,13 +295,6 @@ std::map<std::string, Renderer> Screens()
         state.pending_todo_titles = {"Water the fern", "Call about the book club",
                                      "Pick up oat milk and a new notebook on the way home"};
         state.pending_todo_count = 3;
-        DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
-    });
-    screens["lock_screen_shutdown"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
-        LockScreenState state = {};
-        state.weekday_text = "Wednesday";
-        state.date_text = "November 11";
-        state.for_shutdown = true;
         DrawLockScreen(fb, rw, rh, pw, ph, state, StatusBar());
     });
     // Onboarding (#86): every slide, as a first run shows it (with Wi-Fi from a provisioning
