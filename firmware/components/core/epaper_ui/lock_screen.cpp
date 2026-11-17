@@ -8,6 +8,7 @@
 #include "design_tokens.h"
 #include "epaper_ui/checkbox.h"
 #include "epaper_ui/font_renderer.h"
+#include "epaper_ui/photo_page.h"
 #include "project_assets.h"
 #include "render_utils.h"
 
@@ -352,6 +353,46 @@ int DrawTodoRow(uint8_t* framebuffer,
 
 }  // namespace
 
+namespace {
+
+// The lock (or, for the shutdown frame, power) icon centred at the bottom. Over a photo it gets
+// a white pad so it stays readable.
+void DrawLockScreenBottomIcon(uint8_t* framebuffer,
+                              int raw_width,
+                              int raw_height,
+                              int portrait_width,
+                              int portrait_height,
+                              bool for_shutdown,
+                              bool on_photo)
+{
+    const EmbeddedImageAsset* bottom_icon =
+        project_assets::GetIcon(for_shutdown ? EmbeddedIconId::kPower : EmbeddedIconId::kLock);
+    if (bottom_icon == nullptr) {
+        return;
+    }
+    const int content_left = design::lock_screen::kSidePadding;
+    const int content_width =
+        std::max(0, portrait_width - (2 * design::lock_screen::kSidePadding));
+    const int icon_size = design::lock_screen::kLockIconSize;
+    const UiRect dest = {
+        content_left + std::max(0, (content_width - icon_size) / 2),
+        portrait_height - design::lock_screen::kLockIconBottomMargin - icon_size,
+        icon_size,
+        icon_size,
+    };
+    if (on_photo) {
+        constexpr int kPad = design::spacing::k8;
+        FillPortraitRect(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                         {dest.x - kPad, dest.y - kPad, dest.width + 2 * kPad,
+                          dest.height + 2 * kPad},
+                         design::color::kWhite);
+    }
+    DrawScaledPortraitMonoAsset(framebuffer, raw_width, raw_height, portrait_width,
+                                portrait_height, dest, bottom_icon, design::color::kBlack);
+}
+
+}  // namespace
+
 void DrawLockScreen(uint8_t* framebuffer,
                     int raw_width,
                     int raw_height,
@@ -361,6 +402,19 @@ void DrawLockScreen(uint8_t* framebuffer,
                     const StatusBarState& status_state)
 {
     if (framebuffer == nullptr) {
+        return;
+    }
+
+    if (state.photo != nullptr && state.photo->width > 0 && state.photo->height > 0) {
+        // A photo instead of the todos (#148): full screen, the status row and icon on top.
+        FillPortraitRect(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                         {0, 0, portrait_width, portrait_height}, design::color::kWhite);
+        DrawPhotoCentered(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                          *state.photo, 0, 0, portrait_width, portrait_height);
+        DrawLockScreenStatusRow(framebuffer, raw_width, raw_height, portrait_width,
+                                portrait_height, status_state);
+        DrawLockScreenBottomIcon(framebuffer, raw_width, raw_height, portrait_width,
+                                 portrait_height, state.for_shutdown, /*on_photo=*/true);
         return;
     }
 
@@ -490,25 +544,8 @@ void DrawLockScreen(uint8_t* framebuffer,
         }
     }
 
-    const EmbeddedImageAsset* bottom_icon = project_assets::GetIcon(
-        state.for_shutdown ? EmbeddedIconId::kPower : EmbeddedIconId::kLock);
-    if (bottom_icon != nullptr) {
-        const int icon_size = design::lock_screen::kLockIconSize;
-        const UiRect dest = {
-            content_left + std::max(0, (content_width - icon_size) / 2),
-            portrait_height - design::lock_screen::kLockIconBottomMargin - icon_size,
-            icon_size,
-            icon_size,
-        };
-        DrawScaledPortraitMonoAsset(framebuffer,
-                                    raw_width,
-                                    raw_height,
-                                    portrait_width,
-                                    portrait_height,
-                                    dest,
-                                    bottom_icon,
-                                    design::color::kBlack);
-    }
+    DrawLockScreenBottomIcon(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                             state.for_shutdown, /*on_photo=*/false);
 }
 
 }  // namespace epaper_ui

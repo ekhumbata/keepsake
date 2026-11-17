@@ -8,6 +8,24 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
+  or scroll view first; on a page with nothing open it now goes up a level (a Settings page,
+  Network and Time included, to Settings, a topic's pages to the one before, everything else to Home) instead of doing
+  nothing.
+- The boot screen shows just the Keepsake logo. The Chroninkle and Followup credits stay on
+  the About page and in the README.
+
+### Added
+
+- **Lock screen photo** (#148). Settings → Todos → **Lock screen shows**: Todos (as before)
+  or **A photo**: a random photo from `/photos`, full screen, with the status row and the lock
+  icon on top, a different one each lock. The next one is chosen and prepared in the
+  background after each lock so locking stays quick. The shutdown frame uses a photo too, so
+  a switched-off Keepsake shows one. Falls back to the todos with no card or no photos.
+  `DrawPhotoCentered` is now shared by the photo viewer and the lock screen.
+
 ### Added
 
 - **A personal note on the About page** (#149). The provisioning file's new `about_message`

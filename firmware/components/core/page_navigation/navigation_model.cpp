@@ -198,7 +198,9 @@ NavigationModel BuildSettingsTodosPageNavigationModel()
     AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
             NavigationItemRole::kSettingsTodosArchiveAfterInput, 0);
     AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
-            NavigationItemRole::kSettingsTodosBackButton, 1);
+            NavigationItemRole::kSettingsTodosLockScreenInput, 1);
+    AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
+            NavigationItemRole::kSettingsTodosBackButton, 2);
     AddFooterItems(model, /*is_home_screen=*/false);
     return model;
 }

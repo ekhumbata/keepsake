@@ -23,6 +23,8 @@ follow_up 598654cd
 home 2ded523c
 home_weather 983ea28b
 lock_screen 72ee2da4
+lock_screen_photo fb7ed0e4
+lock_screen_photo_shutdown 10d4cc27
 lock_screen_shutdown 3a2a18e7
 notes f3037bb7
 notes_empty eac3007f
@@ -50,7 +52,7 @@ settings_about 1b97aef4
 settings_about_note 6b5b64f6
 settings_about_update_ready eb8b6a5c
 settings_storage 638d3036
-settings_todos de0ba4f1
+settings_todos e2c38783
 settings_topics f8b07ede
 time 252ccbc2
 todos f30676f8

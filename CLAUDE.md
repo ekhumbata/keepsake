@@ -52,8 +52,9 @@ Kconfig namespace, and source comments/log strings all lead with the new name
 now (see `docs/todo-archive.md` for that pass). The **GitHub repo** is the one
 piece still deliberately deferred — it's still `mach1na/folloup`, tracked in
 `docs/todo.md`. The `kFollowupLogo` asset symbol is an intentional exception:
-it's the actual original Followup wordmark, kept for the boot splash's "Based
-on" attribution line, not a stale identifier to rename.
+it's the actual original Followup wordmark, not a stale identifier to rename
+(Keepsake's boot splash shows only the Keepsake logo; the credits live on the
+About page).
 
 Read `docs/app-architecture.md` before changing firmware architecture,
 component boundaries, AXP2101/PMIC integration, board wiring, partition
@@ -228,8 +229,9 @@ Full detail: "Dependency Direction" in `docs/app-architecture.md`.
 - Input precedence: overlay focus first, then footer, then page targets.
   `UP`/`DOWN` press-down move roving focus; a quick `ACTION`/BOOT press is the
   app-wide "exit entered control"/back gesture (`button_service::
-  IsBackGesture`); the rocker-middle `FN` single-click is the dedicated
-  select/confirm button (`button_service::IsSelectButton`); press-and-hold
+  IsBackGesture`), and when the page has nothing entered `app_shell`'s
+  `NavigateUpFromCurrentScreen` takes it up a level (Home for most pages);
+  the rocker-middle `FN` single-click is the dedicated select/confirm button (`button_service::IsSelectButton`); press-and-hold
   `ACTION` arms/starts/stops a recording. Long-press `DOWN` is deliberately
   *not* part of the back gesture — that hold is reserved for continuous
   scrolling within an entered control. `PWR` is not a GPIO button — it's wired

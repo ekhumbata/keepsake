@@ -35,7 +35,7 @@ is driven by these.
 
 | Control | Quick action | Press and hold |
 |---|---|---|
-| **Record button** | **Back** — exits whatever you're currently inside (an open list, a scroll view, a switch) | **Record** a thought (see below) |
+| **Record button** | **Back** — exits whatever you're currently inside (an open list, a scroll view); with nothing open, goes up a level | **Record** a thought (see below) |
 | **Rocker** (tilt up / tilt down / press in) | Tilt up or down to move the selection; press the rocker straight in (**Select**) to select/confirm | Hold a tilt to keep moving in that direction |
 | **PWR** | Short press: **lock / unlock** the screen | Hold ~1 second: open a **shut down?** confirmation |
 
@@ -45,7 +45,9 @@ A few things worth knowing up front:
   moves your selection; pressing it straight in — referred to as
   **Select** in this manual — selects/confirms.
 - **The Record button does double duty.** A quick tap is **Back** — it
-  backs out of whatever you're currently inside. Press and *hold* it, and
+  backs out of whatever you're currently inside, and with nothing open it
+  goes up a level: from a Settings page (Network, Time, Storage…) to
+  Settings, and from any other page to Home. Press and *hold* it, and
   it starts recording instead. You don't need to reach for a different
   control to back out of a list versus to record.
 - **Holding PWR for a full 6 seconds forces the power off**, no matter what
@@ -458,6 +460,11 @@ Todos](#archiving-completed-todos)). Choices are 7, 14, 30, 60, or 90
 days, or **Never** to turn off automatic archiving entirely (you can
 still archive individual items manually). Default is 7 days.
 
+**Lock screen shows** — **Todos** (the date and your pending Todos, the
+default) or **A photo**: a different photo from the `photos` folder each
+time the screen locks, full screen. With no photos (or no SD card) it
+shows the Todos instead.
+
 ### About
 
 Shows the installed firmware version, how updates are going, and an
@@ -517,6 +524,11 @@ on the Home screen in one step rather than needing a second press.
   follow-up is shown first). If there are more than five, you'll see a
   "+N more pending" line instead of a longer list. If you're all caught
   up, it just says so.
+
+If **Settings → Todos → Lock screen shows** is set to **A photo**, the lock
+screen is a random photo instead, with the battery and lock icon on top.
+Switching off shows one too, and it stays on the screen while Keepsake is
+off.
 
 **Auto-sleep** (when you're not locked, but the device has just been left
 alone): after about 3 minutes of no motion, the screen goes to sleep —

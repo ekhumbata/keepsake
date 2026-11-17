@@ -16,6 +16,11 @@ void MarkOnboardingViewed();
 uint8_t ReaderTextSize();
 void SetReaderTextSize(uint8_t size);
 
+// What the lock screen shows (#148): false = the date and pending todos (the default), true =
+// a random photo from /photos (falling back to the todos when there are none).
+bool LockScreenShowsPhoto();
+void SetLockScreenShowsPhoto(bool photo);
+
 // Personal touches (#42, #85, #86), from the provisioning file. On the device only (NVS), never
 // in the repo. Empty when not set.
 struct PersonalSettings {
