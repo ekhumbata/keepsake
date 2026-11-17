@@ -540,8 +540,6 @@ on the Home screen in one step rather than needing a second press.
 
 If **Settings → Display & sound → Lock screen shows** is set to **A photo**, the lock
 screen is a random photo instead, with the battery and lock icon on top.
-Switching off shows one too, and it stays on the screen while Keepsake is
-off.
 
 **Auto-sleep** (when you're not locked, but the device has just been left
 alone): after about 3 minutes of no motion, the screen goes to sleep —
@@ -554,7 +552,8 @@ disconnects WiFi; press the Record button or PWR to wake it back up.
 
 **Shutting down**: hold PWR for about a second. A confirmation appears —
 "Your device will power off. Do you want to continue?" — with **Cancel**
-and **Shut down** options. Confirming powers the device off. If it's
+and **Shut down** options. Confirming clears the screen to white and powers
+the device off, so a switched-off Keepsake looks blank. If it's
 plugged into USB power at the time, it'll actually stay on until you
 unplug the cable — shutting down and unplugging together is what fully
 powers it off on external power.
