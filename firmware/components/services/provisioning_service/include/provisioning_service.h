@@ -23,6 +23,8 @@ struct Outcome {
     Status status = Status::kNoFile;
     // For a toast: "All set up!" / "The setup file has a problem" ... Empty for kNoFile.
     std::string message;
+    // The file asked for the introduction on the next start (#161): this start goes to Home.
+    bool intro_on_next_start = false;
 };
 
 Outcome ImportFromSdCard();

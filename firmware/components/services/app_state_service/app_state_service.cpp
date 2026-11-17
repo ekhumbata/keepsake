@@ -67,6 +67,19 @@ void MarkOnboardingViewed()
     nvs_close(handle);
 }
 
+void ResetOnboardingViewed()
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READWRITE, &handle) != ESP_OK) {
+        ESP_LOGW(kTag, "Onboarding reset: nvs_open failed");
+        return;
+    }
+    if (nvs_set_u8(handle, kOnboardingKey, 0) == ESP_OK) {
+        (void)nvs_commit(handle);
+    }
+    nvs_close(handle);
+}
+
 uint8_t ReaderTextSize()
 {
     nvs_handle_t handle = 0;

@@ -44,6 +44,20 @@ public:
         result_->problems.push_back(field + ": " + what);
     }
 
+    // A yes/no field: must be true or false; false when absent.
+    bool Flag(const mini_json::Value& root, const char* key)
+    {
+        const mini_json::Value* value = root.Find(key);
+        if (value == nullptr || value->type == mini_json::Value::Type::kNull) {
+            return false;
+        }
+        if (value->type != mini_json::Value::Type::kBool) {
+            Problem(key, "must be true or false (no quotes)");
+            return false;
+        }
+        return value->boolean;
+    }
+
     // A text field: must be a string; returns it trimmed (or "" when absent).
     std::string Text(const mini_json::Value& root, const char* key, size_t max_bytes)
     {
@@ -281,7 +295,7 @@ ParseResult ParseProvision(std::string_view json, Provision* out)
                                              "version",      "wifi",          "timezone",
                                              "weather_location", "friend_name", "birthday",
                                              "welcome_message",  "about_message", "gemini_key",
-                                             "_comment"};
+                                             "show_intro", "_comment"};
     for (const auto& member : root.object) {
         bool known = false;
         for (const char* name : kKnown) {
@@ -311,6 +325,7 @@ ParseResult ParseProvision(std::string_view json, Provision* out)
     ReadSpecialDays(root, &check, &parsed);
     parsed.welcome_message = check.Text(root, "welcome_message", kMaxWelcomeBytes);
     parsed.about_message = check.Text(root, "about_message", kMaxAboutBytes);
+    parsed.show_intro = check.Flag(root, "show_intro");
     parsed.gemini_key = ReadGeminiKey(root, &check);
 
     if (result.problems.empty() && parsed.empty()) {
@@ -344,6 +359,7 @@ std::string DescribeForLog(const Provision& provision)
     if (!provision.special_days.empty()) add(std::to_string(provision.special_days.size()) + " special days");
     if (!provision.welcome_message.empty()) add("welcome message");
     if (!provision.about_message.empty()) add("about message");
+    if (provision.show_intro) add("introduction on next start");
     if (!provision.gemini_key.empty()) add("gemini key");
     return out.empty() ? "nothing" : out;
 }
