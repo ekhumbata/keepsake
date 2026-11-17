@@ -8,6 +8,15 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
+  or scroll view first; on a page with nothing open it now goes up a level (a Settings page,
+  Network and Time included, to Settings, a topic's pages to the one before, everything else to Home) instead of doing
+  nothing.
+- The boot screen shows just the Keepsake logo. The Chroninkle and Followup credits stay on
+  the About page and in the README.
+
 ### Added
 
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.
