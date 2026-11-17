@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A card put in while Keepsake is on is picked up** (#146). The board has no card-detect
+  line, so the card was only mounted at boot. Opening Books, Photos or Settings → Storage now
+  tries to mount it (`storage_service::MountIfNeeded`, at most every 5 s, never during USB
+  drive mode or a format).
+
 ### Added
 
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.

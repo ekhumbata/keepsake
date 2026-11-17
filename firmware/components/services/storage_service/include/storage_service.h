@@ -73,6 +73,13 @@ esp_err_t RunWithMountedFilesystem(MountedFilesystemHandler handler, void* conte
 // card. Safe to call when no card is present or storage is uninitialized.
 esp_err_t RecoverAfterLightSleep();
 
+// This board has no card-detect line, so the card is only mounted at boot. Screens that read
+// the card (Books, Photos, Settings -> Storage) call this when they open: if the card isn't
+// mounted (and USB drive mode or a format isn't using it), it tries again, so a card put in
+// while Keepsake is on is picked up (#146). Without a card each try waits out the SD timeout,
+// so tries are at least a few seconds apart. True when the card is mounted afterwards.
+bool MountIfNeeded();
+
 esp_err_t RequestFormatSdCard();
 
 // USB mass-storage mode. Entering unmounts the card app-side and hands it to the host;
