@@ -21,8 +21,8 @@ day_valentines 54add948
 details 2fceeb80
 follow_up 598654cd
 home b70e1915
-home_menu_scrolled f5cadf14
-home_weather 8effe32a
+home_menu_scrolled 14b688e6
+home_weather c7b09dfb
 lock_screen 72ee2da4
 lock_screen_photo fb7ed0e4
 notes f3037bb7
