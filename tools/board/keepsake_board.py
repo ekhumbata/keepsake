@@ -16,6 +16,7 @@ Usage as a script:
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import struct
 import sys
@@ -89,7 +90,18 @@ class ReplyReader:
         if data_at >= 0 and self._pending is not None:
             parts = line[data_at + len(DATA_PREFIX):].split(" ", 1)
             if len(parts) == 2 and parts[0].isdigit():
-                self._chunks[int(parts[0])] = base64.b64decode(parts[1])
+                try:
+                    chunk = base64.b64decode(parts[1], validate=True)
+                except (binascii.Error, ValueError):
+                    # A log line from another task landed inside this one: fail the reply
+                    # now rather than waiting for a chunk that will never arrive.
+                    self.log.append(line)
+                    self.replies.append(
+                        Reply({**self._pending, "ok": False, "error": "garbled data line"}))
+                    self._pending = None
+                    self._chunks = {}
+                    return
+                self._chunks[int(parts[0])] = chunk
                 self._finish_if_complete()
             return
         if at >= 0:
@@ -137,7 +149,17 @@ class Board:
         while time.monotonic() < deadline:
             try:
                 name = self.port_name or find_port()
-                self._serial = serial.Serial(name, self.baud, timeout=0.1)
+                # Open with DTR and RTS released: pyserial asserts both by default, and on
+                # Windows that toggles the ESP32-S3's USB reset, rebooting the board on
+                # every command.
+                port = serial.Serial()
+                port.port = name
+                port.baudrate = self.baud
+                port.timeout = 0.1
+                port.dtr = False
+                port.rts = False
+                port.open()
+                self._serial = port
                 self.port_name = name
                 return self
             except Exception as error:  # the port comes and goes while the board reboots
@@ -207,8 +229,12 @@ class Board:
                 return self.reader.replies.pop(0)
         raise BoardError(f"no reply to '{' '.join(words)}' within {timeout:.0f} s")
 
-    def screenshot(self, path: Optional[Path] = None) -> tuple:
-        reply = self.command("screenshot", timeout=30.0)
+    def screenshot(self, path: Optional[Path] = None, attempts: int = 3) -> tuple:
+        for attempt in range(attempts):
+            reply = self.command("screenshot", timeout=30.0)
+            if reply.ok or reply.get("error") != "garbled data line" or attempt == attempts - 1:
+                break
+            self._pump(2.0)  # let the rest of the garbled reply drain before asking again
         if not reply.ok:
             raise BoardError(reply.get("error", "screenshot failed"))
         width, height, pixels = raw_to_portrait(reply.payload, reply["width"], reply["height"])
