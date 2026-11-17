@@ -15,6 +15,13 @@ via `git log`, not backfilled here.
   footer (a two-line greeting, the weather), the menu shows the rows around the selection,
   with a small arrow for the ones scrolled away. Badges now follow their item, not a slot.
 
+### Added
+
+- **Set up now, give later** (#161). `"show_intro": true` in the provisioning file makes the
+  first-run introduction and welcome note wait for the next start: the import start goes to
+  Home ("All set up!"), and the next time it's switched on it greets the person as if it were
+  new. A wrong value (`"yes"`) is refused with a plain reason like every other field.
+
 ### Fixed
 
 - **Board tests from Windows** (#142). `keepsake_board.py` opens the port with DTR/RTS

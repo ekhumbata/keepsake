@@ -111,6 +111,7 @@ TEST_CASE("a full file imports, trimmed and normalised")
         "birthday": "1994-02-29",
         "welcome_message": "Hi!",
         "about_message": " A note for you. ",
+        "show_intro": true,
         "gemini_key": "AIzaExampleKey123"
     })", &p);
     REQUIRE(result.ok);
@@ -119,9 +120,10 @@ TEST_CASE("a full file imports, trimmed and normalised")
     CHECK(p.friend_name == "Sam");
     CHECK(p.birthday == "02-29");
     CHECK(p.about_message == "A note for you.");
+    CHECK(p.show_intro);
     CHECK(provisioning::DescribeForLog(p) ==
           "wifi: 2 networks, timezone, friend name, birthday, welcome message, about message, "
-          "gemini key");
+          "introduction on next start, gemini key");
     // The log line never contains the values.
     CHECK(provisioning::DescribeForLog(p).find("correct") == std::string::npos);
 }
@@ -139,6 +141,7 @@ TEST_CASE("each kind of mistake is reported, and nothing is imported")
         "birthday": "14/07",
         "friend_name": 42,
         "gemini_key": "has space",
+        "show_intro": "yes",
         "version": 2
     })", &p);
     CHECK_FALSE(result.ok);
@@ -150,6 +153,7 @@ TEST_CASE("each kind of mistake is reported, and nothing is imported")
     CHECK(Mentions(result, "birthday"));
     CHECK(Mentions(result, "friend_name"));
     CHECK(Mentions(result, "gemini_key"));
+    CHECK(Mentions(result, "show_intro"));
     CHECK(Mentions(result, "version"));
     CHECK(p.empty());
 
