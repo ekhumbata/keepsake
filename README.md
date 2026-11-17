@@ -64,7 +64,7 @@ Keepsake is driven entirely by three physical controls: a rocker, the Record but
 | --- | --- |
 | Rocker, tilt up / down | Move the selection; hold a tilt to keep moving |
 | Rocker, press in ("Select") | Select / confirm |
-| Record button, tap ("Back") | Back out of a list, scroll view, or switch you're currently inside |
+| Record button, tap ("Back") | Back out of a list or scroll view you're inside; otherwise go up a level (to Home from most pages) |
 | Record button, press and hold | Record — starts on the hold, stops when you let go |
 | PWR, tap | Lock the screen, or unlock it |
 | PWR, hold ~1s | Open the shutdown confirmation |
@@ -84,7 +84,7 @@ Copyright (C) 2026 Alex Vong ([ALXV](https://github.com/alxv2016)), Copyright (C
   v1.0.0. Chroninkle was itself renamed from **Followup** (its name through version 0.5.0).
 - **Followup** was a fork of [ALXV's folloup-sticky](https://github.com/alxv2016/folloup-sticky), whose `main` branch
   targets SeeedStudio's reTerminal Sticky and whose `folloup-waveshare` branch ports it to this Waveshare board.
-  The boot screen credits Chroninkle and shows Followup's original logo on its "Based on" line.
+  The About page credits both.
 
 Thank you to ALXV and mach1na for the design and implementation Keepsake grows from.
 
