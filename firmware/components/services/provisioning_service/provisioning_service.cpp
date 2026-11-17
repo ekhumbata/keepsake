@@ -162,6 +162,7 @@ bool Apply(const provisioning::Provision& provision)
     personal.friend_name = provision.friend_name;
     personal.birthday = provision.birthday;
     personal.welcome_message = provision.welcome_message;
+    personal.about_message = provision.about_message;
     personal.weather_location = provision.weather_location;
     personal.anniversary = provision.anniversary;
     personal.first_date = provision.first_date;

@@ -16,5 +16,6 @@
     { "date": "03-17", "title": "Happy Gotcha Day, Biscuit!", "message": "Treats for the dog today." }
   ],
   "welcome_message": "Happy birthday! I made you a little reading companion.",
+  "about_message": "A short note that Settings -> About shows.",
   "gemini_key": ""
 }

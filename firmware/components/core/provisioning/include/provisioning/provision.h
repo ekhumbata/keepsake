@@ -43,6 +43,7 @@ struct Provision {
     };
     std::vector<SpecialDay> special_days;  // at most 12
     std::string welcome_message;     // shown once on the welcome card (#86)
+    std::string about_message;       // a personal note on Settings -> About (#149)
     std::string gemini_key;          // optional (#49)
 
     bool operator==(const Provision& other) const = default;

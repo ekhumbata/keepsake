@@ -375,6 +375,16 @@ std::map<std::string, Renderer> Screens()
         state.back = {.label_text = "Back"};
         DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
+    // With a personal note from the provisioning file (#149); sample text, never a real one.
+    screens["settings_about_note"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        SettingsAboutPageState state = {};
+        state.version_text = "Version 1.3.0";
+        state.update_status_text = "You're up to date.";
+        state.update = {.label_text = "Check for updates"};
+        state.personal_note = "For Sam: may every rainy afternoon come with a good book. Love, me.";
+        state.back = {.label_text = "Back", .selected = true};
+        DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
     screens["settings_about_update_ready"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         SettingsAboutPageState state = {};
         state.version_text = "Version 1.3.0";

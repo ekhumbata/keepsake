@@ -48,8 +48,9 @@ photos_empty c7f2dc31
 saved_wifi 90847051
 saved_wifi_forget 19395120
 settings 6db7c406
-settings_about d33b33f0
-settings_about_update_ready 2327f758
+settings_about 1b97aef4
+settings_about_note 6b5b64f6
+settings_about_update_ready eb8b6a5c
 settings_storage 638d3036
 settings_todos e2c38783
 settings_topics f8b07ede

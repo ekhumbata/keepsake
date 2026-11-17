@@ -110,6 +110,7 @@ TEST_CASE("a full file imports, trimmed and normalised")
         "friend_name": "  Sam ",
         "birthday": "1994-02-29",
         "welcome_message": "Hi!",
+        "about_message": " A note for you. ",
         "gemini_key": "AIzaExampleKey123"
     })", &p);
     REQUIRE(result.ok);
@@ -117,8 +118,10 @@ TEST_CASE("a full file imports, trimmed and normalised")
     CHECK(p.wifi[1].password.empty());
     CHECK(p.friend_name == "Sam");
     CHECK(p.birthday == "02-29");
+    CHECK(p.about_message == "A note for you.");
     CHECK(provisioning::DescribeForLog(p) ==
-          "wifi: 2 networks, timezone, friend name, birthday, welcome message, gemini key");
+          "wifi: 2 networks, timezone, friend name, birthday, welcome message, about message, "
+          "gemini key");
     // The log line never contains the values.
     CHECK(provisioning::DescribeForLog(p).find("correct") == std::string::npos);
 }

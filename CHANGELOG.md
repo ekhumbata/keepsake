@@ -60,6 +60,13 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **A personal note on the About page** (#149). The provisioning file's new `about_message`
+  (up to 400 bytes) is shown on Settings → About; like the other personal values it lives on
+  the device, never in the repo. The upstream credits shrink to one small line under Back
+  ("Built on Chroninkle (mach1na) and Followup (ALXV Labs). GNU GPL v3.").
+
+### Added
+
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.
   - The rocker flips through the photos (oldest first, wrapping round) with a full
     refresh each. A press hides or shows the caption ("First date, May 20, 2019" and

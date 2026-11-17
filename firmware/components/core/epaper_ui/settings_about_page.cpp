@@ -12,6 +12,8 @@ namespace {
 constexpr auto kTitleRole = design::TypographyRole::kHeadingH1;
 constexpr auto kVersionRole = design::TypographyRole::kLabelLarge;
 constexpr auto kBodyRole = design::TypographyRole::kBody;
+constexpr auto kCreditsRole = design::TypographyRole::kLabelSmall;
+constexpr int kCreditsGap = design::spacing::k16;
 constexpr int kSideInset = design::spacing::k16;
 constexpr int kTopGap = design::spacing::k24;
 constexpr int kHeadingBottomPadding = design::spacing::k24;
@@ -64,10 +66,11 @@ Layout BuildLayout(int portrait_width, int portrait_height, const SettingsAboutP
     layout.body_y = cursor + kVersionBodyGap;
 
     const std::vector<std::string> body_lines =
-        WrapTextToWidth(kBodyRole, std::string(state.acknowledgment_text), page_width);
+        state.personal_note.empty() ? std::vector<std::string>{}
+                                    : WrapTextToWidth(kBodyRole, state.personal_note, page_width);
     const int body_height =
         static_cast<int>(body_lines.size()) * (LineHeight(kBodyRole) + kBodyLineGap);
-    const int body_bottom = layout.body_y + body_height;
+    const int body_bottom = body_lines.empty() ? cursor : layout.body_y + body_height;
 
     ButtonStyle back_style = {};
     back_style.width = page_width;
@@ -161,18 +164,28 @@ void DrawSettingsAboutPage(uint8_t* framebuffer,
                    {.width = layout.update.width, .center_label = true});
     }
 
-    const std::vector<std::string> body_lines =
-        WrapTextToWidth(kBodyRole, std::string(state.acknowledgment_text), layout.page_width);
-    int cursor_y = layout.body_y;
-    const int body_line_height = LineHeight(kBodyRole);
-    for (const std::string& line : body_lines) {
-        DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
-                           kSideInset, cursor_y, line, kBodyRole, design::color::kTextPrimary);
-        cursor_y += body_line_height + kBodyLineGap;
+    if (!state.personal_note.empty()) {
+        int cursor_y = layout.body_y;
+        for (const std::string& line :
+             WrapTextToWidth(kBodyRole, state.personal_note, layout.page_width)) {
+            DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width,
+                               portrait_height, kSideInset, cursor_y, line, kBodyRole,
+                               design::color::kTextPrimary);
+            cursor_y += LineHeight(kBodyRole) + kBodyLineGap;
+        }
     }
 
     DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height, layout.back.x,
               layout.back.y, state.back, {.width = layout.back.width, .center_label = true});
+
+    int credits_y = layout.back.y + layout.back.height + kCreditsGap;
+    for (const std::string& line : WrapTextToWidth(
+             kCreditsRole, std::string(state.acknowledgment_text), layout.page_width)) {
+        DrawTypographyText(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                           kSideInset, credits_y, line, kCreditsRole,
+                           design::color::kTextSecondary);
+        credits_y += LineHeight(kCreditsRole);
+    }
 
     DrawGlobalFooter(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
                      footer_state);
