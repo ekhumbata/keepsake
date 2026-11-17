@@ -80,7 +80,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 |---|---|
 | Rocker up / down | Move the selection (hold to keep moving); in the reader, previous / next page |
 | Rocker press | Select / confirm |
-| Record, tap | Back |
+| Record, tap | Back: out of an open list, otherwise up a level (to Home from most pages) |
 | Record, hold | Record a voice note (stops when you let go) |
 | PWR, tap | Lock / unlock |
 | PWR, hold ~1 s | Shut down (asks first) |
