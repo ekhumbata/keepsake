@@ -26,11 +26,12 @@ struct SettingsAboutPageState {
     // updates", "Restart to update", ...).
     std::string update_status_text;
     ButtonState update = {};
-    std::string_view acknowledgment_text =
-        "Keepsake is built on Chroninkle by mach1na, which began as Followup by ALXV Labs. "
-        "Thank you to both for the design and code it grows from. Free software under the "
-        "GNU GPL v3.";
+    // A personal note from the provisioning file (#149), shown in body text. Empty = none.
+    std::string personal_note;
     ButtonState back = {};
+    // The upstream credits and licence, one small line under Back (#149).
+    std::string_view acknowledgment_text =
+        "Built on Chroninkle (mach1na) and Followup (ALXV Labs). GNU GPL v3.";
 };
 
 UiRect SettingsAboutPageItemBounds(int portrait_width,

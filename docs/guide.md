@@ -101,7 +101,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 1. Copy [`provision.example.json`](../provision.example.json) **somewhere outside the repo** and fill it in: Wi-Fi
    networks, `timezone` (e.g. `Europe/London`), and optionally the friend's name, birthday (`MM-DD`), anniversary and
    first date (`MM-DD` or `YYYY-MM-DD`; with the year it counts them), which `holidays` to celebrate, your own
-   `special_days` (date, title, message), a welcome message, a weather location and a Gemini key. Delete the lines
+   `special_days` (date, title, message), a welcome message, a note for Settings → About (`about_message`), a weather location and a Gemini key. Delete the lines
    you don't need.
 2. Put it on the SD card as `.keepsake/provision.json` (the `.keepsake` folder is hidden on some computers).
 3. Start Keepsake. It imports the file before Wi-Fi starts, shows **All set up!**, then **overwrites and deletes the

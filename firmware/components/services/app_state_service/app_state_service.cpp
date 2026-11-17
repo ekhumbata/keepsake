@@ -14,6 +14,7 @@ constexpr uint8_t kDefaultReaderTextSize = 1;
 constexpr const char* kFriendNameKey = "friend_name";
 constexpr const char* kBirthdayKey = "birthday";
 constexpr const char* kWelcomeKey = "welcome";
+constexpr const char* kAboutKey = "about_note";
 constexpr const char* kWeatherLocationKey = "weather_loc";
 constexpr const char* kNoteShownKey = "note_shown";
 constexpr const char* kAnniversaryKey = "anniversary";
@@ -102,6 +103,7 @@ PersonalSettings Personal()
     settings.friend_name = ReadString(handle, kFriendNameKey);
     settings.birthday = ReadString(handle, kBirthdayKey);
     settings.welcome_message = ReadString(handle, kWelcomeKey);
+    settings.about_message = ReadString(handle, kAboutKey);
     settings.weather_location = ReadString(handle, kWeatherLocationKey);
     settings.anniversary = ReadString(handle, kAnniversaryKey);
     settings.first_date = ReadString(handle, kFirstDateKey);
@@ -130,6 +132,7 @@ bool SavePersonal(const PersonalSettings& settings)
     save(kFriendNameKey, settings.friend_name);
     save(kBirthdayKey, settings.birthday);
     save(kWelcomeKey, settings.welcome_message);
+    save(kAboutKey, settings.about_message);
     save(kWeatherLocationKey, settings.weather_location);
     save(kAnniversaryKey, settings.anniversary);
     save(kFirstDateKey, settings.first_date);

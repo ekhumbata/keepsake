@@ -22,6 +22,7 @@ struct PersonalSettings {
     std::string friend_name;
     std::string birthday;          // "MM-DD"
     std::string welcome_message;
+    std::string about_message;     // the note on Settings -> About (#149)
     std::string weather_location;
     std::string anniversary;   // "MM-DD" or "YYYY-MM-DD"
     std::string first_date;    // "MM-DD" or "YYYY-MM-DD"

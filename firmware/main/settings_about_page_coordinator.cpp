@@ -2,6 +2,7 @@
 
 #include <cstdio>
 
+#include "app_state_service.h"
 #include "esp_app_desc.h"
 #include "ota_service.h"
 
@@ -39,6 +40,7 @@ epaper_ui::SettingsAboutPageState SettingsAboutPageCoordinator::BuildState() con
     std::snprintf(version_buffer, sizeof(version_buffer), "Version %s",
                  esp_app_get_description()->version);
     state.version_text = version_buffer;
+    state.personal_note = app_state_service::Personal().about_message;  // #149, from the card
 
     const firmware_update::Status update = ota_service::GetStatus();
     state.update_status_text = firmware_update::Describe(update);

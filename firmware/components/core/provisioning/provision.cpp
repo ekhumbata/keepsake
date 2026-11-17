@@ -12,6 +12,7 @@ constexpr size_t kMaxTimezoneBytes = 64;
 constexpr size_t kMaxLocationBytes = 64;
 constexpr size_t kMaxNameBytes = 32;
 constexpr size_t kMaxWelcomeBytes = 400;
+constexpr size_t kMaxAboutBytes = 400;
 constexpr size_t kMaxKeyBytes = 128;
 
 std::string Trim(const std::string& text)
@@ -279,7 +280,8 @@ ParseResult ParseProvision(std::string_view json, Provision* out)
     static constexpr const char* kKnown[] = {"anniversary", "first_date", "holidays", "special_days",
                                              "version",      "wifi",          "timezone",
                                              "weather_location", "friend_name", "birthday",
-                                             "welcome_message",  "gemini_key",  "_comment"};
+                                             "welcome_message",  "about_message", "gemini_key",
+                                             "_comment"};
     for (const auto& member : root.object) {
         bool known = false;
         for (const char* name : kKnown) {
@@ -308,6 +310,7 @@ ParseResult ParseProvision(std::string_view json, Provision* out)
     ReadHolidays(root, &check, &parsed);
     ReadSpecialDays(root, &check, &parsed);
     parsed.welcome_message = check.Text(root, "welcome_message", kMaxWelcomeBytes);
+    parsed.about_message = check.Text(root, "about_message", kMaxAboutBytes);
     parsed.gemini_key = ReadGeminiKey(root, &check);
 
     if (result.problems.empty() && parsed.empty()) {
@@ -340,6 +343,7 @@ std::string DescribeForLog(const Provision& provision)
     if (provision.holidays_given) add("holidays");
     if (!provision.special_days.empty()) add(std::to_string(provision.special_days.size()) + " special days");
     if (!provision.welcome_message.empty()) add("welcome message");
+    if (!provision.about_message.empty()) add("about message");
     if (!provision.gemini_key.empty()) add("gemini key");
     return out.empty() ? "nothing" : out;
 }
