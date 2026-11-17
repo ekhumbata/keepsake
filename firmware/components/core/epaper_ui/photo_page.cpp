@@ -47,6 +47,33 @@ void DrawMessage(uint8_t* framebuffer, int raw_width, int raw_height, int portra
 
 }  // namespace
 
+void DrawPhotoCentered(uint8_t* framebuffer,
+                       int raw_width,
+                       int raw_height,
+                       int portrait_width,
+                       int portrait_height,
+                       const cover_image::Thumbnail& photo,
+                       int area_x,
+                       int area_y,
+                       int area_width,
+                       int area_height)
+{
+    const int w = std::min(photo.width, area_width);
+    const int h = std::min(photo.height, area_height);
+    const int x0 = area_x + (area_width - w) / 2;
+    const int y0 = area_y + (area_height - h) / 2;
+    const int sx = (photo.width - w) / 2;  // a bigger photo is cut evenly on both sides
+    const int sy = (photo.height - h) / 2;
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            if (photo.black(sx + x, sy + y)) {
+                DrawPortraitPixel(framebuffer, raw_width, raw_height, portrait_width,
+                                  portrait_height, x0 + x, y0 + y, true);
+            }
+        }
+    }
+}
+
 void DrawPhotoPage(uint8_t* framebuffer,
                    int raw_width,
                    int raw_height,
@@ -68,18 +95,8 @@ void DrawPhotoPage(uint8_t* framebuffer,
 
     // Centred in the area above the caption line.
     const int area_height = portrait_height - kCaptionHeight;
-    const int w = std::min(photo->width, portrait_width);
-    const int h = std::min(photo->height, area_height);
-    const int x0 = (portrait_width - w) / 2;
-    const int y0 = (area_height - h) / 2;
-    for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x) {
-            if (photo->black(x, y)) {
-                DrawPortraitPixel(framebuffer, raw_width, raw_height, portrait_width,
-                                  portrait_height, x0 + x, y0 + y, true);
-            }
-        }
-    }
+    DrawPhotoCentered(framebuffer, raw_width, raw_height, portrait_width, portrait_height, *photo,
+                      0, 0, portrait_width, area_height);
 
     if (!state.show_caption) {
         return;

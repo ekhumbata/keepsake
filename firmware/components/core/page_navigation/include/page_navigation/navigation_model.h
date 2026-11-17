@@ -87,6 +87,7 @@ enum class NavigationItemRole : uint8_t {
     kSettingsStorageFormatSdButton,
     kSettingsStorageBackButton,
     kSettingsTodosArchiveAfterInput,
+    kSettingsTodosLockScreenInput,  // what the lock screen shows (#148)
     kSettingsTodosBackButton,
     kSettingsTopicsTopicRow,
     kSettingsTopicsNewTopicButton,

@@ -27,6 +27,19 @@ struct PhotoPageState {
     bool operator==(const PhotoPageState& other) const = default;
 };
 
+// Draws a prepared photo centred in the area (x, y, width, height), cut to it if bigger. Only
+// sets black pixels: the caller clears the area first. Shared with the lock screen (#148).
+void DrawPhotoCentered(uint8_t* framebuffer,
+                       int raw_width,
+                       int raw_height,
+                       int portrait_width,
+                       int portrait_height,
+                       const cover_image::Thumbnail& photo,
+                       int area_x,
+                       int area_y,
+                       int area_width,
+                       int area_height);
+
 void DrawPhotoPage(uint8_t* framebuffer,
                    int raw_width,
                    int raw_height,

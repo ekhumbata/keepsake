@@ -19,6 +19,15 @@ via `git log`, not backfilled here.
 
 ### Added
 
+- **Lock screen photo** (#148). Settings → Todos → **Lock screen shows**: Todos (as before)
+  or **A photo**: a random photo from `/photos`, full screen, with the status row and the lock
+  icon on top, a different one each lock. The next one is chosen and prepared in the
+  background after each lock so locking stays quick. The shutdown frame uses a photo too, so
+  a switched-off Keepsake shows one. Falls back to the todos with no card or no photos.
+  `DrawPhotoCentered` is now shared by the photo viewer and the lock screen.
+
+### Added
+
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.
   - The rocker flips through the photos (oldest first, wrapping round) with a full
     refresh each. A press hides or shows the caption ("First date, May 20, 2019" and
