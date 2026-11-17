@@ -10,6 +10,8 @@ namespace app_state_service {
 // survives an SD format; a future Settings action can clear it to replay onboarding.
 bool OnboardingViewed();
 void MarkOnboardingViewed();
+// Forget it (#161): the introduction shows again on the next start.
+void ResetOnboardingViewed();
 
 // Reader text size (#28): 0 small, 1 medium (the default), 2 large. Kept on the device rather
 // than the SD card, like the onboarding flag.

@@ -201,6 +201,16 @@ std::map<std::string, Renderer> Screens()
         state.welcome_message.current_date = {"Wednesday", "November 11"};
         DrawDashboardPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
+    // The menu scrolled to its last row (#162): the rows that don't fit above the footer
+    // scroll with the selection, with an arrow for the ones above.
+    screens["home_menu_scrolled"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        DashboardPageState state = {};
+        state.welcome_message.title_text = "Capture that thought!";  // two lines
+        state.welcome_message.current_date = {"Wednesday", "November 11"};
+        state.menu.selected_index = static_cast<int>(DashboardMenuItem::kTopics);
+        state.menu.shows_notes_badge = true;
+        DrawDashboardPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
     // Weather under the greeting (#37), as weather::Summary words it, through the display filter.
     screens["home_weather"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         DashboardPageState state = {};

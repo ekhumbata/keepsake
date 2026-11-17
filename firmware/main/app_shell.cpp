@@ -2604,7 +2604,9 @@ void Run()
         ESP_LOGW(kTag, "Initial footer update failed: %s", esp_err_to_name(footer_err));
     }
     // First-run users see the onboarding carousel; returning users go straight to the dashboard.
-    const bool show_onboarding = !app_state_service::OnboardingViewed();
+    // A setup file with "show_intro" (#161) saves the introduction for the next start.
+    const bool show_onboarding = !app_state_service::OnboardingViewed() &&
+                                 !s_provisioning_outcome.intro_on_next_start;
     const esp_err_t initial_err =
         show_onboarding ? ShowOnboardingScreen(display_service::RefreshMode::kFull)
                         : ShowHomeScreen(display_service::RefreshMode::kFull);

@@ -188,6 +188,12 @@ bool Apply(const provisioning::Provision& provision)
     } else if (!provision.welcome_message.empty()) {
         app_state_service::MarkWelcomeNoteShown(false);  // a new note: show it once (#85)
     }
+    if (provision.show_intro) {
+        // Set up now, given later (#161): the introduction and welcome note wait for the next
+        // start, as if it were new.
+        app_state_service::ResetOnboardingViewed();
+        app_state_service::MarkWelcomeNoteShown(false);
+    }
     return ok;
 }
 
@@ -232,6 +238,7 @@ Outcome ImportFromSdCard()
 
     ESP_LOGI(kTag, "Importing: %s", provisioning::DescribeForLog(provision).c_str());
     const bool applied = Apply(provision);
+    outcome.intro_on_next_start = applied && provision.show_intro;
     const bool wiped = WipeAndDelete(path, text.size());
     (void)unlink(problems_path.c_str());  // an old one, from an earlier attempt
     if (!applied || !wiped) {
