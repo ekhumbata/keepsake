@@ -109,6 +109,9 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
    file** so no passwords stay on the card.
 4. If something in it is wrong, nothing is imported: Keepsake shows **The setup file has a problem** and writes
    `.keepsake/provision-problems.txt` next to it, listing each problem. Fix the file and restart.
+- **Giving it as a gift:** add `"show_intro": true`. The start that imports the file goes straight to Home,
+  so you can check everything; switch it off, and the next time it's switched on it shows the introduction and
+  welcome note as if it were new (#161). Switching off during the introduction keeps it for next time.
 - Never commit a filled-in copy (`provision.json` is in `.gitignore`).
 
 ### Add books over USB

@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy this file OUTSIDE the repo, fill it in, and put it on the SD card as /.keepsake/provision.json. Keepsake imports it on the next start, then wipes and deletes it. Every setting is optional; delete the lines you don't need. Dates are \"MM-DD\" or \"YYYY-MM-DD\" (with the year, anniversaries count: \"Happy 5th anniversary!\"). Never commit the filled-in copy.",
+  "_comment": "Copy this file OUTSIDE the repo, fill it in, and put it on the SD card as /.keepsake/provision.json. Keepsake imports it on the next start, then wipes and deletes it. Every setting is optional; delete the lines you don't need. Dates are \"MM-DD\" or \"YYYY-MM-DD\" (with the year, anniversaries count: \"Happy 5th anniversary!\"). show_intro: true makes the introduction and welcome note wait for the next time it's switched on, so you can set it up and test it, switch it off, and give it as new. Never commit the filled-in copy.",
   "version": 1,
   "wifi": [
     { "ssid": "Friends-Home-WiFi", "password": "home network password" },
@@ -17,5 +17,6 @@
   ],
   "welcome_message": "Happy birthday! I made you a little reading companion.",
   "about_message": "A short note that Settings -> About shows.",
+  "show_intro": true,
   "gemini_key": ""
 }

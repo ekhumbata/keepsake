@@ -44,6 +44,9 @@ struct Provision {
     std::vector<SpecialDay> special_days;  // at most 12
     std::string welcome_message;     // shown once on the welcome card (#86)
     std::string about_message;       // a personal note on Settings -> About (#149)
+    // For gifting (#161): show the first-run introduction and welcome note the next time it's
+    // switched on (not on the start that imports the file).
+    bool show_intro = false;
     std::string gemini_key;          // optional (#49)
 
     bool operator==(const Provision& other) const = default;
