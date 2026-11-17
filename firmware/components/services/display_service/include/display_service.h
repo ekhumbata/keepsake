@@ -14,6 +14,7 @@
 #include "epaper_ui/settings_about_page.h"
 #include "epaper_ui/settings_storage_page.h"
 #include "epaper_ui/settings_todos_page.h"
+#include "epaper_ui/settings_display_page.h"
 #include "epaper_ui/settings_topics_page.h"
 #include "epaper_ui/topics_browse_page.h"
 #include "epaper_ui/topic_entries_page.h"
@@ -42,6 +43,7 @@ enum class ScreenId {
     kTime,
     kSettingsStorage,
     kSettingsTodos,
+    kSettingsDisplay,
     kSettingsTopics,
     kSettingsAbout,
     kTopicsBrowse,
@@ -116,6 +118,7 @@ esp_err_t SetGlobalFooterState(const epaper_ui::GlobalFooterState& state);
 esp_err_t SetSettingsPageState(const epaper_ui::SettingsPageState& state);
 esp_err_t SetSettingsStoragePageState(const epaper_ui::SettingsStoragePageState& state);
 esp_err_t SetSettingsTodosPageState(const epaper_ui::SettingsTodosPageState& state);
+esp_err_t SetSettingsDisplayPageState(const epaper_ui::SettingsDisplayPageState& state);
 esp_err_t SetSettingsTopicsPageState(const epaper_ui::SettingsTopicsPageState& state);
 esp_err_t SetSettingsAboutPageState(const epaper_ui::SettingsAboutPageState& state);
 esp_err_t SetWifiPageState(const epaper_ui::WifiPageState& state);

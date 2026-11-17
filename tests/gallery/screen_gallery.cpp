@@ -43,6 +43,7 @@
 #include "epaper_ui/settings_about_page.h"
 #include "epaper_ui/settings_page.h"
 #include "epaper_ui/settings_storage_page.h"
+#include "epaper_ui/settings_display_page.h"
 #include "epaper_ui/settings_todos_page.h"
 #include "epaper_ui/settings_topics_page.h"
 #include "epaper_ui/sticky_note.h"
@@ -392,6 +393,7 @@ std::map<std::string, Renderer> Screens()
         state.update_status_text = "You're up to date.";
         state.update = {.label_text = "Check for updates"};
         state.personal_note = "For Sam: may every rainy afternoon come with a good book. Love, me.";
+        state.introduction = {.label_text = "Replay the introduction"};
         state.back = {.label_text = "Back", .selected = true};
         DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
@@ -402,6 +404,15 @@ std::map<std::string, Renderer> Screens()
         state.update = {.label_text = "Restart to update", .selected = true};
         state.back = {.label_text = "Back"};
         DrawSettingsAboutPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
+    });
+    // Display & sound (#164): the lock screen and button sounds pickers.
+    screens["settings_display"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
+        SettingsDisplayPageState state = {};
+        state.lock_screen_input = {.label_text = "Lock screen shows", .value_text = "A photo",
+                                   .focused = true};
+        state.button_sounds_input = {.label_text = "Button sounds", .value_text = "Off"};
+        state.back = {.label_text = "Back"};
+        DrawSettingsDisplayPage(fb, rw, rh, pw, ph, state, StatusBar(), Footer());
     });
     screens["settings_todos"] = page([](uint8_t* fb, int rw, int rh, int pw, int ph) {
         SettingsTodosPageState state = {};

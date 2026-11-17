@@ -12,6 +12,7 @@ constexpr const char* kOnboardingKey = "onboarded";
 constexpr const char* kReaderTextSizeKey = "text_size";
 constexpr uint8_t kDefaultReaderTextSize = 1;
 constexpr const char* kLockScreenPhotoKey = "lock_photo";
+constexpr const char* kButtonSoundsKey = "btn_sounds";
 constexpr const char* kFriendNameKey = "friend_name";
 constexpr const char* kBirthdayKey = "birthday";
 constexpr const char* kWelcomeKey = "welcome";
@@ -129,6 +130,33 @@ void SetLockScreenShowsPhoto(bool photo)
         return;
     }
     if (nvs_set_u8(handle, kLockScreenPhotoKey, photo ? 1 : 0) == ESP_OK) {
+        (void)nvs_commit(handle);
+    }
+    nvs_close(handle);
+}
+
+bool ButtonSoundsEnabled()
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READONLY, &handle) != ESP_OK) {
+        return true;
+    }
+    uint8_t value = 1;
+    if (nvs_get_u8(handle, kButtonSoundsKey, &value) != ESP_OK) {
+        value = 1;
+    }
+    nvs_close(handle);
+    return value != 0;
+}
+
+void SetButtonSoundsEnabled(bool enabled)
+{
+    nvs_handle_t handle = 0;
+    if (nvs_open(kNvsNamespace, NVS_READWRITE, &handle) != ESP_OK) {
+        ESP_LOGW(kTag, "Button sounds setting: nvs_open failed");
+        return;
+    }
+    if (nvs_set_u8(handle, kButtonSoundsKey, enabled ? 1 : 0) == ESP_OK) {
         (void)nvs_commit(handle);
     }
     nvs_close(handle);

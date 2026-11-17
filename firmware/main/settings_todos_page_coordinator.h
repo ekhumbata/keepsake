@@ -14,8 +14,7 @@ public:
     bool SetFocusIndex(int index);
     bool IsRoleFocused(page_navigation::NavigationItemRole role) const;
 
-    epaper_ui::SettingsTodosPageState BuildState(int archive_after_days,
-                                                 bool lock_screen_photo) const;
+    epaper_ui::SettingsTodosPageState BuildState(int archive_after_days) const;
 
     const page_navigation::NavigationModel& navigation_model() const { return navigation_model_; }
     const page_navigation::RovingFocus& focus() const { return focus_; }

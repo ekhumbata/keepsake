@@ -29,6 +29,7 @@ struct Layout {
     int update_text_y = 0;
     UiRect update = {};
     int body_y = 0;
+    UiRect introduction = {};
     UiRect back = {};
 };
 
@@ -75,7 +76,12 @@ Layout BuildLayout(int portrait_width, int portrait_height, const SettingsAboutP
     ButtonStyle back_style = {};
     back_style.width = page_width;
     back_style.center_label = true;
-    layout.back = ButtonBounds(page_x, body_bottom + kBackButtonGap, state.back, back_style);
+    int buttons_y = body_bottom + kBackButtonGap;
+    if (!state.introduction.label_text.empty()) {
+        layout.introduction = ButtonBounds(page_x, buttons_y, state.introduction, back_style);
+        buttons_y = layout.introduction.y + layout.introduction.height + kUpdateGap;
+    }
+    layout.back = ButtonBounds(page_x, buttons_y, state.back, back_style);
 
     return layout;
 }
@@ -91,6 +97,8 @@ UiRect SettingsAboutPageItemBounds(int portrait_width,
     switch (item) {
         case SettingsAboutPageItemId::kUpdate:
             return layout.update;
+        case SettingsAboutPageItemId::kIntroduction:
+            return layout.introduction;
         case SettingsAboutPageItemId::kBack:
             return layout.back;
         case SettingsAboutPageItemId::kNone:
@@ -111,7 +119,8 @@ bool HitTestSettingsAboutPageItem(int portrait_width,
     }
 
     for (const SettingsAboutPageItemId candidate :
-         {SettingsAboutPageItemId::kUpdate, SettingsAboutPageItemId::kBack}) {
+         {SettingsAboutPageItemId::kUpdate, SettingsAboutPageItemId::kIntroduction,
+          SettingsAboutPageItemId::kBack}) {
         const UiRect bounds =
             SettingsAboutPageItemBounds(portrait_width, portrait_height, state, candidate);
         if (!bounds.IsEmpty() && bounds.Contains(x, y)) {
@@ -175,6 +184,11 @@ void DrawSettingsAboutPage(uint8_t* framebuffer,
         }
     }
 
+    if (!state.introduction.label_text.empty()) {
+        DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                   layout.introduction.x, layout.introduction.y, state.introduction,
+                   {.width = layout.introduction.width, .center_label = true});
+    }
     DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height, layout.back.x,
               layout.back.y, state.back, {.width = layout.back.width, .center_label = true});
 

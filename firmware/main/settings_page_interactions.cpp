@@ -19,6 +19,8 @@ ActivateResult HandlePrimaryActivate(const SettingsPageCoordinator& coordinator)
         result.intent = ActivateIntent::kShowSavedWifi;
     } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuTime)) {
         result.intent = ActivateIntent::kShowTime;
+    } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuDisplay)) {
+        result.intent = ActivateIntent::kShowDisplay;
     } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuStorage)) {
         result.intent = ActivateIntent::kShowStorage;
     } else if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsMenuTodos)) {
@@ -64,6 +66,11 @@ void ApplyPrimaryActivateResult(const ActivateResult& result, const ActivateCall
         case ActivateIntent::kShowStorage:
             if (callbacks.show_storage) {
                 callbacks.show_storage();
+            }
+            break;
+        case ActivateIntent::kShowDisplay:
+            if (callbacks.show_display) {
+                callbacks.show_display();
             }
             break;
         case ActivateIntent::kShowTodos:

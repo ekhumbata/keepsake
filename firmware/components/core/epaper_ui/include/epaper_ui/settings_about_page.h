@@ -14,6 +14,7 @@ namespace epaper_ui {
 enum class SettingsAboutPageItemId : uint8_t {
     kNone = 0,
     kUpdate,
+    kIntroduction,  // replay the first-run introduction (#164)
     kBack,
 };
 
@@ -28,6 +29,8 @@ struct SettingsAboutPageState {
     ButtonState update = {};
     // A personal note from the provisioning file (#149), shown in body text. Empty = none.
     std::string personal_note;
+    // Replays the first-run introduction (#164; it was the hub's Manual button).
+    ButtonState introduction = {};
     ButtonState back = {};
     // The upstream credits and licence, one small line under Back (#149).
     std::string_view acknowledgment_text =

@@ -30,6 +30,7 @@ enum class SurfaceKey {
     kBookListPage,
     kBookReaderPage,
     kPhotoPage,
+    kSettingsDisplayPage,  // Display & sound (#164)
 };
 
 using ApplyCallback = esp_err_t (*)();

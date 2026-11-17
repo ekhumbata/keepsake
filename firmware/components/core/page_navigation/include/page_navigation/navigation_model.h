@@ -22,6 +22,7 @@ enum class NavigationScope : uint8_t {
     kOnboarding,
     kSettingsStorage,
     kSettingsTodos,
+    kSettingsDisplay,  // Display & sound (#164)
     kSettingsTopics,
     kSettingsAbout,
     kBookList,
@@ -46,6 +47,7 @@ enum class NavigationItemSection : uint8_t {
     kOnboardingPageControls,
     kSettingsStoragePageControls,
     kSettingsTodosPageControls,
+    kSettingsDisplayPageControls,
     kSettingsTopicsPageControls,
     kSettingsAboutPageControls,
     kBookListPageControls,
@@ -61,6 +63,7 @@ enum class NavigationItemRole : uint8_t {
     kSettingsMenuNetwork,
     kSettingsMenuSavedWifi,
     kSettingsMenuTime,
+    kSettingsMenuDisplay,  // Display & sound (#164)
     kSettingsMenuStorage,
     kSettingsMenuTodos,
     kSettingsMenuTopics,
@@ -87,12 +90,15 @@ enum class NavigationItemRole : uint8_t {
     kSettingsStorageFormatSdButton,
     kSettingsStorageBackButton,
     kSettingsTodosArchiveAfterInput,
-    kSettingsTodosLockScreenInput,  // what the lock screen shows (#148)
     kSettingsTodosBackButton,
+    kSettingsDisplayLockScreenInput,    // what the lock screen shows (#148)
+    kSettingsDisplayButtonSoundsInput,  // button clicks on/off (#163)
+    kSettingsDisplayBackButton,
     kSettingsTopicsTopicRow,
     kSettingsTopicsNewTopicButton,
     kSettingsTopicsBackButton,
     kSettingsAboutUpdateButton,
+    kSettingsAboutIntroButton,  // replay the introduction (#164)
     kSettingsAboutBackButton,
     kDashboardMenuItem,
     kTopicsBrowseTopicRow,
@@ -137,6 +143,7 @@ NavigationModel BuildWifiPageNavigationModel();
 NavigationModel BuildTimePageNavigationModel();
 NavigationModel BuildSettingsStoragePageNavigationModel();
 NavigationModel BuildSettingsTodosPageNavigationModel();
+NavigationModel BuildSettingsDisplayPageNavigationModel();
 NavigationModel BuildSettingsTopicsPageNavigationModel(int topic_count);
 NavigationModel BuildSettingsAboutPageNavigationModel();
 NavigationModel BuildDashboardPageNavigationModel();

@@ -23,6 +23,10 @@ void SetReaderTextSize(uint8_t size);
 bool LockScreenShowsPhoto();
 void SetLockScreenShowsPhoto(bool photo);
 
+// Button sounds (#163): the clicks on menu presses. On by default.
+bool ButtonSoundsEnabled();
+void SetButtonSoundsEnabled(bool enabled);
+
 // Personal touches (#42, #85, #86), from the provisioning file. On the device only (NVS), never
 // in the repo. Empty when not set.
 struct PersonalSettings {

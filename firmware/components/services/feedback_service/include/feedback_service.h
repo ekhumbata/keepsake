@@ -21,6 +21,8 @@ enum class FeedbackEvent {
 
 esp_err_t Init();
 esp_err_t Play(FeedbackEvent event);
+// Button sounds (#163): when off, menu clicks and the picker cue are silent; other sounds play.
+void SetButtonSoundsEnabled(bool enabled);
 
 }  // namespace feedback_service
 

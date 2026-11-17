@@ -69,9 +69,8 @@ NavigationModel BuildSettingsPageNavigationModel()
     NavigationModel model = {};
     model.scope = NavigationScope::kSettings;
 
-    // Settings is a hub: 5 headings that navigate to a dedicated sub-page, plus Manual (replay
-    // onboarding) as a direct action rather than a heading -- it's a one-shot action, not
-    // something to configure.
+    // Settings is a hub: 8 headings, each opening a sub-page. Replaying the introduction (it
+    // used to be a Manual button here) is on About (#164).
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
             NavigationItemRole::kSettingsMenuNetwork, 0);
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
@@ -79,17 +78,15 @@ NavigationModel BuildSettingsPageNavigationModel()
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
             NavigationItemRole::kSettingsMenuTime, 2);
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
-            NavigationItemRole::kSettingsMenuStorage, 3);
+            NavigationItemRole::kSettingsMenuDisplay, 3);
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
-            NavigationItemRole::kSettingsMenuTodos, 4);
+            NavigationItemRole::kSettingsMenuStorage, 4);
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
-            NavigationItemRole::kSettingsMenuTopics, 5);
+            NavigationItemRole::kSettingsMenuTodos, 5);
     AddItem(model, NavigationItemSection::kSettingsPageMenu,
-            NavigationItemRole::kSettingsMenuAbout, 6);
-    AddItem(model,
-            NavigationItemSection::kSettingsPageMenu,
-            NavigationItemRole::kSettingsManualOnboardingButton,
-            7);
+            NavigationItemRole::kSettingsMenuTopics, 6);
+    AddItem(model, NavigationItemSection::kSettingsPageMenu,
+            NavigationItemRole::kSettingsMenuAbout, 7);
     AddFooterItems(model, /*is_home_screen=*/false);
     return model;
 }
@@ -185,7 +182,9 @@ NavigationModel BuildSettingsAboutPageNavigationModel()
     AddItem(model, NavigationItemSection::kSettingsAboutPageControls,
             NavigationItemRole::kSettingsAboutUpdateButton, 0);
     AddItem(model, NavigationItemSection::kSettingsAboutPageControls,
-            NavigationItemRole::kSettingsAboutBackButton, 1);
+            NavigationItemRole::kSettingsAboutIntroButton, 1);
+    AddItem(model, NavigationItemSection::kSettingsAboutPageControls,
+            NavigationItemRole::kSettingsAboutBackButton, 2);
     AddFooterItems(model, /*is_home_screen=*/false);
     return model;
 }
@@ -198,9 +197,22 @@ NavigationModel BuildSettingsTodosPageNavigationModel()
     AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
             NavigationItemRole::kSettingsTodosArchiveAfterInput, 0);
     AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
-            NavigationItemRole::kSettingsTodosLockScreenInput, 1);
-    AddItem(model, NavigationItemSection::kSettingsTodosPageControls,
-            NavigationItemRole::kSettingsTodosBackButton, 2);
+            NavigationItemRole::kSettingsTodosBackButton, 1);
+    AddFooterItems(model, /*is_home_screen=*/false);
+    return model;
+}
+
+NavigationModel BuildSettingsDisplayPageNavigationModel()
+{
+    NavigationModel model = {};
+    model.scope = NavigationScope::kSettingsDisplay;
+
+    AddItem(model, NavigationItemSection::kSettingsDisplayPageControls,
+            NavigationItemRole::kSettingsDisplayLockScreenInput, 0);
+    AddItem(model, NavigationItemSection::kSettingsDisplayPageControls,
+            NavigationItemRole::kSettingsDisplayButtonSoundsInput, 1);
+    AddItem(model, NavigationItemSection::kSettingsDisplayPageControls,
+            NavigationItemRole::kSettingsDisplayBackButton, 2);
     AddFooterItems(model, /*is_home_screen=*/false);
     return model;
 }

@@ -16,6 +16,7 @@ enum class ActivateIntent : uint8_t {
     kShowSavedWifi,  // the saved networks list (#43)
     kShowTime,
     kShowStorage,
+    kShowDisplay,  // Display & sound (#164)
     kShowTodos,
     kShowTopics,
     kShowAbout,
@@ -36,6 +37,7 @@ struct ActivateCallbacks {
     std::function<void()> show_saved_wifi;
     std::function<void()> show_time;
     std::function<void()> show_storage;
+    std::function<void()> show_display;
     std::function<void()> show_todos;
     std::function<void()> show_topics;
     std::function<void()> show_about;
