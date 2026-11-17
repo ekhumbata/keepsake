@@ -172,17 +172,33 @@ Loaded Prepare(const Item& item)
     }
 
     cover_image::Thumbnail bitmap;
-    if (loaded.format == "JPEG" && item.size > kStbMaxBytes) {
+    // The full-size decoder holds the whole image in memory, so it only gets JPEGs that fit
+    // its pixel cap. Choose by pixels, not file size: a phone's 12 MP photo is often under
+    // 2 MB (#143). A frame header the 64 KB head doesn't reach (huge EXIF) counts as big.
+    int jpeg_width = 0;
+    int jpeg_height = 0;
+    const bool size_known =
+        loaded.format == "JPEG" && photo::JpegSize(head, &jpeg_width, &jpeg_height);
+    const bool big_jpeg =
+        loaded.format == "JPEG" &&
+        (item.size > kStbMaxBytes || !size_known ||
+         static_cast<uint64_t>(jpeg_width) * static_cast<uint64_t>(jpeg_height) >
+             cover_image::Limits{}.max_source_pixels);
+    bool scaled = false;
+    if (big_jpeg) {
         photo::Gray gray;
-        const bool decoded = DecodeJpegScaled(file, &gray);
-        std::fclose(file);
-        if (!decoded) {
+        if (DecodeJpegScaled(file, &gray)) {
+            bitmap = photo::Prepare(gray, photo::ReadExif(head).orientation);
+            scaled = true;
+        } else if (item.size > kStbMaxBytes) {
+            std::fclose(file);
             loaded.result = photo::Result::kTooBig;  // e.g. a huge progressive JPEG
             return loaded;
         }
-        bitmap = photo::Prepare(gray, photo::ReadExif(head).orientation);
-    } else {
-        std::fclose(file);
+        // Otherwise (e.g. a small progressive JPEG) the full-size decoder below may manage.
+    }
+    std::fclose(file);
+    if (!scaled) {
         std::string encoded;
         if (!ReadFile(full, kStbMaxBytes, &encoded)) {
             loaded.result = photo::Result::kUndecodable;

@@ -32,6 +32,11 @@ struct Exif {
 // malformed is just left at its default; never reads outside `jpeg`.
 Exif ReadExif(std::string_view jpeg);
 
+// The pixel size from a JPEG's frame header (SOF), walking the segments from the start; false
+// when `jpeg` ends before the frame header (a head that stops inside a big APP block) or isn't
+// a JPEG. Never reads outside `jpeg`.
+bool JpegSize(std::string_view jpeg, int* width, int* height);
+
 // --- images -----------------------------------------------------------------------------------
 
 struct Gray {

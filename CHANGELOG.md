@@ -8,6 +8,13 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Full-size phone photos open** (#143). The viewer chose its JPEG decoder by file size, so a
+  12 MP phone photo of 1.5 MB went to the full-size decoder (4 MP cap) and showed "It's too
+  big". It now reads the pixel size from the JPEG's frame header (`photo::JpegSize`, unit
+  tested and fuzzed) and sends anything over the cap to the scaled ROM decoder.
+
 ### Changed
 
 - **Back always goes somewhere.** A quick Record (BOOT) tap still backs out of an open list
