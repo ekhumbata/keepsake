@@ -8,6 +8,12 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **No footer while reading** (#147). The reader hides the Home and mic icons (focus never
+  reached Home, and Record tap / the menu already go back) and the text uses the space: the
+  page indicator sits at the bottom edge. Holding Record still records.
+
 ### Added
 
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.

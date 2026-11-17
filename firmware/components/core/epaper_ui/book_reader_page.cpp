@@ -20,18 +20,13 @@ constexpr int kSideInset = design::spacing::k16;
 constexpr int kTopGap = design::spacing::k24;
 constexpr int kTitleContentGap = design::spacing::k16;
 constexpr int kContentIndicatorGap = design::spacing::k8;
-constexpr int kIndicatorFooterGap = design::spacing::k16;
+// The reader has no footer (#147): the page indicator sits this far above the bottom edge.
+constexpr int kIndicatorBottomGap = design::global_footer::kBottomPadding;
 // Bookmark ribbon (#28): hangs from under the status bar at the right edge, with a notch.
 constexpr int kRibbonWidth = 18;
 constexpr int kRibbonHeight = 34;
 constexpr int kRibbonNotch = 8;
 constexpr int kRibbonTitleGap = design::spacing::k8;
-
-int FooterTop(int portrait_height)
-{
-    return portrait_height - design::global_footer::kBottomPadding -
-           design::global_footer::kButtonSize;
-}
 
 struct Layout {
     UiRect title = {};
@@ -49,9 +44,8 @@ Layout BuildLayout(int portrait_width, int portrait_height)
     layout.title = {page_x, title_y, page_width, LineHeight(kTitleRole)};
 
     const int content_top = layout.title.bottom() + kTitleContentGap;
-    const int footer_top = FooterTop(portrait_height);
     const int indicator_height = LineHeight(kPageIndicatorRole);
-    const int indicator_y = footer_top - kIndicatorFooterGap - indicator_height;
+    const int indicator_y = portrait_height - kIndicatorBottomGap - indicator_height;
     const int content_height = std::max(0, indicator_y - kContentIndicatorGap - content_top);
     layout.content = {page_x, content_top, page_width, content_height};
     layout.page_indicator = {page_x, indicator_y, page_width, indicator_height};
@@ -295,8 +289,7 @@ void DrawBookReaderPage(uint8_t* framebuffer,
                        layout.page_indicator.x, layout.page_indicator.y, page_label,
                        kPageIndicatorRole, design::color::kBlack);
 
-    DrawGlobalFooter(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
-                     footer_state);
+    (void)footer_state;  // the reader has no footer (#147); the text uses that space
 }
 
 }  // namespace epaper_ui
