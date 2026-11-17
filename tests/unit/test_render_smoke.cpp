@@ -116,10 +116,9 @@ TEST_CASE("the book list page draws with an empty and a full shelf")
     }
 }
 
-TEST_CASE("the lock screen draws, including its shutdown variant")
+TEST_CASE("the lock screen draws")
 {
-    for (bool for_shutdown : {false, true}) {
-        CAPTURE(for_shutdown);
+    {
         Canvas canvas;
         epaper_ui::LockScreenState state = {};
         state.weekday_text = "Wednesday";
@@ -131,7 +130,6 @@ TEST_CASE("the lock screen draws, including its shutdown variant")
             "Return the library book",
         };
         state.pending_todo_count = 7;
-        state.for_shutdown = for_shutdown;
         epaper_ui::DrawLockScreen(canvas.framebuffer(), kRawWidth, kRawHeight, kPortraitWidth,
                                   kPortraitHeight, state, MakeStatusBar());
         CHECK(canvas.GuardsIntact());

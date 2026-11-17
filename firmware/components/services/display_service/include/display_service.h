@@ -165,6 +165,9 @@ esp_err_t WakeDisplay();
 // guarantee between "queue a screen change" and "wake and refresh now" -- a losing race
 // draws the pre-sleep screen first and the intended one a moment later as a second,
 // redundant full refresh. This does both atomically under the same lock.
+// Shutdown (#168): a full refresh to white, synchronously, so a switched-off Keepsake shows a
+// blank screen (and the unpowered panel has nothing to ghost). Nothing is drawn after it.
+esp_err_t ClearForShutdown();
 esp_err_t WakeDisplayToScreen(ScreenId screen);
 esp_err_t RecoverAfterLightSleep();
 bool IsRefreshInProgress();

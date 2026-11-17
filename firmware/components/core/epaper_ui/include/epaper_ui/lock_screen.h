@@ -19,13 +19,8 @@ struct LockScreenState {
     std::vector<std::string> pending_todo_titles = {};
     // True total count of pending todos, which may be larger than pending_todo_titles.size().
     int pending_todo_count = 0;
-    // True only for the one-shot freeze frame painted immediately before a full
-    // power-off (see lock_screen_runtime::ShowForShutdown): swaps the bottom lock
-    // icon for a power icon at the same size/position, so the frozen screen reads
-    // as "powered down" rather than "locked."
-    bool for_shutdown = false;
     // Set when the lock screen shows a photo (#148): the prepared 1-bit photo, full screen,
-    // with the status row and the lock (or power) icon drawn outlined on top. Null = todos.
+    // with the status row and the lock icon on top. Null = todos.
     std::shared_ptr<const cover_image::Thumbnail> photo = {};
 };
 

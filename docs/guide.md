@@ -19,7 +19,7 @@ update) · 💤 later
 | Reader with a book font | 🚧 [#28](https://github.com/ekhumbata/keepsake/issues/28) | Literata at three text sizes, chapter + % footer and a menu with Contents, bookmarks and Go to %, and hold-to-skip-chapter are in |
 | Library with covers | 🚧 [#27](https://github.com/ekhumbata/keepsake/issues/27) | Titles, progress and "reading now" first are in, subfolders too, with a Continue reading card showing the cover; covers on every book still to come |
 | Friendly file messages | 🚧 [#29](https://github.com/ekhumbata/keepsake/issues/29) | A kind message for DRM-locked, PDF and damaged files, never a crash (shown as text in the reader today; the mascot card comes with the redesign) |
-| Add books over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
+| Add books and photos over USB | ✅ / 📋 [#30](https://github.com/ekhumbata/keepsake/issues/30) | USB drive mode works today from Settings → Storage; the plug-in prompt and "3 new books" toast are planned |
 | Add books from a phone | 📋 [#32](https://github.com/ekhumbata/keepsake/issues/32) | Open "Add books", go to `keepsake.local` on the phone, upload or search |
 | Free books (Project Gutenberg) | 📋 [#31](https://github.com/ekhumbata/keepsake/issues/31), [#33](https://github.com/ekhumbata/keepsake/issues/33) | Search and download public-domain books, from the phone or on the device |
 | MOBI / AZW3 (DRM-free) | 📋 stretch [#34](https://github.com/ekhumbata/keepsake/issues/34) | Kindle-format files that aren't DRM-locked |
@@ -32,7 +32,7 @@ update) · 💤 later
 | Feature | Status | What it is |
 |---|---|---|
 | Lock screen with todos | ✅ | Date + your top pending todos while locked |
-| Lock screen photo | 🚧 [#148](https://github.com/ekhumbata/keepsake/issues/148) | Settings → Display & sound → Lock screen shows: **A photo** shows a random photo from `photos` each time it locks (and when switched off); falls back to the todos (to be checked on the device) |
+| Lock screen photo | 🚧 [#148](https://github.com/ekhumbata/keepsake/issues/148) | Settings → Display & sound → Lock screen shows: **A photo** shows a random photo from `photos` each time it locks; falls back to the todos (to be checked on the device) |
 | Photos | 🚧 [#136](https://github.com/ekhumbata/keepsake/issues/136) | Photos of the two of you, preloaded on the SD card (see "Preload photos") and added later by dropping them into `photos` over USB (unedited phone photos work too, #143). A Photos row on Home opens them full screen: the rocker flips through, oldest first; a press hides or shows the caption from the file name (to be checked on the device) |
 | Books-first Home screen | 📋 [#23](https://github.com/ekhumbata/keepsake/issues/23) | Continue reading, Library, Add books, Reminders, Settings; notes fold into one entry |
 | Weather | 🚧 [#37](https://github.com/ekhumbata/keepsake/issues/37) | From Open-Meteo (no key), hourly, for the provisioning file's `weather_location` (a town, or "lat, lon"). Shows under Home's greeting ("8C, light rain"); offline it says "updated 2 h ago" and hides after 6 h (to be checked on the device) |
@@ -115,11 +115,15 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
   welcome note as if it were new (#161). Switching off during the introduction keeps it for next time.
 - Never commit a filled-in copy (`provision.json` is in `.gitignore`).
 
-### Add books over USB
-1. Plug Keepsake into a computer with a USB-C data cable.
+### Add books and photos over USB
+1. Plug Keepsake into a computer with a USB-C data cable (a charge-only cable shows no drive).
 2. On Keepsake: **Settings → Storage → Enable OTG**. The SD card appears on the computer as a drive.
-3. Copy `.epub` or `.txt` books into the `books` folder.
+3. Copy `.epub` or `.txt` books into `books`, and `.jpg` / `.png` photos into `photos`.
 4. **Eject the drive on the computer first**, then on Keepsake choose **Disable OTG mode**.
+5. Open Books or Photos: the new files are there. (Checked on the board, 2026-11-17.)
+
+The user manual has the same steps for the person using it:
+[Copying books and photos from a computer](user-manual.md#copying-books-and-photos-from-a-computer).
 
 ### Add books from a phone
 📋 Planned ([#32](https://github.com/ekhumbata/keepsake/issues/32)): open **Add books** on Keepsake, scan the QR code
@@ -153,7 +157,7 @@ There's no touchscreen: a rocker on the side, the **Record** button and the **PW
 ### Charge and power off
 - Charge with USB-C: a Charging card with Mochi appears, and the status bar shows the battery and a charging mark.
 - Keepsake nudges at 20%, 10% and 5% battery, once each.
-- Hold PWR ~1 s → **Shut down**. On USB power it stays on until unplugged.
+- Hold PWR ~1 s → **Shut down**: the screen clears to white, then it powers off (#168). On USB power it stays on until unplugged.
 
 ### Fix common problems
 | Problem | Try this |

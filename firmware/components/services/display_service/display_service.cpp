@@ -2185,6 +2185,26 @@ esp_err_t WakeDisplayToScreen(ScreenId screen)
     return ESP_OK;
 }
 
+esp_err_t ClearForShutdown()
+{
+    if (!s_initialized) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    std::lock_guard<std::mutex> lock(s_panel_mutex);
+    EpaperPanel& panel = Panel();
+    panel.Clear(true);
+    RefreshBusyGuard refresh_busy;
+    const esp_err_t err = RefreshForMode(panel, RefreshMode::kFull);
+    if (err != ESP_OK) {
+        ESP_LOGW(kTag, "Clearing the screen before shutdown failed: %s", esp_err_to_name(err));
+        return err;
+    }
+    s_display_sleeping = false;
+    ESP_LOGI(kTag, "Screen cleared for shutdown");
+    return ESP_OK;
+}
+
 esp_err_t RecoverAfterLightSleep()
 {
     if (!s_initialized) {

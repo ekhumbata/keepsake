@@ -8,6 +8,14 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Changed
+
+- **Switched off means a blank screen** (#168). Shutting down now clears the e-paper to white
+  with a full refresh before the power goes (`display_service::ClearForShutdown`), instead of
+  freezing the lock screen (or, with the photo lock screen, a photo) on the panel. A white
+  screen is also what an unpowered e-paper should be stored with. The lock screen's
+  shutdown-frame variant is gone.
+
 ### Added
 
 - **Settings → Display & sound** (#164), with **Lock screen shows** (moved from Settings →

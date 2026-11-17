@@ -355,18 +355,15 @@ int DrawTodoRow(uint8_t* framebuffer,
 
 namespace {
 
-// The lock (or, for the shutdown frame, power) icon centred at the bottom. Over a photo it gets
-// a white pad so it stays readable.
+// The lock icon centred at the bottom. Over a photo it gets a white pad so it stays readable.
 void DrawLockScreenBottomIcon(uint8_t* framebuffer,
                               int raw_width,
                               int raw_height,
                               int portrait_width,
                               int portrait_height,
-                              bool for_shutdown,
                               bool on_photo)
 {
-    const EmbeddedImageAsset* bottom_icon =
-        project_assets::GetIcon(for_shutdown ? EmbeddedIconId::kPower : EmbeddedIconId::kLock);
+    const EmbeddedImageAsset* bottom_icon = project_assets::GetIcon(EmbeddedIconId::kLock);
     if (bottom_icon == nullptr) {
         return;
     }
@@ -414,7 +411,7 @@ void DrawLockScreen(uint8_t* framebuffer,
         DrawLockScreenStatusRow(framebuffer, raw_width, raw_height, portrait_width,
                                 portrait_height, status_state);
         DrawLockScreenBottomIcon(framebuffer, raw_width, raw_height, portrait_width,
-                                 portrait_height, state.for_shutdown, /*on_photo=*/true);
+                                 portrait_height, /*on_photo=*/true);
         return;
     }
 
@@ -545,7 +542,7 @@ void DrawLockScreen(uint8_t* framebuffer,
     }
 
     DrawLockScreenBottomIcon(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
-                             state.for_shutdown, /*on_photo=*/false);
+                             /*on_photo=*/false);
 }
 
 }  // namespace epaper_ui
