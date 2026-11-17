@@ -47,12 +47,13 @@ photo_portrait 8d4c5849
 photos_empty c7f2dc31
 saved_wifi 90847051
 saved_wifi_forget 19395120
-settings 6db7c406
+settings d38038ff
 settings_about 1b97aef4
-settings_about_note 6b5b64f6
+settings_about_note b76ca460
 settings_about_update_ready eb8b6a5c
+settings_display b2680491
 settings_storage 638d3036
-settings_todos e2c38783
+settings_todos de0ba4f1
 settings_topics f8b07ede
 time 252ccbc2
 todos f30676f8

@@ -9,6 +9,7 @@ constexpr NavigationItemRole kMenuRoles[epaper_ui::kSettingsMenuItemCount] = {
     NavigationItemRole::kSettingsMenuNetwork,
     NavigationItemRole::kSettingsMenuSavedWifi,
     NavigationItemRole::kSettingsMenuTime,
+    NavigationItemRole::kSettingsMenuDisplay,
     NavigationItemRole::kSettingsMenuStorage,
     NavigationItemRole::kSettingsMenuTodos,
     NavigationItemRole::kSettingsMenuTopics,
@@ -53,9 +54,5 @@ epaper_ui::SettingsPageState SettingsPageCoordinator::BuildState() const
         }
     }
 
-    state.manual_button = {
-        .label_text = "Manual",
-        .selected = IsRoleFocused(NavigationItemRole::kSettingsManualOnboardingButton),
-    };
     return state;
 }

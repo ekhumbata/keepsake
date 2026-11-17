@@ -26,6 +26,8 @@ void ResetFocus();
 // polls these, same pattern as onboarding_page_runtime::RequestManualLaunch().
 void RequestShowStorage();
 bool ConsumePendingShowStorage();
+void RequestShowDisplay();
+bool ConsumePendingShowDisplay();
 void RequestShowTodos();
 bool ConsumePendingShowTodos();
 void RequestShowTopics();

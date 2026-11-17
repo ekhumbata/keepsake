@@ -1,5 +1,7 @@
 #include "feedback_service.h"
 
+#include <atomic>
+
 #include "esp_log.h"
 #include "waveshare_board.h"
 #include "system_sound_service.h"
@@ -8,6 +10,23 @@ namespace feedback_service {
 namespace {
 
 constexpr const char* kTag = "FeedbackService";
+
+// The sounds a menu press makes (#163): clicks, and the cue for a picker opening. Startup,
+// lock/unlock, recording, shutdown and error sounds aren't affected by the setting.
+std::atomic<bool> s_button_sounds_enabled{true};
+
+bool IsButtonSound(FeedbackEvent event)
+{
+    switch (event) {
+        case FeedbackEvent::kButtonClick:
+        case FeedbackEvent::kButtonDoubleClick:
+        case FeedbackEvent::kButtonLongPress:
+        case FeedbackEvent::kModalOpen:
+            return true;
+        default:
+            return false;
+    }
+}
 
 // Maps a feedback event onto the closest system-sound cue (played through the
 // ES8311 codec). There is no dedicated buzzer on this board.
@@ -54,8 +73,16 @@ esp_err_t Init()
     return ESP_OK;
 }
 
+void SetButtonSoundsEnabled(bool enabled)
+{
+    s_button_sounds_enabled.store(enabled, std::memory_order_relaxed);
+}
+
 esp_err_t Play(FeedbackEvent event)
 {
+    if (IsButtonSound(event) && !s_button_sounds_enabled.load(std::memory_order_relaxed)) {
+        return ESP_OK;  // button sounds are off (#163)
+    }
     SystemSoundService::GetInstance().PlayCue(CueForEvent(event));
     return ESP_OK;
 }

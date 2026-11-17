@@ -17,12 +17,6 @@ ActivateResult HandlePrimaryActivate(const SettingsTodosPageCoordinator& coordin
         result.intent = ActivateIntent::kShowArchiveAfterModal;
         return result;
     }
-    if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsTodosLockScreenInput)) {
-        result.handled = true;
-        result.play_activate_cue = true;
-        result.intent = ActivateIntent::kShowLockScreenModal;
-        return result;
-    }
     if (coordinator.IsRoleFocused(NavigationItemRole::kSettingsTodosBackButton)) {
         // Returns to the Settings hub -- this page is only ever reached from there, so there's
         // no other source to track.
@@ -57,11 +51,6 @@ void ApplyPrimaryActivateResult(const ActivateResult& result, const ActivateCall
         case ActivateIntent::kShowArchiveAfterModal:
             if (callbacks.show_archive_after_modal) {
                 callbacks.show_archive_after_modal();
-            }
-            break;
-        case ActivateIntent::kShowLockScreenModal:
-            if (callbacks.show_lock_screen_modal) {
-                callbacks.show_lock_screen_modal();
             }
             break;
         case ActivateIntent::kNone:

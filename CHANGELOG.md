@@ -8,6 +8,15 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Added
+
+- **Settings → Display & sound** (#164), with **Lock screen shows** (moved from Settings →
+  Todos, where nobody would look for it) and **Button sounds** (#163): Off silences the menu
+  clicks and the picker cue; recording, lock/unlock, start-up, shut-down and error sounds
+  still play (`feedback_service::SetButtonSoundsEnabled`, NVS `app_state/btn_sounds`).
+- The hub's **Manual** button is now **Replay the introduction** on About, so the eight
+  headings fit above the footer.
+
 ### Fixed
 
 - **Board tests from Windows** (#142). `keepsake_board.py` opens the port with DTR/RTS

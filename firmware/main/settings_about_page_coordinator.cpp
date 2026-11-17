@@ -41,6 +41,11 @@ epaper_ui::SettingsAboutPageState SettingsAboutPageCoordinator::BuildState() con
                  esp_app_get_description()->version);
     state.version_text = version_buffer;
     state.personal_note = app_state_service::Personal().about_message;  // #149, from the card
+    state.introduction = {
+        .label_text = "Replay the introduction",
+        .selected =
+            IsRoleFocused(page_navigation::NavigationItemRole::kSettingsAboutIntroButton),
+    };
 
     const firmware_update::Status update = ota_service::GetStatus();
     state.update_status_text = firmware_update::Describe(update);

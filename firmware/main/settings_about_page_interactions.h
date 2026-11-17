@@ -14,6 +14,7 @@ enum class ActivateIntent : uint8_t {
     kShowHome,
     kShowSettings,
     kUpdate,  // check for updates, or restart into a downloaded one (#40)
+    kShowIntroduction,  // replay the first-run introduction (#164)
 };
 
 struct ActivateResult {
@@ -28,6 +29,7 @@ struct ActivateCallbacks {
     std::function<void()> show_home;
     std::function<void()> show_settings;
     std::function<void()> update;
+    std::function<void()> show_introduction;
 };
 
 ActivateResult HandlePrimaryActivate(const SettingsAboutPageCoordinator& coordinator);

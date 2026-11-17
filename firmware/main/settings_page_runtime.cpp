@@ -15,6 +15,7 @@ namespace {
 std::mutex s_mutex;
 SettingsPageCoordinator s_coordinator = {};
 std::atomic<bool> s_pending_show_storage = false;
+std::atomic<bool> s_pending_show_display = false;
 std::atomic<bool> s_pending_show_todos = false;
 std::atomic<bool> s_pending_show_topics = false;
 std::atomic<bool> s_pending_show_about = false;
@@ -198,6 +199,16 @@ void RequestShowStorage()
 bool ConsumePendingShowStorage()
 {
     return s_pending_show_storage.exchange(false, std::memory_order_relaxed);
+}
+
+void RequestShowDisplay()
+{
+    s_pending_show_display.store(true, std::memory_order_relaxed);
+}
+
+bool ConsumePendingShowDisplay()
+{
+    return s_pending_show_display.exchange(false, std::memory_order_relaxed);
 }
 
 void RequestShowTodos()

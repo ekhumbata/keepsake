@@ -52,6 +52,7 @@
 #include "settings_page_runtime.h"
 #include "settings_about_page_runtime.h"
 #include "settings_storage_page_runtime.h"
+#include "settings_display_page_runtime.h"
 #include "settings_todos_page_runtime.h"
 #include "settings_topics_page_runtime.h"
 #include "details_page_runtime.h"
@@ -339,6 +340,28 @@ esp_err_t ShowSettingsTodosScreen(display_service::RefreshMode refresh_mode)
                                              refresh_mode, "show_settings_todos_screen");
 }
 
+esp_err_t ShowSettingsDisplayScreen(display_service::RefreshMode refresh_mode)
+{
+    SyncStatusBarState("show_settings_display_screen");
+    page_input_runtime::ResetFocusForScreen(display_service::ScreenId::kSettingsDisplay);
+    footer_runtime::SetLayoutState(
+        FooterLayoutForScreen(display_service::ScreenId::kSettingsDisplay));
+    footer_runtime::SetProjectionState(page_input_runtime::BuildFooterProjectionForScreen(
+        display_service::ScreenId::kSettingsDisplay));
+    const esp_err_t footer_err = footer_runtime::UpdateDisplayState();
+    if (footer_err != ESP_OK && footer_err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Footer sync before display & sound screen failed: %s",
+                 esp_err_to_name(footer_err));
+    }
+    const esp_err_t page_err = settings_display_page_runtime::UpdateDisplayState();
+    if (page_err != ESP_OK && page_err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(kTag, "Display & sound page sync before show failed: %s",
+                 esp_err_to_name(page_err));
+    }
+    return display_service::SetCurrentScreen(display_service::ScreenId::kSettingsDisplay,
+                                             refresh_mode, "show_settings_display_screen");
+}
+
 esp_err_t ShowSettingsTopicsScreen(display_service::RefreshMode refresh_mode)
 {
     SyncStatusBarState("show_settings_topics_screen");
@@ -393,6 +416,13 @@ void ShowSettingsSubPageIfRequested()
         const esp_err_t err = ShowSettingsStorageScreen(display_service::RefreshMode::kPartial);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
             ESP_LOGW(kTag, "Show settings storage screen failed: %s", esp_err_to_name(err));
+        }
+        return;
+    }
+    if (settings_page_runtime::ConsumePendingShowDisplay()) {
+        const esp_err_t err = ShowSettingsDisplayScreen(display_service::RefreshMode::kPartial);
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGW(kTag, "Show display & sound screen failed: %s", esp_err_to_name(err));
         }
         return;
     }
@@ -1266,6 +1296,7 @@ void HandleRecordingSessionEvent(const recording_session_service::Event& event, 
         case recording_session_service::Phase::kAwaitingTagSelection: {
             time_page_runtime::ClearPendingSelectModal();
             settings_todos_page_runtime::ClearPendingSelectModal();
+            settings_display_page_runtime::ClearPendingSelectModal();
             const esp_err_t err =
                 overlay_runtime::ShowSelectModal(BuildRecordingTagSelectModalState());
             FlushOverlayFeedback();
@@ -1672,6 +1703,7 @@ bool NavigateUpFromCurrentScreen()
     switch (display_service::GetCurrentScreen()) {
         case display_service::ScreenId::kSettingsStorage:
         case display_service::ScreenId::kSettingsTodos:
+        case display_service::ScreenId::kSettingsDisplay:
         case display_service::ScreenId::kSettingsTopics:
         case display_service::ScreenId::kSettingsAbout:
         case display_service::ScreenId::kWifi:
@@ -1731,6 +1763,8 @@ void HandleDispatchedButtonEvent(const button_service::ButtonEventInfo& event)
             !time_page_runtime::HandleSelectModalSubmit(
                 overlay_result.select_modal_selected_index) &&
             !settings_todos_page_runtime::HandleSelectModalSubmit(
+                overlay_result.select_modal_selected_index) &&
+            !settings_display_page_runtime::HandleSelectModalSubmit(
                 overlay_result.select_modal_selected_index) &&
             !settings_topics_page_runtime::HandleItemActionSelection(
                 overlay_result.select_modal_selected_index) &&
@@ -2036,6 +2070,7 @@ void InitFeedbackService()
         ESP_LOGW(kTag, "Feedback service init failed: %s", esp_err_to_name(err));
         return;
     }
+    feedback_service::SetButtonSoundsEnabled(app_state_service::ButtonSoundsEnabled());  // #163
 }
 
 void InitDisplayService()

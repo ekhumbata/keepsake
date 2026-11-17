@@ -25,8 +25,6 @@ void ResetFocus();
 // Opens the "Archive todos after" picker (7/14/30/60/90 days, or Never), pre-selected to the
 // currently saved value.
 esp_err_t ShowArchiveAfterModal();
-// Opens the "Lock screen shows" picker (Todos / A photo, #148), pre-selected to the setting.
-esp_err_t ShowLockScreenModal();
 // Dispatch the archive-after-days modal selection. Returns true if that modal was pending (so
 // the shared submit chain in app_shell stops here).
 bool HandleSelectModalSubmit(int selected_index);

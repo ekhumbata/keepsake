@@ -15,7 +15,7 @@ constexpr int kTitleBottomGap = design::spacing::k24;
 constexpr int kMenuManualGap = design::spacing::k24;
 
 constexpr std::array<const char*, kSettingsMenuItemCount> kSettingsMenuLabels = {
-    "Network", "Saved Wi-Fi", "Time", "Storage", "Todos", "Topics", "About",
+    "Network", "Saved Wi-Fi", "Time", "Display & sound", "Storage", "Todos", "Topics", "About",
 };
 
 int PageWidth(int portrait_width)
@@ -173,8 +173,11 @@ void DrawSettingsPage(uint8_t* framebuffer,
     ButtonStyle manual_style = {};
     manual_style.width = layout.manual_button.width;
     manual_style.center_label = true;
-    DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
-              layout.manual_button.x, layout.manual_button.y, state.manual_button, manual_style);
+    if (!state.manual_button.label_text.empty()) {  // gone from the hub since #164
+        DrawButton(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
+                   layout.manual_button.x, layout.manual_button.y, state.manual_button,
+                   manual_style);
+    }
 
     DrawGlobalFooter(framebuffer, raw_width, raw_height, portrait_width, portrait_height,
                      footer_state);

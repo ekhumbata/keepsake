@@ -68,7 +68,7 @@ walks you through a short introduction:
 - Wi-Fi.
 
 Tilt the **rocker** to move through it and press it in to choose. Close it on
-the last slide. You can replay it any time from **Settings → Manual**.
+the last slide. You can replay it any time from **Settings → About → Replay the introduction**.
 
 If Keepsake already knows a Wi-Fi network (it came with a setup file), the
 last slide says you're all set, and Home opens with your welcome note, if
@@ -383,20 +383,19 @@ If Keepsake can't open a photo, it says why instead:
 
 ## Settings
 
-Settings is a hub, like a phone's settings app: seven headings, each
-opening its own page, plus one action below them:
+Settings is a hub, like a phone's settings app: eight headings, each
+opening its own page:
 
 - **Network** — WiFi and Access Point.
 - **Saved Wi-Fi** — the networks Keepsake remembers; forget one you no
   longer use.
 - **Time** — timezone and clock.
+- **Display & sound** — what the lock screen shows, and button sounds.
 - **Storage** — SD card status and management.
 - **Todos** — todo archiving.
 - **Topics** — create, rename, and delete topics.
-- **About** — firmware version, updates, and acknowledgments.
-- **Manual** — replays the first-time onboarding carousel. This one isn't
-  a heading — it's a direct action, since there's nothing to configure on
-  it.
+- **About** — firmware version, updates, acknowledgments, and replaying
+  the introduction.
 
 Select a heading to open its page. Every one of those pages has its own
 **Back** button at the bottom that returns you to this Settings hub. The
@@ -462,16 +461,26 @@ Todos](#archiving-completed-todos)). Choices are 7, 14, 30, 60, or 90
 days, or **Never** to turn off automatic archiving entirely (you can
 still archive individual items manually). Default is 7 days.
 
+### Display & sound
+
 **Lock screen shows** — **Todos** (the date and your pending Todos, the
 default) or **A photo**: a different photo from the `photos` folder each
 time the screen locks, full screen. With no photos (or no SD card) it
 shows the Todos instead.
+
+**Button sounds** — **On** (the default) or **Off**. Off silences the
+clicks when you move or select with the rocker and the sound when a list
+of choices opens. Recording, lock and unlock, start-up, shut-down and
+error sounds still play.
 
 ### About
 
 Shows the installed firmware version, how updates are going, and an
 acknowledgment: Keepsake is built on Chroninkle by mach1na, which began as
 Followup by ALXV Labs. It's free software under the GNU GPL v3.
+
+**Replay the introduction** plays the first-time introduction again; when
+it ends you're back in Settings.
 
 **Updates** install by themselves. Once a day, when Wi-Fi is around,
 Keepsake checks for a newer version and downloads it in the background. It
@@ -527,7 +536,7 @@ on the Home screen in one step rather than needing a second press.
   "+N more pending" line instead of a longer list. If you're all caught
   up, it just says so.
 
-If **Settings → Todos → Lock screen shows** is set to **A photo**, the lock
+If **Settings → Display & sound → Lock screen shows** is set to **A photo**, the lock
 screen is a random photo instead, with the battery and lock icon on top.
 Switching off shows one too, and it stays on the screen while Keepsake is
 off.

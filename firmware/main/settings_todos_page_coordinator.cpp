@@ -40,7 +40,7 @@ bool SettingsTodosPageCoordinator::IsRoleFocused(page_navigation::NavigationItem
 }
 
 epaper_ui::SettingsTodosPageState SettingsTodosPageCoordinator::BuildState(
-    int archive_after_days, bool lock_screen_photo) const
+    int archive_after_days) const
 {
     epaper_ui::SettingsTodosPageState state = {};
     state.navigation_focus_index = focus_.index();
@@ -49,12 +49,6 @@ epaper_ui::SettingsTodosPageState SettingsTodosPageCoordinator::BuildState(
         .value_text = FormatArchiveAfterLabel(archive_after_days),
         .focused = IsRoleFocused(
             page_navigation::NavigationItemRole::kSettingsTodosArchiveAfterInput),
-    };
-    state.lock_screen_input = {
-        .label_text = "Lock screen shows",
-        .value_text = lock_screen_photo ? "A photo" : "Todos",
-        .focused = IsRoleFocused(
-            page_navigation::NavigationItemRole::kSettingsTodosLockScreenInput),
     };
     state.back = {
         .label_text = "Back",
