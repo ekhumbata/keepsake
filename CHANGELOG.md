@@ -8,6 +8,18 @@ via `git log`, not backfilled here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Reading progress can't be wiped by a failed read** (#144). Any failure to open
+  `/books/.library` used to look like "no index yet", so the shelf rebuilt it from scratch and
+  saved over everyone's progress (seen once on the board). Now a missing index is rebuilt but
+  an unreadable one is left alone (the shelf shows file names until it reads again), the
+  errno is logged, saves go to a temp file that's then swapped in, and one lock covers every
+  read-modify-write of the index.
+- **A book that can't be opened doesn't take over Continue reading** (#145). A locked or
+  damaged EPUB still shows its friendly message, but it's no longer recorded as the book being
+  read, and no position file is written for it.
+
 ### Added
 
 - **Photos** (#136). Home has a **Photos** row that opens a full-screen viewer.
